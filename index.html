@@ -4,11 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Подушка — прототип</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Alegreya:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { height:100%; overflow:hidden; }
   body {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
     background: radial-gradient(ellipse at 50% 30%, #2c5240 0%, #1e3a2d 55%, #12241c 100%);
     color:#2b2118;
     display:flex; justify-content:center; align-items:stretch;
@@ -38,9 +41,9 @@
   .stat .lbl { font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; color:#3a2d1c; }
   .stat .lbl .ico { display:flex; align-items:center; color:#5c4a2e; }
   .stat svg { width:22px; height:22px; }
-  .bar { height:10px; background:#b3a17c; border-radius:5px; margin-top:5px; overflow:hidden; border:1px solid #8a7550; }
-  .bar i { display:block; height:100%; border-radius:5px; transition:width .4s; }
-  #bHealth i { background:#b0413e; } #bMood i { background:#c98a2d; } #bRel i { background:#4a7ab5; }
+  .bar { height:12px; background:#9c8657; border-radius:6px; margin-top:5px; overflow:hidden; border:1.5px solid #6b5535; box-shadow:inset 0 1px 3px rgba(0,0,0,.35); }
+  .bar i { display:block; height:100%; border-radius:6px; transition:width .4s; }
+  #bHealth i { background:#d63a35; } #bMood i { background:#e8a41e; } #bRel i { background:#3f7fd4; }
   #safety { display:flex; gap:8px; margin-top:10px; }
   .chip {
     flex:1; text-align:center; padding:8px 6px; font-size:16px; border-radius:7px 10px 6px 9px;
@@ -50,10 +53,10 @@
   .chip b { display:block; font-size:20px; }
   #cushionChip.hit { animation:shield .6s; }
   @keyframes shield { 0%{transform:scale(1)} 30%{transform:scale(1.15); box-shadow:0 0 18px #ffd76a} 100%{transform:scale(1)} }
-  /* green/red pulse on HUD when value changes */
-  .pulseG { animation:pg .8s; } .pulseR { animation:pr .8s; }
-  @keyframes pg { 0%{box-shadow:0 0 0 0 rgba(46,125,50,.95)} 100%{box-shadow:0 0 0 14px rgba(46,125,50,0)} }
-  @keyframes pr { 0%{box-shadow:0 0 0 0 rgba(179,54,42,.95)} 100%{box-shadow:0 0 0 14px rgba(179,54,42,0)} }
+  /* green/red pulse on HUD when value changes — bright, visible on dark felt */
+  .pulseG { animation:pg .9s; } .pulseR { animation:pr .9s; }
+  @keyframes pg { 0%{box-shadow:0 0 0 4px #4ade63, 0 0 22px 6px rgba(74,222,99,.9)} 100%{box-shadow:0 0 0 12px rgba(74,222,99,0), 0 0 22px 6px rgba(74,222,99,0)} }
+  @keyframes pr { 0%{box-shadow:0 0 0 4px #ff5b4d, 0 0 22px 6px rgba(255,91,77,.9)} 100%{box-shadow:0 0 0 12px rgba(255,91,77,0), 0 0 22px 6px rgba(255,91,77,0)} }
 
   /* ---------- card table ---------- */
   #table { flex:1 1 auto; position:relative; display:flex; align-items:center; justify-content:center; min-height:0; }
@@ -80,21 +83,28 @@
   .card.back { transform:scale(.94) rotate(2.5deg); filter:brightness(.92); }
   .card.top { cursor:grab; z-index:5; }
   .card.top:active { cursor:grabbing; }
-  .cEmoji { font-size:66px; text-align:center; margin-top:12px; filter:drop-shadow(1px 2px 1px rgba(0,0,0,.25)); }
-  .cCat { text-align:center; font-size:12.5px; letter-spacing:2px; text-transform:uppercase; color:#7a6340; margin-top:6px; }
-  .cText { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-size:21.5px; line-height:1.35; padding:6px 4px; color:#33271a; }
-  .cHintRow { display:flex; justify-content:space-between; font-size:15px; font-weight:bold; color:#6b5535; padding:0 2px; }
-  .cHintRow span { max-width:48%; }
-  .cHintRow .rgt { text-align:right; }
-  /* choice sticker shown while dragging */
-  .choiceTag {
-    position:absolute; top:14px; padding:9px 13px; font-size:18px; border-radius:6px 9px 5px 8px;
-    border:2px solid; opacity:0; transform:rotate(-6deg); max-width:68%; background:#f3e9cf;
-    box-shadow:0 3px 6px rgba(0,0,0,.3); pointer-events:none; z-index:6;
+  /* card sections */
+  .cHead { text-align:center; padding:6px 0 10px; border-bottom:2px dashed rgba(110,85,50,.35); }
+  .cEmoji { font-size:56px; filter:drop-shadow(1px 2px 1px rgba(0,0,0,.25)); }
+  .cCat { font-size:13px; font-weight:800; letter-spacing:3px; text-transform:uppercase; color:#8a6d3f; margin-top:4px; }
+  .cText {
+    flex:1; display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Alegreya', Georgia, serif; font-size:22px; line-height:1.4; padding:10px 4px; color:#2e2315;
   }
-  .choiceTag .eff { display:block; font-size:16px; margin-top:3px; color:#5c4a2e; }
-  .eff .g { color:#256b2a; font-weight:bold; white-space:nowrap; }
-  .eff .b { color:#a02020; font-weight:bold; white-space:nowrap; }
+  /* choices — the most important zone */
+  .choices { display:flex; gap:10px; padding-top:12px; border-top:2px dashed rgba(110,85,50,.35); }
+  .choice {
+    flex:1; display:flex; flex-direction:column; justify-content:flex-start; gap:4px;
+    background:rgba(255,249,230,.6); border:2.5px solid #7a6340; border-radius:12px;
+    padding:10px 8px 11px; text-align:center; cursor:pointer; transition:transform .12s, background .12s, border-color .12s;
+  }
+  .choice:active { transform:scale(.97); }
+  .choice .dir { font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:#9a7f4e; }
+  .choice .lbl2 { font-size:18px; font-weight:800; line-height:1.2; color:#2e2315; }
+  .choice .fx { font-size:15.5px; font-weight:700; margin-top:2px; }
+  .choice.hot { transform:scale(1.06); background:#fdf3d9; border-color:#3d2a12; box-shadow:0 6px 14px rgba(0,0,0,.35); }
+  .eff .g { color:#1d6b24; font-weight:800; white-space:nowrap; }
+  .eff .b { color:#a01818; font-weight:800; white-space:nowrap; }
   .eff svg { width:15px; height:15px; vertical-align:-2px; }
   #tagL { right:12px; border-color:#8f4d3c; color:#8f4d3c; transform:rotate(6deg); }
   #tagR { left:12px; border-color:#4c6e3f; color:#3f5e33; }
@@ -102,22 +112,25 @@
   /* floating deltas — big colored pills */
   #floats { position:absolute; inset:0; pointer-events:none; z-index:30; display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:4%; }
   .float {
-    display:flex; align-items:center; gap:8px; padding:9px 18px; border-radius:26px;
-    font-size:22px; font-weight:bold; color:#fff; animation:rise 1.6s forwards;
-    box-shadow:0 4px 12px rgba(0,0,0,.45); border:2px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; gap:8px; padding:10px 20px; border-radius:28px;
+    font-size:24px; font-weight:800; color:#fff; animation:rise 1.6s forwards;
+    box-shadow:0 5px 16px rgba(0,0,0,.55); border:2.5px solid rgba(255,255,255,.65);
   }
-  .float svg { width:24px; height:24px; }
-  .float.up { background:#2e7d32; } .float.down { background:#b3362a; }
+  .float svg { width:26px; height:26px; }
+  .float.up { background:#1f8c3b; } .float.down { background:#c62f22; }
   @keyframes rise { 0%{opacity:0; transform:translateY(14px) scale(.8)} 12%{opacity:1; transform:translateY(0) scale(1.06)} 22%{transform:scale(1)} 75%{opacity:1} 100%{opacity:0; transform:translateY(-40px)} }
 
-  /* lesson toast */
-  #toast {
-    position:absolute; left:50%; bottom:8px; transform:translateX(-50%) rotate(-1deg);
-    background:#f3e9cf; border:1px solid #8a7550; border-left:4px solid #b0872d;
-    padding:10px 16px; font-size:16px; color:#4a3a22; max-width:92%; border-radius:3px 8px 4px 7px;
-    box-shadow:0 4px 10px rgba(0,0,0,.45); opacity:0; transition:opacity .3s; z-index:40; text-align:center;
-  }
-  #toast.show { opacity:1; }
+  /* note popup (advice / outcomes) — manual close */
+  .sheet.note { border-left:7px solid #b0872d; text-align:center; }
+  .sheet.note .nIco { font-size:44px; }
+  .sheet.note .nTitle { font-size:13px; font-weight:800; letter-spacing:3px; text-transform:uppercase; color:#8a6d3f; margin:4px 0 8px; }
+  #noteText { font-family:'Alegreya', Georgia, serif; font-size:19.5px; line-height:1.45; color:#2e2315; }
+  /* settings / history */
+  .hist { text-align:left; margin-top:10px; max-height:40vh; overflow-y:auto; }
+  .hist .row { display:flex; justify-content:space-between; gap:8px; align-items:center; padding:8px 4px; border-bottom:1px dotted #a08a60; font-size:15px; }
+  .hist .row b { white-space:nowrap; }
+  #gearBtn { cursor:pointer; user-select:none; }
+  #gearBtn:active { transform:scale(.94); }
 
   /* ---------- overlays ---------- */
   .ovl {
@@ -165,6 +178,7 @@
       <div class="tag hand" id="monthTag">Месяц 1</div>
       <div class="tag" id="moneyTag">💰 <b>15 000 ₽</b></div>
       <div class="tag" id="debtTag">🩸 <b>0 ₽</b></div>
+      <div class="tag" id="gearBtn" onclick="G.openSettings()" title="Настройки">⚙️</div>
     </div>
     <div id="stats">
       <div class="stat" id="stHealth"><div class="lbl"><span class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span><span id="vHealth">70</span></div><div class="bar" id="bHealth"><i style="width:70%"></i></div></div>
@@ -179,8 +193,7 @@
 
   <div id="table">
     <div id="floats"></div>
-    <div id="toast"></div>
-    <div class="kbHint">свайп или ← →</div>
+    <div class="kbHint">свайп, ← → или тап по варианту</div>
   </div>
 
   <!-- overlays -->
@@ -190,7 +203,22 @@
     <p>Свайпай карточки влево или вправо. Каждое решение двигает деньги, здоровье, настроение и отношения.</p>
     <p><b>Задача: прожить 6 месяцев и не скатиться в микрозаймы.</b></p>
     <p class="small">Подсказка из будущего: кризисы приходят без предупреждения. Подушка — твоя броня.</p>
-    <button class="btn hand" onclick="G.startRun()">Начать жизнь</button>
+    <div id="startBtns"><button class="btn hand" onclick="G.newSession()">Начать жизнь</button></div>
+    <p class="small" id="startHist"></p>
+  </div></div>
+
+  <div class="ovl" id="noteOvl"><div class="sheet note">
+    <div class="nIco">📎</div>
+    <div class="nTitle">На заметку</div>
+    <div id="noteText"></div>
+    <button class="btn hand" onclick="G.closeNote()">Понял, принял 👍</button>
+  </div></div>
+
+  <div class="ovl" id="setOvl"><div class="sheet">
+    <h2 class="hand">⚙️ Сессии</h2>
+    <div class="hist" id="histList"></div>
+    <button class="btn sec" onclick="G.closeSettings()">← Вернуться</button>
+    <button class="btn hand" onclick="G.newSession()">Новая сессия</button>
   </div></div>
 
   <div class="ovl" id="payOvl"><div class="sheet">
@@ -321,6 +349,7 @@ function newState(){ return {
 const ICO = {
   h:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
   o:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.3 14.3c1 1.3 2.3 2 3.7 2s2.7-.7 3.7-2"/><circle cx="8.8" cy="9.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="9.6" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  osad:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.3 16.6c1-1.3 2.3-2 3.7-2s2.7.7 3.7 2"/><circle cx="8.8" cy="9.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="9.6" r="1.1" fill="currentColor" stroke="none"/></svg>',
   r:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7.5" r="3.4"/><path d="M2.5 19.2c0-3.2 2.9-5.4 6.5-5.4s6.5 2.2 6.5 5.4V20H2.5z"/><circle cx="17.3" cy="8.3" r="2.7"/><path d="M16.4 14.2c2.9.4 5.1 2.2 5.1 4.9v.9h-3.6v-.8c0-2-.5-3.6-1.5-5z"/></svg>',
   m:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9.2"/><path d="M9.2 17V7h4a2.9 2.9 0 0 1 0 5.8H8.2M8.2 15h5" stroke-linecap="round"/></svg>',
 };
@@ -348,10 +377,18 @@ function floatDelta(html, up){
   f.innerHTML = html;
   $('floats').appendChild(f); setTimeout(()=>f.remove(), 1700);
 }
-let toastT;
-function toast(msg){
-  const t = $('toast'); t.textContent = '📎 ' + msg; t.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 3400);
+/* advice/outcome popups — queued, manual close */
+let noteQueue = [];
+function toast(msg){ noteQueue.push(msg); maybeShowNote(); }
+function maybeShowNote(){
+  if ($('noteOvl').classList.contains('show')) return;
+  if (!noteQueue.length) return;
+  $('noteText').textContent = noteQueue.shift();
+  show('noteOvl');
+}
+function closeNote(){
+  hide('noteOvl');
+  if (noteQueue.length) setTimeout(maybeShowNote, 150);
 }
 
 /* ================= EFFECTS ================= */
@@ -379,7 +416,8 @@ function applyEff(eff, isCrisis){
     if (eff[k]){
       S[stat] += eff[k]; clamp(stat);
       const up = eff[k] > 0;
-      floatDelta(ICO[k] + '<span>' + (up?'+':'−') + Math.abs(eff[k]) + '</span>', up);
+      const icon = (k === 'o' && !up) ? ICO.osad : ICO[k];
+      floatDelta(icon + '<span>' + (up?'+':'−') + Math.abs(eff[k]) + '</span>', up);
       pulse($(hudId), up);
     }
   });
@@ -449,30 +487,41 @@ function showCard(){
   }
   const el = document.createElement('div'); el.className = 'card top';
   el.innerHTML = `
-    <div class="choiceTag" id="tagL"><span>${data.L.lbl}</span><span class="eff">${effPreview(data.L)}</span></div>
-    <div class="choiceTag" id="tagR"><span>${data.R.lbl}</span><span class="eff">${effPreview(data.R)}</span></div>
-    <div class="cEmoji">${data.e}</div>
-    <div class="cCat">${data.cat || ''}</div>
+    <div class="cHead"><div class="cEmoji">${data.e}</div><div class="cCat">${data.cat || ''}</div></div>
     <div class="cText">${data.t}</div>
-    <div class="cHintRow"><span>← ${data.L.lbl}</span><span class="rgt">${data.R.lbl} →</span></div>`;
+    <div class="choices">
+      <div class="choice" data-side="L"><div class="dir">← влево</div><div class="lbl2">${data.L.lbl}</div><div class="fx eff">${effPreview(data.L)}</div></div>
+      <div class="choice" data-side="R"><div class="dir">вправо →</div><div class="lbl2">${data.R.lbl}</div><div class="fx eff">${effPreview(data.R)}</div></div>
+    </div>`;
   tbl.appendChild(el);
   topCard = {el, data};
+  el.querySelectorAll('.choice').forEach(ch=>{
+    ch.addEventListener('click', e=>{
+      if (dragMoved) return;
+      if (topCard && topCard.el === el) resolve(ch.dataset.side);
+    });
+  });
   attachDrag(el);
 }
+let dragMoved = false;
 function attachDrag(el){
+  const chL = el.querySelector('.choice[data-side="L"]');
+  const chR = el.querySelector('.choice[data-side="R"]');
   el.addEventListener('pointerdown', e=>{
     if (!topCard || topCard.el !== el) return;
     drag = {x0:e.clientX, dx:0};
+    dragMoved = false;
     el.setPointerCapture(e.pointerId);
   });
   el.addEventListener('pointermove', e=>{
     if (!drag) return;
     drag.dx = e.clientX - drag.x0;
+    if (Math.abs(drag.dx) > 8) dragMoved = true;
     el.style.transition = 'none';
     el.style.transform = `translateX(${drag.dx}px) rotate(${drag.dx/18}deg)`;
-    const p = Math.min(Math.abs(drag.dx)/90, 1);
-    el.querySelector(drag.dx < 0 ? '#tagL' : '#tagR').style.opacity = p;
-    el.querySelector(drag.dx < 0 ? '#tagR' : '#tagL').style.opacity = 0;
+    const hot = Math.abs(drag.dx) > 40;
+    chL.classList.toggle('hot', hot && drag.dx < 0);
+    chR.classList.toggle('hot', hot && drag.dx > 0);
   });
   const up = e=>{
     if (!drag) return;
@@ -481,8 +530,9 @@ function attachDrag(el){
     else {
       el.style.transition = 'transform .25s';
       el.style.transform = '';
-      el.querySelectorAll('.choiceTag').forEach(t=>t.style.opacity = 0);
+      chL.classList.remove('hot'); chR.classList.remove('hot');
     }
+    setTimeout(()=>{ dragMoved = false; }, 50);
   };
   el.addEventListener('pointerup', up);
   el.addEventListener('pointercancel', up);
@@ -503,6 +553,7 @@ function resolve(side){
   if (data.isCrisis) S.crisesTotal++;
   renderHUD();
   S.deck.shift();
+  saveGame();
   setTimeout(showCard, 340);
 }
 
@@ -528,16 +579,17 @@ function payday(){
   $('payNote').textContent = S.creditLeft === 0 && S.month <= 3 ? 'Кредит за телефон скоро закончится. Держись.' :
     'Свободный остаток — твоё поле для манёвра. Или для глупостей.';
   renderHUD();
+  saveGame();
   show('payOvl');
 }
-function closePayday(){ hide('payOvl'); buildDeck(); showCard(); }
+function closePayday(){ hide('payOvl'); buildDeck(); saveGame(); showCard(); }
 
 function endMonth(){
   // pending random outcomes
   const rows = [['Заработано за месяц', S.mEarn], ['Потрачено', -S.mSpend]];
   S.pending = S.pending.filter(p=>{
-    if (Math.random() < p.chance){ S.cash += p.amount; if (p.amount) rows.push([p.label, p.amount]); }
-    else if (p.failLabel) toastQueue.push(p.failLabel);
+    if (Math.random() < p.chance){ S.cash += p.amount; if (p.amount) rows.push([p.label, p.amount]); if (p.label) noteQueue.push('✅ ' + p.label + ': +' + p.amount.toLocaleString('ru-RU') + ' ₽'); }
+    else if (p.failLabel) noteQueue.push(p.failLabel);
     return false;
   });
   // deposit interest
@@ -573,10 +625,9 @@ function endMonth(){
   renderHUD();
   show('repOvl');
 }
-let toastQueue = [];
 function openAlloc(){
   hide('repOvl');
-  if (toastQueue.length) { toast(toastQueue.shift()); }
+  maybeShowNote();
   if (S.cash < 10000){ nextMonth(); return; }
   updateAlloc(); show('allocOvl');
 }
@@ -593,7 +644,7 @@ function alloc(kind){
   if (kind === 'cushion') S.cushion += 10000;
   if (kind === 'deposit') S.deposit += 10000;
   if (kind === 'fun'){ S.mood += 6; clamp('mood'); S.impulses++; }
-  renderHUD(); updateAlloc();
+  renderHUD(); updateAlloc(); saveGame();
   if (S.cash < 10000) setTimeout(nextMonth, 500);
 }
 function nextMonth(){
@@ -612,6 +663,7 @@ function title(cap){
   return ['🥷','Финансовый самурай'];
 }
 function finish(){
+  pushHist('finished'); LS.del(SAVE_KEY); ended = true;
   const cap = S.cash + S.cushion + S.deposit - S.debt;
   const [ico, rank] = title(cap);
   $('endSheet').innerHTML = `
@@ -626,10 +678,12 @@ function finish(){
     </div>
     <p class="small">Импульсивных трат: ${S.impulses} · Кризисов пережито: ${S.crisesTotal}, из них подушкой: ${S.crisesAbsorbed} · Микрозаймов: ${S.loansTaken}</p>
     <p>${cap >= 120000 ? 'Следующий уровень — заставить этот капитал работать: облигации, ETF, акции. Это уже другая игра 😉' : 'Попробуй ещё раз: подушка до кризиса, а не после — в этом весь секрет.'}</p>
-    <button class="btn hand" onclick="G.startRun()">Прожить ещё раз</button>`;
+    <p class="small">Результат сохранён в историю сессий (⚙️)</p>
+    <button class="btn hand" onclick="G.newSession()">Прожить ещё раз</button>`;
   show('endOvl');
 }
 function gameOver(){
+  pushHist('debt'); LS.del(SAVE_KEY); ended = true;
   $('endSheet').innerHTML = `
     <h1 class="hand">📉 Долговая спираль</h1>
     <p>Микрозаймы под 30% в месяц съели бюджет. Звонят коллекторы. Ран окончен.</p>
@@ -638,20 +692,108 @@ function gameOver(){
       <div><span>Импульсивных трат</span><b>${S.impulses}</b></div>
     </div>
     <p class="small">Урок бесплатный (в отличие от микрозайма): сначала подушка — потом хотелки. Кризис приходит всегда, вопрос лишь — к кому.</p>
-    <button class="btn hand" onclick="G.startRun()">Начать заново</button>`;
+    <p class="small">Результат сохранён в историю сессий (⚙️)</p>
+    <button class="btn hand" onclick="G.newSession()">Начать заново</button>`;
   show('endOvl');
 }
 
 /* ================= UTIL ================= */
 function show(id){ $(id).classList.add('show'); }
 function hide(id){ $(id).classList.remove('show'); }
+
+/* ================= PERSISTENCE ================= */
+const SAVE_KEY = 'podushka.save.v1', HIST_KEY = 'podushka.hist.v1';
+const LS = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} },
+  del(k){ try { localStorage.removeItem(k); } catch(e){} },
+};
+let ended = false;
+function saveGame(){
+  if (!S || ended) return;
+  const scal = {};
+  ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
+   'catCost','cashback','depositOpen','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
+    .forEach(k=>scal[k]=S[k]);
+  LS.set(SAVE_KEY, {
+    scal,
+    used: [...S.used].map(t=>POOL.findIndex(c=>c.t===t)).filter(i=>i>=0),
+    deck: S.deck.map(it=>it.crisis ? {c:CRISES.indexOf(it.crisis)} : {p:POOL.indexOf(it.card)}),
+    pending: S.pending,
+  });
+}
+function loadGame(){
+  const d = LS.get(SAVE_KEY);
+  if (!d || !d.scal) return false;
+  S = newState();
+  Object.assign(S, d.scal);
+  S.used = new Set((d.used||[]).map(i=>POOL[i] && POOL[i].t).filter(Boolean));
+  S.deck = (d.deck||[]).map(o=> o.c!=null ? {crisis:CRISES[o.c]} : {card:POOL[o.p]}).filter(it=>it.crisis||it.card);
+  S.pending = d.pending || [];
+  return true;
+}
+function pushHist(result){
+  if (!S) return;
+  const hist = LS.get(HIST_KEY) || [];
+  const cap = S.cash + S.cushion + S.deposit - S.debt;
+  hist.unshift({
+    d: Date.now(), result,
+    m: Math.min(S.month, MONTHS),
+    cap, cushion: S.cushion, deposit: S.deposit, debt: S.debt,
+    rank: result === 'debt' ? '💀 Долговая спираль' : (result === 'abandoned' ? '⏸ Брошена' : title(cap)[0] + ' ' + title(cap)[1]),
+    imp: S.impulses, loans: S.loansTaken,
+  });
+  LS.set(HIST_KEY, hist.slice(0, 30));
+}
+function histHTML(){
+  const hist = LS.get(HIST_KEY) || [];
+  if (!hist.length) return '<p class="small">Прошлых сессий пока нет.</p>';
+  return hist.map(h=>{
+    const date = new Date(h.d).toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
+    return `<div class="row"><span>${date} · ${h.rank}</span><b>${h.m} мес · ${fmt(h.cap)}</b></div>`;
+  }).join('');
+}
+
+/* ================= SESSION FLOW ================= */
 function startRun(){
-  hide('startOvl'); hide('endOvl');
+  hide('startOvl'); hide('endOvl'); hide('setOvl');
+  ended = false; noteQueue = [];
   S = newState();
   renderHUD();
   payday();
 }
-window.G = { startRun, closePayday, openAlloc, alloc, nextMonth };
+function newSession(){
+  if (S && !ended){ pushHist('abandoned'); }
+  LS.del(SAVE_KEY);
+  startRun();
+}
+function continueRun(){
+  if (!loadGame()){ startRun(); return; }
+  ended = false;
+  hide('startOvl'); hide('endOvl'); hide('setOvl');
+  renderHUD();
+  if (S.deck && S.deck.length) showCard();
+  else { buildDeck(); saveGame(); showCard(); }
+}
+function openSettings(){
+  $('histList').innerHTML = histHTML();
+  show('setOvl');
+}
+function closeSettings(){ hide('setOvl'); }
+function renderStart(){
+  const saved = LS.get(SAVE_KEY);
+  const btns = $('startBtns');
+  if (saved && saved.scal){
+    btns.innerHTML = `<button class="btn hand" onclick="G.continueRun()">▶ Продолжить (месяц ${saved.scal.month})</button>
+      <button class="btn sec" onclick="G.newSession()">Новая сессия</button>`;
+  } else {
+    btns.innerHTML = '<button class="btn hand" onclick="G.newSession()">Начать жизнь</button>';
+  }
+  const hist = LS.get(HIST_KEY) || [];
+  $('startHist').textContent = hist.length ? `Сыграно сессий: ${hist.length}. Лучший капитал: ${fmt(Math.max(...hist.map(h=>h.cap)))}` : '';
+}
+window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth };
+renderStart();
 </script>
 </body>
 </html>
