@@ -189,6 +189,8 @@
     <div id="safety">
       <div class="chip" id="cushionChip">🛡 Подушка <b id="vCushion">0 ₽</b></div>
       <div class="chip" id="depositChip" style="display:none">🏦 Депозит <b id="vDeposit">0 ₽</b></div>
+      <div class="chip" id="bondsChip" style="display:none">📜 Облигации <b id="vBonds">0 ₽</b></div>
+      <div class="chip" id="stocksChip" style="display:none">📈 Акции <b id="vStocks">0 ₽</b></div>
     </div>
   </div>
 
@@ -245,6 +247,10 @@
       <button onclick="G.alloc('cushion')">🛡 В подушку<b>+10 000</b></button>
       <button id="allocDep" onclick="G.alloc('deposit')" disabled>🏦 На депозит<b>+10 000</b></button>
       <button onclick="G.alloc('fun')">🎉 На себя<b>−10 000, 😊+</b></button>
+    </div>
+    <div class="alloc" id="allocLvl2" style="display:none">
+      <button id="allocBonds" onclick="G.alloc('bonds')">📜 Облигации<b>~8,5%/год, стабильно</b></button>
+      <button id="allocStocks" onclick="G.alloc('stocks')">📈 Акции<b>больше, но трясёт</b></button>
     </div>
     <button class="btn sec" style="margin-top:14px" onclick="G.nextMonth()">Хватит, живём дальше →</button>
   </div></div>
@@ -321,6 +327,15 @@ const POOL = [
   L:{lbl:'Купить билет',m:-4500,o:11,imp:1},R:{lbl:'Посидеть дома',o:-5}},
  {e:'🧦',cat:'быт',t:'Зима близко. Куртка «ещё норм», но молния уже философски смотрит на мир.',
   L:{lbl:'Новая куртка',m:-7000,h:3,o:4},R:{lbl:'Заклеить молнию',o:-3}},
+ /* ---- investor cards, months 7+ ---- */
+ {e:'📉',cat:'инвестиции',min:7,t:'Рынок красный. Акции −8% за неделю. Палец сам тянется к кнопке «продать всё».',
+  L:{lbl:'Продать всё',fx:'panicSell',imp:1},R:{lbl:'Ничего не делать',note:'Время в рынке важнее тайминга рынка. Просадки приходят и уходят — зафиксированный убыток остаётся.'}},
+ {e:'🚀',cat:'инвестиции',min:7,t:()=>`Все вокруг покупают ${pick(['TechMegaCorp','QuantumAI Inc','NeuroDrive'])}: +40% за месяц! В лифте только о них и говорят.`,
+  L:{lbl:'Зайти на хайпе',m:-10000,fx:'hype',imp:1},R:{lbl:'Пропустить',note:'Когда об акции говорят в лифте — умные деньги уже выходят.'}},
+ {e:'🎪',cat:'инвестиции',min:7,t:'Брокер предлагает плечо ×5: «Умножь свой результат!» Мелким шрифтом: «в обе стороны».',
+  L:{lbl:'Взять плечо',fx:'margin',imp:1},R:{lbl:'Торговать на свои',note:'Плечо умножает не доход, а исход. Чаще всего — печальный.'}},
+ {e:'🥚',cat:'инвестиции',min:7,t:'Коллега: «Я всё держу в одной акции. Чего мелочиться?»',
+  L:{lbl:'«Гений!»',o:2,note:'Одна корзина для всех яиц — план на омлет. Диверсификация — единственный бесплатный обед на рынке.'},R:{lbl:'«Рискованно»',o:1,note:'Верно. Диверсификация — единственный бесплатный обед на рынке.'}},
 ];
 
 const CRISES = [
@@ -348,6 +363,7 @@ function newState(){ return {
   month:1, cash:15000, cushion:0, deposit:0, debt:0,
   health:70, mood:70, rel:70,
   salary:SALARY, credit:8000, creditLeft:3, catCost:0, cashback:false, depositOpen:false, mfo:0,
+  level:1, bonds:0, stocks:0,
   deck:[], used:new Set(), usedCr:new Set(), flags:{}, pending:[],
   mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
 };}
@@ -367,8 +383,10 @@ function pulse(el, up){
   el.classList.remove('pulseG','pulseR'); void el.offsetWidth;
   el.classList.add(up ? 'pulseG' : 'pulseR');
 }
+function maxMonths(){ return S.level >= 2 ? 12 : MONTHS; }
+function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks - S.debt; }
 function renderHUD(){
-  $('monthTag').textContent = 'Месяц ' + S.month + ' / ' + MONTHS;
+  $('monthTag').textContent = (S.level >= 2 ? '📈 ' : '') + 'Месяц ' + S.month + ' / ' + maxMonths();
   const mt = $('moneyTag'); mt.querySelector('b').textContent = fmt(S.cash); mt.classList.toggle('neg', S.cash<0);
   const dt = $('debtTag'); dt.style.display = S.debt>0 ? '' : 'none'; dt.querySelector('b').textContent = fmt(S.debt);
   [['Health','health'],['Mood','mood'],['Rel','rel']].forEach(([id,k])=>{
@@ -378,6 +396,10 @@ function renderHUD(){
   $('vCushion').textContent = fmt(S.cushion);
   $('depositChip').style.display = S.depositOpen ? '' : 'none';
   $('vDeposit').textContent = fmt(S.deposit);
+  $('bondsChip').style.display = S.bonds > 0 ? '' : 'none';
+  $('vBonds').textContent = fmt(S.bonds);
+  $('stocksChip').style.display = S.stocks > 0 ? '' : 'none';
+  $('vStocks').textContent = fmt(S.stocks);
 }
 function floatDelta(html, cls){
   const f = document.createElement('div');
@@ -442,14 +464,25 @@ const FX = {
   dental(){ S.flags.dental = true; },
   gym(){ S.flags.gym = true; },
   mfoTrap(){ S.mfo += 10000; toast('Взял 10 000 «под 0%». Проверим в конце месяца, что там с нулём процентов.'); },
+  panicSell(){
+    if (S.stocks > 0){
+      const got = Math.round(S.stocks * 0.92);
+      S.cash += got; S.stocks = 0;
+      toast('Продал на дне: зафиксировал убыток −8%. Классика: страх продаёт дёшево, жадность покупает дорого.');
+    } else toast('Продавать нечего — акций в портфеле нет. Повезло: паника прошла бесплатно.');
+    renderHUD();
+  },
+  hype(){ S.pending.push({label:'Хайповая акция: успел выйти в плюс', amount:16000, chance:.25, failLabel:'Хайповая акция: купил на пике, −70%. Хайп — худший инвестсоветник.'}); },
+  margin(){ S.pending.push({label:'Плечо ×5: угадал движение', amount:15000, chance:.3, failLabel:'Плечо ×5: маржин-колл, −20 000 ₽. Плечо умножает в обе стороны.', failAmount:20000}); },
   unlockDeposit(){ if(!S.depositOpen){ S.depositOpen = true; toast('Открыт депозит: 1% в месяц на остаток. Деньги начали работать.'); renderHUD(); } },
 };
 
 /* ================= DECK ================= */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildDeck(){
-  const fresh = POOL.filter(c=>!S.used.has(c.t));
-  const stale = POOL.filter(c=>S.used.has(c.t));
+  const avail = POOL.filter(c=>!c.min || S.month >= c.min);
+  const fresh = avail.filter(c=>!S.used.has(c.t));
+  const stale = avail.filter(c=>S.used.has(c.t));
   let picks = shuffle(fresh.slice()).slice(0, CARDS_PER_MONTH);
   if (picks.length < CARDS_PER_MONTH) picks = picks.concat(shuffle(stale.slice()).slice(0, CARDS_PER_MONTH - picks.length));
   // guarantee the deposit-offer card while deposit is locked (from month 2)
@@ -486,8 +519,9 @@ function effPreview(eff){
   [['h'],['o'],['r']].forEach(([k])=>{
     if (eff[k]) parts.push(wrap(eff[k]>0, ICO[k] + (eff[k]>0?'+':'−') + Math.abs(eff[k])));
   });
-  if (eff.fx === 'friendLoan' || eff.fx === 'shitcoin') parts.push('🎲');
+  if (['friendLoan','shitcoin','hype','margin'].includes(eff.fx)) parts.push('🎲');
   if (eff.fx === 'mfoTrap') parts.push('<span class="b">⏳ а потом?</span>');
+  if (eff.fx === 'panicSell') parts.push('<span class="b">фиксация −8%</span>');
   return parts.join(' &nbsp;') || '✔ без последствий';
 }
 function showCard(){
@@ -613,13 +647,34 @@ function endMonth(){
   const rows = [['Заработано за месяц', S.mEarn], ['Потрачено', -S.mSpend]];
   S.pending = S.pending.filter(p=>{
     if (Math.random() < p.chance){ S.cash += p.amount; if (p.amount) rows.push([p.label, p.amount]); if (p.label) noteQueue.push('✅ ' + p.label + ': +' + p.amount.toLocaleString('ru-RU') + ' ₽'); }
-    else if (p.failLabel) noteQueue.push(p.failLabel);
+    else {
+      if (p.failAmount){ S.cash -= p.failAmount; rows.push(['Маржин-колл', -p.failAmount]); }
+      if (p.failLabel) noteQueue.push(p.failLabel);
+    }
     return false;
   });
   // deposit interest
   if (S.depositOpen && S.deposit > 0){
     const int_ = Math.round(S.deposit * 0.01);
     S.deposit += int_; rows.push(['Проценты по депозиту', int_]);
+  }
+  // level 2: markets move
+  if (S.level >= 2){
+    if (S.bonds > 0){
+      const coupon = Math.round(S.bonds * 0.007);
+      S.bonds += coupon; rows.push(['📜 Облигации: купон (~8,5% годовых)', coupon]);
+    }
+    if (S.stocks > 0){
+      if (Math.random() < 0.1){
+        const drop = Math.round(S.stocks * 0.18);
+        S.stocks -= drop; rows.push(['📉 ОБВАЛ РЫНКА: акции −18%', -drop]);
+        noteQueue.push('Рынок обвалился на 18%. Это нормально — такое случается. Худшее, что можно сделать сейчас, — продать в панике. Лучшее — докупить, если есть подушка.');
+      } else {
+        const r = pick([-0.09, -0.04, 0.01, 0.03, 0.06, 0.11]);
+        const d = Math.round(S.stocks * r);
+        S.stocks += d; rows.push(['📈 Акции: рынок за месяц ' + (r>0?'+':'') + Math.round(r*100) + '%', d]);
+      }
+    }
   }
   // existing debt accrues interest
   if (S.debt > 0){
@@ -661,12 +716,15 @@ function updateAlloc(){
   document.querySelectorAll('.alloc button').forEach(b=>{ if(b.id!=='allocDep') b.disabled = S.cash < 10000; });
   if (!S.depositOpen) $('allocDep').innerHTML = '🏦 Депозит<b>ещё не открыт</b>';
   else $('allocDep').innerHTML = '🏦 На депозит<b>+10 000</b>';
+  $('allocLvl2').style.display = S.level >= 2 ? '' : 'none';
 }
 function alloc(kind){
   if (S.cash < 10000) return;
   S.cash -= 10000;
   if (kind === 'cushion') S.cushion += 10000;
   if (kind === 'deposit') S.deposit += 10000;
+  if (kind === 'bonds') S.bonds += 10000;
+  if (kind === 'stocks') S.stocks += 10000;
   if (kind === 'fun'){ S.mood += 6; clamp('mood'); S.impulses++; }
   renderHUD(); updateAlloc(); saveGame();
   if (S.cash < 10000) setTimeout(nextMonth, 500);
@@ -674,7 +732,28 @@ function alloc(kind){
 function nextMonth(){
   hide('allocOvl');
   S.month++;
-  if (S.month > MONTHS){ finish(); return; }
+  if (S.level === 1 && S.month > MONTHS){
+    if (totalCap() >= 40000 && S.debt === 0){ offerLevel2(); return; }
+    finish(); return;
+  }
+  if (S.month > maxMonths()){ finish(); return; }
+  payday();
+}
+function offerLevel2(){
+  $('endSheet').innerHTML = `
+    <h1 class="hand">🔓 Уровень 2: Инвестор</h1>
+    <p>Полгода прожито, капитал <b>${fmt(totalCap())}</b>, долгов нет. Бюджет ты освоил.</p>
+    <p>Впереди месяцы 7–12. Открываются <b>📜 облигации</b> (стабильный купон ~8,5% годовых) и <b>📈 акции</b> (в среднем доходнее, но рынок трясёт, а иногда — обваливает).</p>
+    <p class="small">Жизнь продолжается: зарплата, кризисы и соблазны никуда не денутся. Теперь к ним добавится рынок.</p>
+    <button class="btn hand" onclick="G.startLevel2()">📈 Стать инвестором</button>
+    <button class="btn sec" onclick="G.finishNow()">Завершить с этим результатом</button>`;
+  show('endOvl');
+}
+function startLevel2(){
+  hide('endOvl');
+  S.level = 2;
+  toast('Уровень 2. Правило первое: подушка и депозит — фундамент. Инвестируй только то, что не понадобится завтра.');
+  renderHUD();
   payday();
 }
 
@@ -686,34 +765,57 @@ function title(cap){
   if (cap < 250000) return ['🏠','Хозяйственный'];
   return ['🥷','Финансовый самурай'];
 }
+function qualityOf(){
+  const avg = Math.round((S.health + S.mood + S.rel) / 3);
+  if (avg >= 70) return [avg, '🌞', 'Цветёшь и пахнешь'];
+  if (avg >= 40) return [avg, '🙂', 'Жить можно'];
+  if (avg >= 20) return [avg, '🥱', 'На износе'];
+  return [avg, '🧟', 'Выгорел дотла'];
+}
 function finish(){
   pushHist('finished'); LS.del(SAVE_KEY); ended = true;
-  const cap = S.cash + S.cushion + S.deposit - S.debt;
+  const cap = totalCap();
   const [ico, rank] = title(cap);
+  const [qAvg, qIco, qLabel] = qualityOf();
+  let verdict;
+  if (cap >= 120000 && qAvg < 30) verdict = '⚖️ Деньги есть — жизни нет. Богатство, которое некому и незачем тратить, — это просто цифры. Попробуй ран, где живут и люди, а не только капитал.';
+  else if (cap >= 120000 && qAvg >= 60) verdict = '🏆 Финансовый дзен: и капитал, и жизнь. Это и есть выигрыш.';
+  else if (cap < 40000 && qAvg >= 70) verdict = '🎈 Жил в кайф — но без запаса. Первый же серьёзный кризис заберёт весь этот кайф с процентами.';
+  else verdict = S.level >= 2 ? 'Рынок попробован. Дальше — только опыт.' : 'Попробуй ещё раз: подушка до кризиса, а не после — в этом весь секрет.';
   $('endSheet').innerHTML = `
     <h1 class="hand">${ico} ${rank}</h1>
-    <p>6 месяцев прожито. Твой капитал:</p>
+    <p>${S.month - 1} мес. прожито${S.level >= 2 ? ' · уровень «Инвестор»' : ''}. Твой капитал:</p>
     <div class="ledger">
       <div><span>💰 На карте</span><b class="plus">${fmt(S.cash)}</b></div>
       <div><span>🛡 Подушка</span><b class="plus">${fmt(S.cushion)}</b></div>
       <div><span>🏦 Депозит</span><b class="plus">${fmt(S.deposit)}</b></div>
+      ${S.bonds?`<div><span>📜 Облигации</span><b class="plus">${fmt(S.bonds)}</b></div>`:''}
+      ${S.stocks?`<div><span>📈 Акции</span><b class="plus">${fmt(S.stocks)}</b></div>`:''}
       ${S.debt?`<div><span>🩸 Долги</span><b class="minus">${fmt(-S.debt)}</b></div>`:''}
       <div><span><b>Итого</b></span><b class="${cap>=0?'plus':'minus'}">${fmt(cap)}</b></div>
     </div>
+    <p><b>${qIco} Качество жизни: ${qLabel} (${qAvg}/100)</b></p>
+    <div class="ledger">
+      <div><span>❤️ Здоровье</span><b>${Math.round(S.health)}</b></div>
+      <div><span>😊 Настроение</span><b>${Math.round(S.mood)}</b></div>
+      <div><span>👥 Отношения</span><b>${Math.round(S.rel)}</b></div>
+    </div>
+    <p>${verdict}</p>
     <p class="small">Импульсивных трат: ${S.impulses} · Кризисов пережито: ${S.crisesTotal}, из них подушкой: ${S.crisesAbsorbed} · Микрозаймов: ${S.loansTaken}</p>
-    <p>${cap >= 120000 ? 'Следующий уровень — заставить этот капитал работать: облигации, ETF, акции. Это уже другая игра 😉' : 'Попробуй ещё раз: подушка до кризиса, а не после — в этом весь секрет.'}</p>
     <p class="small">Результат сохранён в историю сессий (⚙️)</p>
     <button class="btn hand" onclick="G.newSession()">Прожить ещё раз</button>`;
   show('endOvl');
 }
 function gameOver(){
   pushHist('debt'); LS.del(SAVE_KEY); ended = true;
+  const [qAvg, qIco, qLabel] = qualityOf();
   $('endSheet').innerHTML = `
     <h1 class="hand">📉 Долговая спираль</h1>
     <p>Микрозаймы под 30% в месяц съели бюджет. Звонят коллекторы. Ран окончен.</p>
     <div class="ledger">
       <div><span>🩸 Долг</span><b class="minus">${fmt(-S.debt)}</b></div>
       <div><span>Импульсивных трат</span><b>${S.impulses}</b></div>
+      <div><span>${qIco} Качество жизни</span><b>${qLabel} (${qAvg}/100)</b></div>
     </div>
     <p class="small">Урок бесплатный (в отличие от микрозайма): сначала подушка — потом хотелки. Кризис приходит всегда, вопрос лишь — к кому.</p>
     <p class="small">Результат сохранён в историю сессий (⚙️)</p>
@@ -737,7 +839,7 @@ function saveGame(){
   if (!S || ended) return;
   const scal = {};
   ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
-   'catCost','cashback','depositOpen','mfo','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
+   'catCost','cashback','depositOpen','mfo','level','bonds','stocks','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
     .forEach(k=>scal[k]=S[k]);
   LS.set(SAVE_KEY, {
     scal,
@@ -763,11 +865,12 @@ function loadGame(){
 function pushHist(result){
   if (!S) return;
   const hist = LS.get(HIST_KEY) || [];
-  const cap = S.cash + S.cushion + S.deposit - S.debt;
+  const cap = totalCap();
+  const q = Math.round((S.health + S.mood + S.rel) / 3);
   hist.unshift({
     d: Date.now(), result,
-    m: Math.min(S.month, MONTHS),
-    cap, cushion: S.cushion, deposit: S.deposit, debt: S.debt,
+    m: Math.min(S.month, maxMonths()),
+    cap, q, lvl: S.level,
     rank: result === 'debt' ? '💀 Долговая спираль' : (result === 'abandoned' ? '⏸ Брошена' : title(cap)[0] + ' ' + title(cap)[1]),
     imp: S.impulses, loans: S.loansTaken,
   });
@@ -778,7 +881,8 @@ function histHTML(){
   if (!hist.length) return '<p class="small">Прошлых сессий пока нет.</p>';
   return hist.map(h=>{
     const date = new Date(h.d).toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
-    return `<div class="row"><span>${date} · ${h.rank}</span><b>${h.m} мес · ${fmt(h.cap)}</b></div>`;
+    const qIco = h.q == null ? '' : (h.q >= 70 ? ' 🌞' : h.q >= 40 ? ' 🙂' : h.q >= 20 ? ' 🥱' : ' 🧟');
+    return `<div class="row"><span>${date} · ${h.rank}${qIco}${h.lvl >= 2 ? ' · 📈' : ''}</span><b>${h.m} мес · ${fmt(h.cap)}</b></div>`;
   }).join('');
 }
 
@@ -820,7 +924,7 @@ function renderStart(){
   const hist = LS.get(HIST_KEY) || [];
   $('startHist').textContent = hist.length ? `Сыграно сессий: ${hist.length}. Лучший капитал: ${fmt(Math.max(...hist.map(h=>h.cap)))}` : '';
 }
-window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth };
+window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, finishNow: finish };
 renderStart();
 </script>
 </body>
