@@ -27,27 +27,33 @@
   .hudrow { display:flex; gap:8px; align-items:center; justify-content:space-between; }
   .tag {
     background:linear-gradient(160deg,#d9c7a3,#c9b48c); border:1px solid #8a7550;
-    border-radius:6px 10px 7px 9px; padding:4px 10px; font-size:14px; color:#3a2d1c;
+    border-radius:6px 10px 7px 9px; padding:7px 14px; font-size:18px; color:#3a2d1c;
     box-shadow:0 2px 4px rgba(0,0,0,.4), inset 0 0 8px rgba(120,90,50,.25);
   }
-  .tag b { font-size:16px; }
+  .tag b { font-size:21px; }
   #moneyTag.neg b { color:#a02020; }
   #debtTag { background:linear-gradient(160deg,#caa3a3,#b98888); display:none; }
-  #stats { display:flex; gap:8px; margin-top:8px; }
-  .stat { flex:1; background:rgba(217,199,163,.92); border:1px solid #8a7550; border-radius:8px 6px 9px 7px; padding:4px 6px 6px; box-shadow:0 2px 4px rgba(0,0,0,.4); }
-  .stat .lbl { font-size:13px; display:flex; justify-content:space-between; }
-  .bar { height:7px; background:#b3a17c; border-radius:4px; margin-top:3px; overflow:hidden; border:1px solid #8a7550; }
-  .bar i { display:block; height:100%; border-radius:4px; transition:width .4s; }
+  #stats { display:flex; gap:8px; margin-top:10px; }
+  .stat { flex:1; background:rgba(217,199,163,.95); border:1px solid #8a7550; border-radius:8px 6px 9px 7px; padding:7px 9px 9px; box-shadow:0 2px 4px rgba(0,0,0,.4); }
+  .stat .lbl { font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center; color:#3a2d1c; }
+  .stat .lbl .ico { display:flex; align-items:center; color:#5c4a2e; }
+  .stat svg { width:22px; height:22px; }
+  .bar { height:10px; background:#b3a17c; border-radius:5px; margin-top:5px; overflow:hidden; border:1px solid #8a7550; }
+  .bar i { display:block; height:100%; border-radius:5px; transition:width .4s; }
   #bHealth i { background:#b0413e; } #bMood i { background:#c98a2d; } #bRel i { background:#4a7ab5; }
-  #safety { display:flex; gap:8px; margin-top:8px; }
+  #safety { display:flex; gap:8px; margin-top:10px; }
   .chip {
-    flex:1; text-align:center; padding:5px 4px; font-size:13px; border-radius:7px 10px 6px 9px;
+    flex:1; text-align:center; padding:8px 6px; font-size:16px; border-radius:7px 10px 6px 9px;
     background:linear-gradient(160deg,#cfe0c3,#b7cfa8); border:1px dashed #5e7a4c; color:#2d3f22;
     box-shadow:0 2px 4px rgba(0,0,0,.35);
   }
-  .chip b { display:block; font-size:15px; }
+  .chip b { display:block; font-size:20px; }
   #cushionChip.hit { animation:shield .6s; }
   @keyframes shield { 0%{transform:scale(1)} 30%{transform:scale(1.15); box-shadow:0 0 18px #ffd76a} 100%{transform:scale(1)} }
+  /* green/red pulse on HUD when value changes */
+  .pulseG { animation:pg .8s; } .pulseR { animation:pr .8s; }
+  @keyframes pg { 0%{box-shadow:0 0 0 0 rgba(46,125,50,.95)} 100%{box-shadow:0 0 0 14px rgba(46,125,50,0)} }
+  @keyframes pr { 0%{box-shadow:0 0 0 0 rgba(179,54,42,.95)} 100%{box-shadow:0 0 0 14px rgba(179,54,42,0)} }
 
   /* ---------- card table ---------- */
   #table { flex:1 1 auto; position:relative; display:flex; align-items:center; justify-content:center; min-height:0; }
@@ -74,32 +80,41 @@
   .card.back { transform:scale(.94) rotate(2.5deg); filter:brightness(.92); }
   .card.top { cursor:grab; z-index:5; }
   .card.top:active { cursor:grabbing; }
-  .cEmoji { font-size:52px; text-align:center; margin-top:14px; filter:drop-shadow(1px 2px 1px rgba(0,0,0,.25)); }
-  .cCat { text-align:center; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#7a6340; margin-top:6px; }
-  .cText { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-size:18px; line-height:1.35; padding:6px 4px; color:#33271a; }
-  .cHintRow { display:flex; justify-content:space-between; font-size:12px; color:#7a6340; padding:0 2px; }
+  .cEmoji { font-size:66px; text-align:center; margin-top:12px; filter:drop-shadow(1px 2px 1px rgba(0,0,0,.25)); }
+  .cCat { text-align:center; font-size:12.5px; letter-spacing:2px; text-transform:uppercase; color:#7a6340; margin-top:6px; }
+  .cText { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-size:21.5px; line-height:1.35; padding:6px 4px; color:#33271a; }
+  .cHintRow { display:flex; justify-content:space-between; font-size:15px; font-weight:bold; color:#6b5535; padding:0 2px; }
   .cHintRow span { max-width:48%; }
   .cHintRow .rgt { text-align:right; }
   /* choice sticker shown while dragging */
   .choiceTag {
-    position:absolute; top:14px; padding:7px 11px; font-size:15px; border-radius:6px 9px 5px 8px;
-    border:2px solid; opacity:0; transform:rotate(-6deg); max-width:62%; background:#f3e9cf;
+    position:absolute; top:14px; padding:9px 13px; font-size:18px; border-radius:6px 9px 5px 8px;
+    border:2px solid; opacity:0; transform:rotate(-6deg); max-width:68%; background:#f3e9cf;
     box-shadow:0 3px 6px rgba(0,0,0,.3); pointer-events:none; z-index:6;
   }
-  .choiceTag .eff { display:block; font-size:13px; margin-top:2px; color:#5c4a2e; }
+  .choiceTag .eff { display:block; font-size:16px; margin-top:3px; color:#5c4a2e; }
+  .eff .g { color:#256b2a; font-weight:bold; white-space:nowrap; }
+  .eff .b { color:#a02020; font-weight:bold; white-space:nowrap; }
+  .eff svg { width:15px; height:15px; vertical-align:-2px; }
   #tagL { right:12px; border-color:#8f4d3c; color:#8f4d3c; transform:rotate(6deg); }
   #tagR { left:12px; border-color:#4c6e3f; color:#3f5e33; }
 
-  /* floating deltas */
-  #floats { position:absolute; inset:0; pointer-events:none; z-index:30; }
-  .float { position:absolute; font-size:16px; font-weight:bold; animation:rise 1.3s forwards; text-shadow:0 1px 2px rgba(0,0,0,.5); }
-  @keyframes rise { 0%{opacity:0; transform:translateY(8px)} 15%{opacity:1} 100%{opacity:0; transform:translateY(-44px)} }
+  /* floating deltas — big colored pills */
+  #floats { position:absolute; inset:0; pointer-events:none; z-index:30; display:flex; flex-direction:column; align-items:center; gap:8px; padding-top:4%; }
+  .float {
+    display:flex; align-items:center; gap:8px; padding:9px 18px; border-radius:26px;
+    font-size:22px; font-weight:bold; color:#fff; animation:rise 1.6s forwards;
+    box-shadow:0 4px 12px rgba(0,0,0,.45); border:2px solid rgba(255,255,255,.35);
+  }
+  .float svg { width:24px; height:24px; }
+  .float.up { background:#2e7d32; } .float.down { background:#b3362a; }
+  @keyframes rise { 0%{opacity:0; transform:translateY(14px) scale(.8)} 12%{opacity:1; transform:translateY(0) scale(1.06)} 22%{transform:scale(1)} 75%{opacity:1} 100%{opacity:0; transform:translateY(-40px)} }
 
   /* lesson toast */
   #toast {
     position:absolute; left:50%; bottom:8px; transform:translateX(-50%) rotate(-1deg);
     background:#f3e9cf; border:1px solid #8a7550; border-left:4px solid #b0872d;
-    padding:8px 14px; font-size:13.5px; color:#4a3a22; max-width:92%; border-radius:3px 8px 4px 7px;
+    padding:10px 16px; font-size:16px; color:#4a3a22; max-width:92%; border-radius:3px 8px 4px 7px;
     box-shadow:0 4px 10px rgba(0,0,0,.45); opacity:0; transition:opacity .3s; z-index:40; text-align:center;
   }
   #toast.show { opacity:1; }
@@ -152,9 +167,9 @@
       <div class="tag" id="debtTag">🩸 <b>0 ₽</b></div>
     </div>
     <div id="stats">
-      <div class="stat"><div class="lbl"><span>❤️</span><span id="vHealth">70</span></div><div class="bar" id="bHealth"><i style="width:70%"></i></div></div>
-      <div class="stat"><div class="lbl"><span>😊</span><span id="vMood">70</span></div><div class="bar" id="bMood"><i style="width:70%"></i></div></div>
-      <div class="stat"><div class="lbl"><span>👥</span><span id="vRel">70</span></div><div class="bar" id="bRel"><i style="width:70%"></i></div></div>
+      <div class="stat" id="stHealth"><div class="lbl"><span class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span><span id="vHealth">70</span></div><div class="bar" id="bHealth"><i style="width:70%"></i></div></div>
+      <div class="stat" id="stMood"><div class="lbl"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.3 14.3c1 1.3 2.3 2 3.7 2s2.7-.7 3.7-2"/><circle cx="8.8" cy="9.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="9.6" r="1.1" fill="currentColor" stroke="none"/></svg></span><span id="vMood">70</span></div><div class="bar" id="bMood"><i style="width:70%"></i></div></div>
+      <div class="stat" id="stRel"><div class="lbl"><span class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7.5" r="3.4"/><path d="M2.5 19.2c0-3.2 2.9-5.4 6.5-5.4s6.5 2.2 6.5 5.4V20H2.5z"/><circle cx="17.3" cy="8.3" r="2.7"/><path d="M16.4 14.2c2.9.4 5.1 2.2 5.1 4.9v.9h-3.6v-.8c0-2-.5-3.6-1.5-5z"/></svg></span><span id="vRel">70</span></div><div class="bar" id="bRel"><i style="width:70%"></i></div></div>
     </div>
     <div id="safety">
       <div class="chip" id="cushionChip">🛡 Подушка <b id="vCushion">0 ₽</b></div>
@@ -215,11 +230,11 @@ const SALARY = 80000, MONTHS = 6, CARDS_PER_MONTH = 12;
 
 /* Card: e emoji, cat label, t text, L/R: {lbl, m(money), h, o(mood), r, fx, note} ; min: month, once */
 const POOL = [
- {e:'👟',cat:'соблазн',t:'Кроссовки со скидкой 40%. Они смотрят на тебя. Ты смотришь на них.',
+ {e:'👟',cat:'соблазн',t:()=>`${pick(['Кроссовки','Худи','Беспроводные наушники','Умные часы','Джинсы'])} со скидкой ${pick(['40%','50%','«только сегодня»'])}. Они смотрят на тебя. Ты смотришь на них.`,
   L:{lbl:'Купить',m:-4000,o:8,imp:1},R:{lbl:'Пройти мимо',o:-4,note:'Скидка — это не заработок. Это способ потратить.'}},
- {e:'🍻',cat:'друзья',t:'Пятница. Друзья зовут в бар. «Ты вообще живой там?»',
+ {e:'🍻',cat:'друзья',t:()=>`Пятница. Друзья зовут в ${pick(['бар','караоке','боулинг','паб-квиз','кальянную'])}. «Ты вообще живой там?»`,
   L:{lbl:'Пойти',m:-3000,o:8,r:8},R:{lbl:'«В другой раз»',r:-7,o:-3}},
- {e:'🛵',cat:'быт',t:'Тяжёлый день. Палец сам тянется к доставке роллов.',
+ {e:'🛵',cat:'быт',t:()=>`Тяжёлый день. Палец сам тянется к доставке ${pick(['роллов','пиццы','бургеров','шаурмы «той самой»'])}.`,
   L:{lbl:'Заказать',m:-1800,o:6,imp:1},R:{lbl:'Гречка с котлетой',o:-3,h:3}},
  {e:'📺',cat:'подписки',t:'Стриминг снова списал 599 ₽. Ты смотрел там одно видео. В марте.',
   L:{lbl:'Пусть живёт',m:-599,o:2},R:{lbl:'Отменить',o:-2,note:'Подписки — тихий насос из кармана. Ревизия раз в квартал.'}},
@@ -235,14 +250,14 @@ const POOL = [
   L:{lbl:'Сделать сейчас',m:-4000,h:6,note:'Профилактика всегда дешевле лечения. Всегда.'},R:{lbl:'Понаблюдаем',h:-6}},
  {e:'📱',cat:'соблазн',t:'Вышел новый айфон. Твой «старый» вдруг стал как будто медленнее.',
   L:{lbl:'В рассрочку!',m:-9000,o:12,imp:1,note:'Рассрочка — это кредит в костюме подарка.'},R:{lbl:'Мой ещё огонь',o:-5}},
- {e:'💸',cat:'друзья',t:'Друг просит в долг 10 000. «Верну через неделю, отвечаю».',
+ {e:'💸',cat:'друзья',t:()=>`${pick(['Саня','Дима','Лёха','Макс','Костян'])} просит в долг 10 000. «Верну через неделю, отвечаю».`,
   L:{lbl:'Дать',m:-10000,r:9,fx:'friendLoan'},R:{lbl:'«Сам на мели»',r:-8}},
  {e:'💍',cat:'события',t:'Свадьба одноклассника. Конверт, костюм, тамада кричит «Горько!»',
   L:{lbl:'Пойти',m:-6000,o:7,r:8},R:{lbl:'Открытку отправлю',r:-7}},
- {e:'🎰',cat:'ловушка',t:'Реклама: «Костя поднял 200К с одного депозита в казино!»',
-  L:{lbl:'А вдруг',m:-5000,o:-4,imp:1,note:'Казино всегда в плюсе. Математика не болеет за тебя.'},R:{lbl:'Костя врёт',note:'Верно. Костя врёт.'}},
- {e:'🪙',cat:'ловушка',t:'Таксист советует SqueezeCoin: «Через месяц иксы, брат, сто процентов».',
-  L:{lbl:'Вложить 5 000',m:-5000,fx:'shitcoin',imp:1},R:{lbl:'Кивнуть и выйти',note:'Если о монете говорит таксист — заходить уже поздно.'}},
+ {e:'🎰',cat:'ловушка',t:()=>`Реклама: «${pick(['Костя','Витя','Серёга','Тимур'])} поднял ${pick(['200К','350К','полляма'])} с одного депозита в казино!»`,
+  L:{lbl:'А вдруг',m:-5000,o:-4,imp:1,note:'Казино всегда в плюсе. Математика не болеет за тебя.'},R:{lbl:'Реклама врёт',note:'Верно. Врёт.'}},
+ {e:'🪙',cat:'ловушка',t:()=>`${pick(['Таксист','Барбер','Курьер','Парень из качалки','Двоюродный брат','Сосед с пятого'])} советует ${pick(['SqueezeCoin','MoonRocket','PumpInu','DogeMars','ChihuahuaCash','GigaChad Token'])}: «Через месяц иксы, брат, сто процентов».`,
+  L:{lbl:'Вложить 5 000',m:-5000,fx:'shitcoin',imp:1},R:{lbl:'Кивнуть и выйти',note:'Если о монете говорят все подряд — заходить уже поздно.'}},
  {e:'🎓',cat:'ловушка',t:'Курс «Мышление миллионера» за 15 000. Спикер арендовал ламборгини на съёмку.',
   L:{lbl:'Купить курс',m:-15000,o:-3,imp:1,note:'Богатеет тут только спикер. С тебя.'},R:{lbl:'Полистать бесплатное',o:2}},
  {e:'🧾',cat:'ловушка',t:'«Микрозайм 0% на 7 дней!» — мигает баннер. Как мило с их стороны.',
@@ -271,8 +286,8 @@ const POOL = [
   L:{lbl:'Оформить',fx:'cashback',note:'Кэшбэк полезен, только если не тратить больше ради кэшбэка.'},R:{lbl:'Не верю банкам',o:1}},
  {e:'🧯',cat:'финансы',t:'Статья: «У 60% людей нет запаса даже на месяц жизни». Ты в этой статистике?',
   L:{lbl:'Задуматься',o:-2,note:'Подушка = 3–6 месяцев расходов. Начни хоть с одного.'},R:{lbl:'Пролистать',o:1}},
- {e:'🎪',cat:'соблазн',t:'Концерт группы твоей юности. Билеты от 4 500. Ностальгия давит.',
-  L:{lbl:'Купить билет',m:-4500,o:11,imp:1},R:{lbl:'Послушать дома',o:-5}},
+ {e:'🎪',cat:'соблазн',t:()=>`${pick(['Концерт группы твоей юности','Стендап, на который все идут','Фестиваль еды и музыки'])}. Билеты от 4 500. ${pick(['Ностальгия давит.','Все уже купили.','Фомо шепчет.'])}`,
+  L:{lbl:'Купить билет',m:-4500,o:11,imp:1},R:{lbl:'Посидеть дома',o:-5}},
  {e:'🧦',cat:'быт',t:'Зима близко. Куртка «ещё норм», но молния уже философски смотрит на мир.',
   L:{lbl:'Новая куртка',m:-7000,h:3,o:4},R:{lbl:'Заклеить молнию',o:-3}},
 ];
@@ -280,7 +295,7 @@ const POOL = [
 const CRISES = [
  {e:'🧊',t:'Холодильник издал предсмертный хрип и затих. Навсегда.',cost:12000,alt:{lbl:'Б/у с авито',cost:6000,o:-3}},
  {e:'🦷',t:'Зуб. Тот самый, за которым «наблюдали». Он перешёл в наступление.',cost:8000,alt:{lbl:'Терпеть до аванса',cost:2000,h:-10}},
- {e:'📵',t:'Телефон нырнул в унитаз. Героически. Насмерть.',cost:9000,alt:{lbl:'Кнопочный пока',cost:1500,o:-8}},
+ {e:'📵',t:()=>`Телефон нырнул ${pick(['в унитаз','с балкона','в тарелку супа','экраном на бордюр'])}. Героически. Насмерть.`,cost:9000,alt:{lbl:'Кнопочный пока',cost:1500,o:-8}},
  {e:'🤒',t:'Простуда свалила на неделю. Аптека радуется тебе как родному.',cost:3000,alt:{lbl:'Чай и подорожник',cost:500,h:-8}},
  {e:'🚿',t:'Сосед сверху «забыл про кран». Твой потолок теперь с дизайнерскими разводами.',cost:7000,alt:{lbl:'Жить с разводами',cost:0,o:-6}},
  {e:'👖',t:'Порвались единственные приличные джинсы. Прямо перед встречей.',cost:3500,alt:{lbl:'Зашить криво',cost:200,r:-4}},
@@ -302,6 +317,19 @@ function newState(){ return {
 };}
 
 /* ================= HUD ================= */
+/* monochrome icons (colored via currentColor) */
+const ICO = {
+  h:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>',
+  o:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.3 14.3c1 1.3 2.3 2 3.7 2s2.7-.7 3.7-2"/><circle cx="8.8" cy="9.6" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.2" cy="9.6" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  r:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7.5" r="3.4"/><path d="M2.5 19.2c0-3.2 2.9-5.4 6.5-5.4s6.5 2.2 6.5 5.4V20H2.5z"/><circle cx="17.3" cy="8.3" r="2.7"/><path d="M16.4 14.2c2.9.4 5.1 2.2 5.1 4.9v.9h-3.6v-.8c0-2-.5-3.6-1.5-5z"/></svg>',
+  m:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9.2"/><path d="M9.2 17V7h4a2.9 2.9 0 0 1 0 5.8H8.2M8.2 15h5" stroke-linecap="round"/></svg>',
+};
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function pulse(el, up){
+  if (!el) return;
+  el.classList.remove('pulseG','pulseR'); void el.offsetWidth;
+  el.classList.add(up ? 'pulseG' : 'pulseR');
+}
 function renderHUD(){
   $('monthTag').textContent = 'Месяц ' + S.month + ' / ' + MONTHS;
   const mt = $('moneyTag'); mt.querySelector('b').textContent = fmt(S.cash); mt.classList.toggle('neg', S.cash<0);
@@ -314,10 +342,11 @@ function renderHUD(){
   $('depositChip').style.display = S.depositOpen ? '' : 'none';
   $('vDeposit').textContent = fmt(S.deposit);
 }
-function floatDelta(txt, color, i){
-  const f = document.createElement('div'); f.className='float'; f.textContent = txt;
-  f.style.color = color; f.style.left = (18 + i*30) + '%'; f.style.top = '12%';
-  $('floats').appendChild(f); setTimeout(()=>f.remove(), 1400);
+function floatDelta(html, up){
+  const f = document.createElement('div');
+  f.className = 'float ' + (up ? 'up' : 'down');
+  f.innerHTML = html;
+  $('floats').appendChild(f); setTimeout(()=>f.remove(), 1700);
 }
 let toastT;
 function toast(msg){
@@ -340,13 +369,19 @@ function applyMoney(delta, isCrisis){
 }
 function clamp(k){ S[k] = Math.max(0, Math.min(100, S[k])); }
 function applyEff(eff, isCrisis){
-  let i = 0;
   if (eff.m){ const r = applyMoney(eff.m, isCrisis);
-    if (r.cushioned > 0) toast('Подушка приняла удар: ' + fmt(-r.cushioned).replace('−','−') + ' из неё, а не из бюджета 🛡');
-    floatDelta((eff.m>0?'+':'') + fmt(eff.m).replace('−','−'), eff.m>0 ? '#8fd18a' : '#ff9c8a', i++);
+    if (r.cushioned > 0) toast('Подушка приняла удар: ' + fmt(r.cushioned) + ' из неё, а не из бюджета 🛡');
+    const up = eff.m > 0;
+    floatDelta(ICO.m + '<span>' + (up?'+':'−') + Math.abs(eff.m).toLocaleString('ru-RU') + ' ₽</span>', up);
+    pulse($('moneyTag'), up);
   }
-  [['h','health','❤️'],['o','mood','😊'],['r','rel','👥']].forEach(([k,stat,ico])=>{
-    if (eff[k]){ S[stat] += eff[k]; clamp(stat); floatDelta(ico+(eff[k]>0?'+':'')+eff[k], eff[k]>0?'#8fd18a':'#ff9c8a', i++); }
+  [['h','health','stHealth'],['o','mood','stMood'],['r','rel','stRel']].forEach(([k,stat,hudId])=>{
+    if (eff[k]){
+      S[stat] += eff[k]; clamp(stat);
+      const up = eff[k] > 0;
+      floatDelta(ICO[k] + '<span>' + (up?'+':'−') + Math.abs(eff[k]) + '</span>', up);
+      pulse($(hudId), up);
+    }
   });
   if (eff.imp) S.impulses++;
   if (eff.fx) FX[eff.fx]();
@@ -386,25 +421,28 @@ function crisisToCard(cr){
   let alt;
   if (cr.alt){ alt = {lbl:cr.alt.lbl, m:-cr.alt.cost}; ['h','o','r'].forEach(k=>{ if(cr.alt[k]) alt[k]=cr.alt[k]; }); }
   else alt = {lbl:'Вздохнуть и заплатить', m:-cr.cost};
-  return {e:cr.e, cat:'⚡ кризис', t:cr.t, L:alt, R:full, isCrisis:true};
+  return {e:cr.e, cat:'⚡ кризис', t:(typeof cr.t === 'function' ? cr.t() : cr.t), L:alt, R:full, isCrisis:true};
 }
 
 /* ================= CARD UI ================= */
 let topCard = null, drag = null;
 function effPreview(eff){
   const parts = [];
-  if (eff.m) parts.push('💰' + (eff.m>0?'+':'−') + Math.abs(eff.m).toLocaleString('ru-RU'));
-  [['h','❤️'],['o','😊'],['r','👥']].forEach(([k,ico])=>{ if(eff[k]) parts.push(ico+(eff[k]>0?'+':'−')); });
-  if (eff.fx === 'friendLoan') parts.push('🎲');
-  if (eff.fx === 'shitcoin') parts.push('🎲');
-  return parts.join('  ') || '—';
+  const wrap = (up, inner) => '<span class="' + (up?'g':'b') + '">' + inner + '</span>';
+  if (eff.m) parts.push(wrap(eff.m>0, (eff.m>0?'+':'−') + Math.abs(eff.m).toLocaleString('ru-RU') + ' ₽'));
+  [['h'],['o'],['r']].forEach(([k])=>{
+    if (eff[k]) parts.push(wrap(eff[k]>0, ICO[k] + (eff[k]>0?'+':'−') + Math.abs(eff[k])));
+  });
+  if (eff.fx === 'friendLoan' || eff.fx === 'shitcoin') parts.push('🎲');
+  return parts.join(' &nbsp;') || '—';
 }
 function showCard(){
   const tbl = $('table');
   tbl.querySelectorAll('.card').forEach(c=>c.remove());
   if (!S.deck.length){ endMonth(); return; }
   const item = S.deck[0];
-  const data = item.crisis ? crisisToCard(item.crisis) : item.card;
+  const src = item.crisis ? crisisToCard(item.crisis) : item.card;
+  const data = Object.assign({}, src, { t: (typeof src.t === 'function' ? src.t() : src.t) });
   // back card
   if (S.deck.length > 1){
     const b = document.createElement('div'); b.className = 'card back'; tbl.appendChild(b);
