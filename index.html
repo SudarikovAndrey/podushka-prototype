@@ -273,9 +273,9 @@ const POOL = [
  {e:'🎂',cat:'работа',t:'Коллега собирает «по тысяче» на день рождения шефа. Уже третий раз в этом году.',
   L:{lbl:'Скинуться',m:-1000,r:5},R:{lbl:'«Я скидывал!»',r:-6,o:2}},
  {e:'🏋️',cat:'здоровье',t:'Абонемент в зал. «Новая жизнь с понедельника» — версия 47.0.',
-  L:{lbl:'Купить',m:-2500,h:8,o:3},R:{lbl:'С понедельника',h:-5}},
+  L:{lbl:'Купить',m:-2500,h:8,o:3,fx:'gym',note:'Крепкая спина не попросит массажиста за 6 000. Профилактика окупается.'},R:{lbl:'С понедельника',h:-5}},
  {e:'🦷',cat:'здоровье',t:'Стоматолог намекает на чистку и «вот тут понаблюдаем».',
-  L:{lbl:'Сделать сейчас',m:-4000,h:6,note:'Профилактика всегда дешевле лечения. Всегда.'},R:{lbl:'Понаблюдаем',h:-6}},
+  L:{lbl:'Сделать сейчас',m:-4000,h:6,fx:'dental',note:'Профилактика всегда дешевле лечения. Этот зуб тебя больше не побеспокоит.'},R:{lbl:'Понаблюдаем',h:-6}},
  {e:'📱',cat:'соблазн',t:'Вышел новый айфон. Твой «старый» вдруг стал как будто медленнее.',
   L:{lbl:'В рассрочку!',m:-9000,o:12,imp:1,note:'Рассрочка — это кредит в костюме подарка.'},R:{lbl:'Мой ещё огонь',o:-5}},
  {e:'💸',cat:'друзья',t:()=>`${pick(['Саня','Дима','Лёха','Макс','Костян'])} просит в долг 10 000. «Верну через неделю, отвечаю».`,
@@ -322,13 +322,18 @@ const POOL = [
 
 const CRISES = [
  {e:'🧊',t:'Холодильник издал предсмертный хрип и затих. Навсегда.',cost:12000,alt:{lbl:'Б/у с авито',cost:6000,o:-3}},
- {e:'🦷',t:'Зуб. Тот самый, за которым «наблюдали». Он перешёл в наступление.',cost:8000,alt:{lbl:'Терпеть до аванса',cost:2000,h:-10}},
+ {e:'🦷',k:'tooth',t:'Зуб. Тот самый, за которым «наблюдали». Он перешёл в наступление.',cost:8000,alt:{lbl:'Терпеть до аванса',cost:2000,h:-10}},
  {e:'📵',t:()=>`Телефон нырнул ${pick(['в унитаз','с балкона','в тарелку супа','экраном на бордюр'])}. Героически. Насмерть.`,cost:9000,alt:{lbl:'Кнопочный пока',cost:1500,o:-8}},
  {e:'🤒',t:'Простуда свалила на неделю. Аптека радуется тебе как родному.',cost:3000,alt:{lbl:'Чай и подорожник',cost:500,h:-8}},
  {e:'🚿',t:'Сосед сверху «забыл про кран». Твой потолок теперь с дизайнерскими разводами.',cost:7000,alt:{lbl:'Жить с разводами',cost:0,o:-6}},
  {e:'👖',t:'Порвались единственные приличные джинсы. Прямо перед встречей.',cost:3500,alt:{lbl:'Зашить криво',cost:200,r:-4}},
- {e:'💊',t:'Спина сказала «хватит» после подработки. Массажист сказал «10 сеансов».',cost:6000,alt:{lbl:'Мазь и лежать',cost:800,h:-7}},
+ {e:'💊',k:'back',t:'Спина сказала «хватит» после подработки. Массажист сказал «10 сеансов».',cost:6000,alt:{lbl:'Мазь и лежать',cost:800,h:-7}},
  {e:'🚌',t:'Контролёр. А проездной остался в других штанах. Штраф.',cost:1500,alt:null},
+ {e:'🧺',t:'Стиральная машина устроила прощальный потоп и умерла.',cost:11000,alt:{lbl:'Стирать руками пока',cost:500,o:-6}},
+ {e:'👓',t:'Очки хрустнули под чьей-то пятой точкой на вечеринке.',cost:4500,alt:{lbl:'Скотч — это стиль',cost:200,r:-4}},
+ {e:'💻',t:'Ноутбук стал выключаться на самом интересном месте.',cost:9000,alt:{lbl:'Чистка и молитва',cost:2500,o:-3}},
+ {e:'🛴',t:'Самокат увели прямо от магазина. С замком.',cost:7000,alt:{lbl:'Теперь ты пешеход',cost:0,o:-7,h:3}},
+ {e:'🔌',t:'Чайник, тостер и роутер сговорились и умерли в один день.',cost:6000,alt:{lbl:'Без тостера жить можно',cost:2500,o:-4}},
 ];
 
 /* ================= STATE ================= */
@@ -340,7 +345,7 @@ function newState(){ return {
   month:1, cash:15000, cushion:0, deposit:0, debt:0,
   health:70, mood:70, rel:70,
   salary:SALARY, credit:8000, creditLeft:3, catCost:0, cashback:false, depositOpen:false,
-  deck:[], used:new Set(), pending:[],
+  deck:[], used:new Set(), usedCr:new Set(), flags:{}, pending:[],
   mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
 };}
 
@@ -427,10 +432,12 @@ function applyEff(eff, isCrisis){
 }
 const FX = {
   friendLoan(){ S.pending.push({label:'Друг вернул долг (о, чудо)', amount:10000, chance:.55, failLabel:'Друг «вернёт с зарплаты». Уже третьей.'}); },
-  shitcoin(){ S.pending.push({label:'SqueezeCoin: продал на пампе', amount:8000, chance:.12, failLabel:'SqueezeCoin −97%. Таксист сменил номер.'}); },
-  upskill(){ S.salary += 4000; toast('С следующего месяца зарплата +4 000 ₽. Навыки платят.'); },
+  shitcoin(){ S.pending.push({label:'Та самая монета внезапно сделала иксы. Успел продать', amount:25000, chance:.1, failLabel:'Та самая монета: −97%. Советчик уже топит за новую. (Шанс иксов был ~10% — казино с лишними шагами.)'}); },
+  upskill(){ S.salary += 4000; toast('Со следующего месяца зарплата +4 000 ₽ — навсегда. Навыки платят.'); },
   cat(){ S.catCost = 2000; },
   cashback(){ S.cashback = true; },
+  dental(){ S.flags.dental = true; },
+  gym(){ S.flags.gym = true; },
   unlockDeposit(){ if(!S.depositOpen){ S.depositOpen = true; toast('Открыт депозит: 1% в месяц на остаток. Деньги начали работать.'); renderHUD(); } },
 };
 
@@ -447,9 +454,13 @@ function buildDeck(){
     if (!picks.includes(depCard)) picks[Math.floor(Math.random()*picks.length)] = depCard;
   }
   picks.forEach(c=>S.used.add(c.t));
-  // crises: 2 in month 1-2, 2-3 later
+  // crises: 2 in month 1-2, 2-3 later; no repeats until pool exhausted; prevention excludes linked crises
   const nCr = S.month <= 2 ? 2 : (2 + (Math.random() < .5 ? 1 : 0));
-  const crs = shuffle(CRISES.slice()).slice(0, nCr).map(c=>({crisis:c}));
+  const allowed = c => !(c.k === 'tooth' && S.flags.dental) && !(c.k === 'back' && S.flags.gym);
+  let crPool = CRISES.filter(c => allowed(c) && !S.usedCr.has(CRISES.indexOf(c)));
+  if (crPool.length < nCr){ S.usedCr.clear(); crPool = CRISES.filter(allowed); }
+  const crs = shuffle(crPool.slice()).slice(0, nCr).map(c=>({crisis:c}));
+  crs.forEach(cr=>S.usedCr.add(CRISES.indexOf(cr.crisis)));
   const deck = picks.map(c=>({card:c}));
   crs.forEach(cr=>{ const pos = 2 + Math.floor(Math.random()*(deck.length-2)); deck.splice(pos,0,cr); });
   S.deck = deck;
@@ -718,6 +729,8 @@ function saveGame(){
   LS.set(SAVE_KEY, {
     scal,
     used: [...S.used].map(t=>POOL.findIndex(c=>c.t===t)).filter(i=>i>=0),
+    usedCr: [...S.usedCr],
+    flags: S.flags,
     deck: S.deck.map(it=>it.crisis ? {c:CRISES.indexOf(it.crisis)} : {p:POOL.indexOf(it.card)}),
     pending: S.pending,
   });
@@ -728,6 +741,8 @@ function loadGame(){
   S = newState();
   Object.assign(S, d.scal);
   S.used = new Set((d.used||[]).map(i=>POOL[i] && POOL[i].t).filter(Boolean));
+  S.usedCr = new Set(d.usedCr || []);
+  S.flags = d.flags || {};
   S.deck = (d.deck||[]).map(o=> o.c!=null ? {crisis:CRISES[o.c]} : {card:POOL[o.p]}).filter(it=>it.crisis||it.card);
   S.pending = d.pending || [];
   return true;
