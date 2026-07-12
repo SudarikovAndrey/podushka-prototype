@@ -164,6 +164,20 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .hist{text-align:left;margin-top:12px;max-height:44vh;overflow-y:auto;}
 .hist .row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--border);font-size:15px;color:var(--text);}
 .hist .row b{white-space:nowrap;font-family:var(--font-num);font-weight:700;font-size:15px;}
+/* ---- animated month report ---- */
+.rev{opacity:0;animation:revIn .45s cubic-bezier(.2,.8,.3,1) forwards;}
+@keyframes revIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.capBig{font-family:var(--font-num);font-weight:800;font-size:32px;line-height:1.05;color:var(--money);margin-top:2px;}
+.capDelta{font-size:14.5px;font-weight:800;font-family:var(--font-num);margin-top:1px;}
+.capDelta.up{color:var(--good);} .capDelta.down{color:var(--bad);}
+.secT{font-family:var(--font-display);font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin:15px 0 3px;text-align:left;}
+.dRow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:14.5px;text-align:left;}
+.dRow .dv{font-family:var(--font-num);font-weight:800;white-space:nowrap;}
+.dRow .dd{font-family:var(--font-num);font-weight:800;font-size:13px;white-space:nowrap;}
+.dd.up{color:var(--good);} .dd.down{color:var(--bad);} .dd.zero{color:var(--muted);font-weight:600;}
+.badge{display:flex;align-items:flex-start;gap:7px;padding:9px 12px;border-radius:12px;font-size:13.5px;font-weight:700;margin:5px 0;text-align:left;line-height:1.35;}
+.badge.crit{background:color-mix(in srgb,var(--bad) 12%,var(--surface));color:var(--bad);border:1.5px solid color-mix(in srgb,var(--bad) 38%,transparent);}
+.badge.good{background:color-mix(in srgb,var(--good) 12%,var(--surface));color:var(--good);border:1.5px solid color-mix(in srgb,var(--good) 38%,transparent);}
 .pulseG{animation:pg .9s;} .pulseR{animation:pr .9s;}
 @keyframes pg{0%{box-shadow:0 0 0 3px var(--good),0 0 20px 4px var(--glow-right)}100%{box-shadow:0 0 0 10px transparent}}
 @keyframes pr{0%{box-shadow:0 0 0 3px var(--bad),0 0 20px 4px var(--glow-left)}100%{box-shadow:0 0 0 10px transparent}}
@@ -230,11 +244,11 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Купить',m:-2500,h:8,o:3,fx:'gym',note:'Крепкая спина не попросит массажиста за 6 000. Профилактика окупается.'},R:{lbl:'С понедельника',h:-5}},
      {e:'🦷',cat:'здоровье',t:'Стоматолог намекает на чистку и «вот тут понаблюдаем».',
       L:{lbl:'Сделать сейчас',m:-4000,h:6,fx:'dental',note:'Профилактика всегда дешевле лечения. Этот зуб тебя больше не побеспокоит.'},R:{lbl:'Понаблюдаем',h:-6}},
-     {e:'📱',cat:'соблазн',t:'Вышел новый айфон. Твой «старый» вдруг стал как будто медленнее.',
+     {e:'📱',cat:'соблазн',once:true,t:'Вышел новый айфон. Твой «старый» вдруг стал как будто медленнее.',
       L:{lbl:'В рассрочку!',m:-9000,o:12,imp:1,note:'Рассрочка — это кредит в костюме подарка.'},R:{lbl:'Мой ещё огонь',o:-5}},
      {e:'💸',cat:'друзья',t:()=>`${pick(['Саня','Дима','Лёха','Макс','Костян'])} просит в долг 10 000. «Верну через неделю, отвечаю».`,
       L:{lbl:'Дать',m:-10000,r:9,fx:'friendLoan'},R:{lbl:'«Сам на мели»',r:-8}},
-     {e:'💍',cat:'события',t:'Свадьба одноклассника. Конверт, костюм, тамада кричит «Горько!»',
+     {e:'💍',cat:'события',once:true,t:'Свадьба одноклассника. Конверт, костюм, тамада кричит «Горько!»',
       L:{lbl:'Пойти',m:-6000,o:7,r:8},R:{lbl:'Открытку отправлю',r:-7}},
      {e:'🎰',cat:'ловушка',t:()=>`Реклама: «${pick(['Костя','Витя','Серёга','Тимур'])} поднял ${pick(['200К','350К','полляма'])} с одного депозита в казино!»`,
       L:{lbl:'А вдруг',m:-5000,o:-4,imp:1,note:'Казино всегда в плюсе. Математика не болеет за тебя.'},R:{lbl:'Реклама врёт',note:'Верно. Врёт.'}},
@@ -268,21 +282,21 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
      {e:'💳',cat:'финансы',t:'Банк предлагает кэшбэк-карту. Обещает возвращать «до 5%».',
       L:{lbl:'Оформить',fx:'cashback',note:'Кэшбэк полезен, только если не тратить больше ради кэшбэка.'},R:{lbl:'Не верю банкам',o:1}},
      {e:'🧯',cat:'финансы',t:'Статья: «У 60% людей нет запаса даже на месяц жизни». Ты в этой статистике?',
-      L:{lbl:'Задуматься',o:-2,note:'Подушка = 3–6 месяцев расходов. Начни хоть с одного.'},R:{lbl:'Пролистать',o:1}},
+      L:{lbl:'Посчитать свой запас',fx:'runway'},R:{lbl:'Пролистать',o:1}},
      {e:'🎪',cat:'соблазн',t:()=>`${pick(['Концерт группы твоей юности','Стендап, на который все идут','Фестиваль еды и музыки'])}. Билеты от 4 500. ${pick(['Ностальгия давит.','Все уже купили.','Фомо шепчет.'])}`,
       L:{lbl:'Купить билет',m:-4500,o:11,imp:1},R:{lbl:'Посидеть дома',o:-5}},
-     {e:'🧦',cat:'быт',t:'Зима близко. Куртка «ещё норм», но молния уже философски смотрит на мир.',
+     {e:'🧦',cat:'быт',once:true,t:'Зима близко. Куртка «ещё норм», но молния уже философски смотрит на мир.',
       L:{lbl:'Новая куртка',m:-7000,h:3,o:4},R:{lbl:'Заклеить молнию',o:-3}},
      {e:'💇',cat:'быт',t:'Барбершоп поднял цены до 2 500. «Ну а чё, аренда выросла».',
       L:{lbl:'Красота требует',m:-2500,o:3},R:{lbl:'Машинка дома',m:-300,o:-3}},
-     {e:'🎁',cat:'семья',t:'День рождения мамы. Она скажет «ничего не надо», но это ловушка.',
+     {e:'🎁',cat:'семья',once:true,t:'День рождения мамы. Она скажет «ничего не надо», но это ловушка.',
       L:{lbl:'Достойный подарок',m:-4000,r:8,o:3},R:{lbl:'Открытка и звонок',r:-5}},
      {e:'📶',cat:'подписки',t:'Оператор тихо перевёл тебя на тариф подороже. Заботливо, без спроса.',
       L:{lbl:'Не заметить',m:-400},R:{lbl:'Позвонить и вернуть',o:-2,note:'Раз в полгода проверяй тарифы и подписки — операторы считают твою невнимательность своей выручкой.'}},
      {e:'🍱',cat:'привычки',t:'Бизнес-ланч у офиса подорожал до 450. Очередь не уменьшилась.',
       L:{lbl:'Продолжать',m:-3500,o:2},R:{lbl:'Контейнеры из дома',o:-3,h:2}},
-     {e:'🧾',cat:'финансы',t:'За лечение зубов можно вернуть налоговый вычет 2 600 ₽. Но бумажки, госуслуги, вот это всё.',
-      L:{lbl:'Заполнить',m:2600,o:-2,note:'Вычеты — деньги, которые государство должно тебе. Лень — единственная причина их не забирать.'},R:{lbl:'Ну его',o:1}},
+     {e:'🧾',cat:'финансы',req:'deduct',t:'За недавнее лечение зубов положен налоговый вычет — 2 600 ₽. Но бумажки, госуслуги, вот это всё.',
+      L:{lbl:'Заполнить',m:2600,o:-2,fx:'taxDeduct',note:'Вычеты — деньги, которые государство должно тебе. Лень — единственная причина их не забирать.'},R:{lbl:'Ну его',o:1}},
      {e:'🛋',cat:'быт',t:'Друг отдаёт диван бесплатно. Нужен только грузовик и два часа страданий.',
       L:{lbl:'Забрать',m:-1500,o:4,r:3},R:{lbl:'Пусть стоит',o:-1}},
      {e:'📦',cat:'подписки',t:'«Коробка сюрпризов по подписке — всего 1 990/мес!» Внутри — сюрпризы.',
@@ -310,7 +324,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     ];
 
     const CRISES = [
-     {e:'🧊',t:'Холодильник издал предсмертный хрип и затих. Навсегда.',cost:12000,alt:{lbl:'Б/у с авито',cost:6000,o:-3}},
+     {e:'🧊',once:true,t:'Холодильник издал предсмертный хрип и затих. Навсегда.',cost:12000,alt:{lbl:'Б/у с авито',cost:6000,o:-3}},
      {e:'🦷',k:'tooth',t:'Зуб. Тот самый, за которым «наблюдали». Он перешёл в наступление.',cost:8000,alt:{lbl:'Терпеть до аванса',cost:2000,h:-10}},
      {e:'📵',t:()=>`Телефон нырнул ${pick(['в унитаз','с балкона','в тарелку супа','экраном на бордюр'])}. Героически. Насмерть.`,cost:9000,alt:{lbl:'Кнопочный пока',cost:1500,o:-8}},
      {e:'🤒',t:'Простуда свалила на неделю. Аптека радуется тебе как родному.',cost:3000,alt:{lbl:'Чай и подорожник',cost:500,h:-8}},
@@ -318,11 +332,11 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
      {e:'👖',t:'Порвались единственные приличные джинсы. Прямо перед встречей.',cost:3500,alt:{lbl:'Зашить криво',cost:200,r:-4}},
      {e:'💊',k:'back',t:'Спина сказала «хватит» после подработки. Массажист сказал «10 сеансов».',cost:6000,alt:{lbl:'Мазь и лежать',cost:800,h:-7}},
      {e:'🚌',t:'Контролёр. А проездной остался в других штанах. Штраф.',cost:1500,alt:null},
-     {e:'🧺',t:'Стиральная машина устроила прощальный потоп и умерла.',cost:11000,alt:{lbl:'Стирать руками пока',cost:500,o:-6}},
+     {e:'🧺',once:true,t:'Стиральная машина устроила прощальный потоп и умерла.',cost:11000,alt:{lbl:'Стирать руками пока',cost:500,o:-6}},
      {e:'👓',t:'Очки хрустнули под чьей-то пятой точкой на вечеринке.',cost:4500,alt:{lbl:'Скотч — это стиль',cost:200,r:-4}},
-     {e:'💻',t:'Ноутбук стал выключаться на самом интересном месте.',cost:9000,alt:{lbl:'Чистка и молитва',cost:2500,o:-3}},
-     {e:'🛴',t:'Самокат увели прямо от магазина. С замком.',cost:7000,alt:{lbl:'Теперь ты пешеход',cost:0,o:-7,h:3}},
-     {e:'🔌',t:'Чайник, тостер и роутер сговорились и умерли в один день.',cost:6000,alt:{lbl:'Без тостера жить можно',cost:2500,o:-4}},
+     {e:'💻',once:true,t:'Ноутбук стал выключаться на самом интересном месте.',cost:9000,alt:{lbl:'Чистка и молитва',cost:2500,o:-3}},
+     {e:'🛴',once:true,t:'Самокат увели прямо от магазина. С замком.',cost:7000,alt:{lbl:'Теперь ты пешеход',cost:0,o:-7,h:3}},
+     {e:'🔌',once:true,t:'Чайник, тостер и роутер сговорились и умерли в один день.',cost:6000,alt:{lbl:'Без тостера жить можно',cost:2500,o:-4}},
     ];
 
     /* ===== STATE ===== */
@@ -429,8 +443,17 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       upskill(){ S.salary += 4000; toast('Со следующего месяца зарплата +4 000 ₽ — навсегда. Навыки платят.'); },
       cat(){ S.catCost = 2000; },
       cashback(){ S.cashback = true; },
-      dental(){ S.flags.dental = true; purgeCrisis('tooth'); },
+      dental(){ S.flags.dental = true; S.flags.dentalSpend = (S.flags.dentalSpend || 0) + 1; purgeCrisis('tooth'); },
       gym(){ S.flags.gym = true; purgeCrisis('back'); },
+      taxDeduct(){ S.flags.deductUsed = S.flags.dentalSpend || 0; },
+      runway(){
+        const monthly = 58000;
+        if (S.cushion <= 0) toast('Твой запас: 0 дней. Ты — в тех самых 60%. Без зарплаты первый же месяц станет микрозаймом. Начни с любой суммы в подушку — сегодня.');
+        else {
+          const weeks = Math.round(S.cushion / (monthly / 4.3));
+          toast('Твоя подушка ' + fmt(S.cushion) + ' — это примерно ' + weeks + ' нед. жизни без зарплаты (расходы ~58 000/мес). Цель — 3 месяца: 60 000 и больше.');
+        }
+      },
       mfoTrap(){ S.mfo += 10000; toast('Взял 10 000 «под 0%». Проверим в конце месяца, что там с нулём процентов.'); },
       panicSell(){
         if (S.stocks > 0){ const got = Math.round(S.stocks * 0.92); S.cash += got; S.stocks = 0;
@@ -474,10 +497,12 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.req === 'lvl2' && S.level >= 2) ||
         (c.req === 'bonds' && S.bondsOpen) ||
         (c.req === 'stocks' && S.stocksOpen) ||
-        (c.req === 'stocksHeld' && S.stocksOpen && S.stocks > 0);
+        (c.req === 'stocksHeld' && S.stocksOpen && S.stocks > 0) ||
+        (c.req === 'deduct' && (S.flags.dentalSpend || 0) > (S.flags.deductUsed || 0));
       const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && !done(c) && reqOk(c));
       const fresh = avail.filter(c=>!S.used.has(c.t));
-      const stale = avail.filter(c=>S.used.has(c.t));
+      /* one-per-run cards (мамин ДР, свадьба, айфон...) never come back from the stale pile */
+      const stale = avail.filter(c=>S.used.has(c.t) && !c.once);
       let picks = shuffle(fresh.slice()).slice(0, CARDS_PER_MONTH);
       if (picks.length < CARDS_PER_MONTH) picks = picks.concat(shuffle(stale.slice()).slice(0, CARDS_PER_MONTH - picks.length));
       if (!S.depositOpen && S.month >= 2){
@@ -498,7 +523,11 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       const nCr = S.month <= 2 ? 2 : (2 + (Math.random() < .5 ? 1 : 0));
       const allowed = c => !(c.k === 'tooth' && S.flags.dental) && !(c.k === 'back' && S.flags.gym);
       let crPool = CRISES.filter(c => allowed(c) && !S.usedCr.has(CRISES.indexOf(c)));
-      if (crPool.length < nCr){ S.usedCr.clear(); crPool = CRISES.filter(allowed); }
+      if (crPool.length < nCr){
+        /* reset the rotation, but «умершая навсегда» техника (холодильник и т.п.) не ломается второй раз */
+        S.usedCr = new Set([...S.usedCr].filter(idx => CRISES[idx] && CRISES[idx].once));
+        crPool = CRISES.filter(c => allowed(c) && !S.usedCr.has(CRISES.indexOf(c)));
+      }
       const crs = shuffle(crPool.slice()).slice(0, nCr).map(c=>({crisis:c}));
       crs.forEach(cr=>S.usedCr.add(CRISES.indexOf(cr.crisis)));
       const deck = picks.map(c=>({card:c}));
@@ -614,6 +643,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (eff.m) S.monthLog.push([data.e + ' ' + eff.lbl, eff.m]);
       if (!eff.m && !eff.h && !eff.o && !eff.r) floatDelta('✔ ' + eff.lbl, 'neu');
       if (data.isCrisis) S.crisesTotal++;
+      if (data.isCrisis && data.e === '🦷') S.flags.dentalSpend = (S.flags.dentalSpend || 0) + 1; // лечил зуб → положен вычет
       renderHUD(); S.deck.shift(); saveGame();
       setTimeout(showCard, 360);
     }
@@ -621,12 +651,15 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     /* ===== MONTH FLOW ===== */
     function ledgerHTML(rows){ return rows.map(([l,v])=>`<div><span>${l}</span><b class="${v>=0?'plus':'minus'}">${v>=0?'+':''}${fmt(v)}</b></div>`).join(''); }
     function payday(){
-      S.mEarn = 0; S.mSpend = 0;
+      S.mEarn = 0; S.mSpend = 0; S.gotBonus = false;
+      /* snapshot of month start — the animated report shows deltas against it */
+      S.snap = { cash:S.cash, cushion:S.cushion, deposit:S.deposit, bonds:S.bonds, stocks:S.stocks, debt:S.debt,
+                 health:S.health, mood:S.mood, rel:S.rel, cap:totalCap(), crisesAbsorbed:S.crisesAbsorbed, goals:goalsDone() };
       const rows = [['Зарплата', S.salary]]; let total = S.salary;
       /* stats drive the paycheck */
       if (S.health < 25){ const sick = Math.round(S.salary * 0.15); rows.push(['🤒 Больничные: здоровье на дне', -sick]); total -= sick; }
       if (S.mood < 25){ const burn = Math.round(S.salary * 0.10); rows.push(['🔥 Выгорание: дедлайны сорваны, премию срезали', -burn]); total -= burn; }
-      if (S.health >= 70 && S.mood >= 70){ rows.push(['⭐ Премия: бодрый и в ресурсе', 5000]); total += 5000; }
+      if (S.health >= 70 && S.mood >= 70){ rows.push(['⭐ Премия: бодрый и в ресурсе', 5000]); total += 5000; S.gotBonus = true; }
       if (S.rel < 25){ S.mood = Math.max(0, S.mood - 8); noteQueue.push('Ты всех продинамил — звать перестали. Одиночество бьёт по настроению (😞 −8). Отношения — тоже актив.'); }
       if (S.mfo > 0){ const owe = Math.round(S.mfo * 1.3); rows.push(['🧾 Микрозайм: «0%» закончились, набежало', -owe]); total -= owe; S.mfo = 0;
         noteQueue.push('Микрозайм: за взятые 10 000 отдал 13 000. «0% на 7 дней» — это крючок, а не подарок. Эффективная ставка — сотни процентов годовых.'); }
@@ -706,12 +739,82 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       else { verdict = 'Дожил. Впритык, но дожил.'; }
       if (S.debt > 45000){ gameOver(); return; }
       rows.slice(2).forEach(r=>S.monthLog.push(r));
-      $('repTitle').textContent = `Итоги месяца ${S.month}`;
-      $('repLedger').innerHTML = ledgerHTML(rows) + `<div><span>На карте сейчас</span><b class="${S.cash>=0?'plus':'minus'}">${fmt(S.cash)}</b></div>`;
-      $('repVerdict').textContent = verdict;
-      $('repGoals').innerHTML = goalsHTML();
       renderHUD();
-      showNotesThen(()=>show('repOvl')); // outcomes first, in context — then the report
+      buildReport(rows, verdict);
+      showNotesThen(()=>{
+        show('repOvl');
+        animateCount($('repCap'), (S.snap && S.snap.cap) || 0, totalCap(), 950);
+      });
+    }
+    function animateCount(el, from, to, ms){
+      if (!el) return;
+      const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const now_ = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      const step = () => {
+        const p = Math.min(1, (now_() - t0) / ms);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(Math.round(from + (to - from) * eased));
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    function buildReport(rows, verdict){
+      const snap = S.snap || {};
+      let i = 0;
+      const rev = html => `<div class="rev" style="animation-delay:${Math.min(0.10 * i++ + 0.1, 2.4).toFixed(2)}s">${html}</div>`;
+      const cap = totalCap();
+      const capD = cap - (snap.cap || 0);
+      let out = '';
+      /* 1. capital with a running counter */
+      out += rev(`<div class="secT">Капитал</div><div class="capBig" id="repCap">${fmt(cap)}</div><div class="capDelta ${capD>=0?'up':'down'}">${capD>=0?'▲ +':'▼ −'}${fmt(Math.abs(capD))} за месяц</div>`);
+      /* 2. money flow */
+      out += rev(`<div class="secT">Движение денег</div>`);
+      rows.forEach(([l,v])=>{ out += rev(`<div class="dRow"><span>${l}</span><span class="dv" style="color:${v>=0?'var(--good)':'var(--bad)'}">${v>=0?'+':''}${fmt(v)}</span></div>`); });
+      /* 3. asset deltas */
+      const aRows = [];
+      const dd = (ico,label,cur,prev,invert)=>{
+        const d = cur - (prev || 0);
+        if (!cur && !d) return;
+        const up = invert ? d < 0 : d > 0;
+        const cls = d === 0 ? 'zero' : (up ? 'up' : 'down');
+        aRows.push(`<div class="dRow"><span>${ico} ${label}</span><span style="display:flex;gap:9px;align-items:center"><span class="dd ${cls}">${d===0?'=':(d>0?'▲ +':'▼ −')+fmt(Math.abs(d))}</span><span class="dv">${fmt(cur)}</span></span></div>`);
+      };
+      dd('💰','На карте',S.cash,snap.cash);
+      dd('🛡','Подушка',S.cushion,snap.cushion);
+      dd('🏦','Депозит',S.deposit,snap.deposit);
+      dd('📜','Облигации',S.bonds,snap.bonds);
+      dd('📈','Акции',S.stocks,snap.stocks);
+      dd('🩸','Долг',S.debt,snap.debt,true);
+      if (aRows.length){ out += rev(`<div class="secT">Активы</div>`); aRows.forEach(r=>{ out += rev(r); }); }
+      /* 4. you */
+      out += rev(`<div class="secT">Ты</div>`);
+      [['❤️','Здоровье','health'],['😊','Настроение','mood'],['👥','Отношения','rel']].forEach(([ico,label,k])=>{
+        const d = Math.round(S[k] - (snap[k] != null ? snap[k] : S[k]));
+        const cls = d === 0 ? 'zero' : (d > 0 ? 'up' : 'down');
+        out += rev(`<div class="dRow"><span>${ico} ${label}</span><span style="display:flex;gap:9px;align-items:center"><span class="dd ${cls}">${d===0?'=':(d>0?'▲ +':'▼ −')+Math.abs(d)}</span><span class="dv">${Math.round(S[k])}</span></span></div>`);
+      });
+      /* 5. critical spots & wins */
+      const crit = [], good = [];
+      if (S.debt > 0) crit.push('🩸 Долг ' + fmt(S.debt) + ' — растёт на 30% в месяц. Гаси первым делом.');
+      if (S.cushion === 0) crit.push('🛡 Подушки нет — следующий кризис ударит прямо по карману.');
+      else if (S.cushion < 20000) crit.push('🛡 Подушка тонкая (' + fmt(S.cushion) + ') — серьёзный кризис её пробьёт.');
+      if (S.cash < 5000 && S.debt === 0) crit.push('💰 Деньги на исходе — до зарплаты дотянуть будет непросто.');
+      if (S.health < 25) crit.push('❤️ Здоровье на дне — в день зарплаты будут больничные (−15%).');
+      if (S.mood < 25) crit.push('😊 Выгорание — премию срежут (−10% зарплаты).');
+      if (S.rel < 25) crit.push('👥 Друзья потеряны из виду — одиночество бьёт по настроению.');
+      const absorbed = S.crisesAbsorbed - (snap.crisesAbsorbed || 0);
+      if (absorbed > 0) good.push('🛡 Подушка приняла кризис — бюджет остался цел. Так это и работает.');
+      const savedNow = (S.cushion + S.deposit + S.bonds + S.stocks) - ((snap.cushion||0) + (snap.deposit||0) + (snap.bonds||0) + (snap.stocks||0));
+      if (savedNow > 0) good.push('📈 Отложено и инвестировано за месяц: +' + fmt(savedNow));
+      if (S.gotBonus) good.push('⭐ Премия за бодрость и настрой: +5 000. Баланс окупается.');
+      if (goalsDone() > (snap.goals || 0)) good.push('🎯 Достигнута новая цель игры!');
+      if (cap > (S.bestCap || 0)){ if (S.bestCap) good.push('🏆 Новый рекорд капитала!'); S.bestCap = cap; }
+      if (crit.length){ out += rev(`<div class="secT" style="color:var(--bad)">⚠ Критично</div>`); crit.forEach(b=>{ out += rev(`<div class="badge crit">${b}</div>`); }); }
+      if (good.length){ out += rev(`<div class="secT" style="color:var(--good)">✓ Молодец</div>`); good.forEach(b=>{ out += rev(`<div class="badge good">${b}</div>`); }); }
+      out += rev(`<p style="margin:12px 0 0">${verdict}</p>`);
+      out += rev(`<div class="secT">🎯 Цели игры</div>` + goalsHTML());
+      $('repTitle').textContent = `Итоги месяца ${S.month}`;
+      $('repBody').innerHTML = out;
     }
     function openAlloc(){ hide('repOvl'); if (S.cash < 10000){ nextMonth(); return; } updateAlloc(); show('allocOvl'); }
     function updateAlloc(){
@@ -837,7 +940,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (!S || ended) return;
       const scal = {};
       ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
-       'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
+       'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','bestCap','gotBonus','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
         .forEach(k=>scal[k]=S[k]);
       LS.set(SAVE_KEY, {
         scal,
@@ -848,6 +951,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         pending: S.pending,
         seenNotes: [...S.seenNotes],
         monthLog: S.monthLog,
+        snap: S.snap || null,
       });
     }
     function loadGame(){
@@ -861,6 +965,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       S.pending = d.pending || [];
       S.seenNotes = new Set(d.seenNotes || []);
       S.monthLog = d.monthLog || [];
+      S.snap = d.snap || null;
       if (!S.monthTotal) S.monthTotal = S.deck.length || CARDS_PER_MONTH;
       return true;
     }
@@ -987,10 +1092,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       </div></div>
       <div class="ovl" id="repOvl"><div class="sheet">
         <h2 id="repTitle">Итоги месяца</h2>
-        <div class="ledger" id="repLedger"></div>
-        <p id="repVerdict"></p>
-        <p style="margin-bottom:2px;text-align:left"><b>🎯 Цели игры</b></p>
-        <div id="repGoals"></div>
+        <div id="repBody"></div>
         <button class="btn" onclick="G.openAlloc()">Дальше</button>
       </div></div>
       <div class="ovl" id="flowOvl"><div class="sheet">
