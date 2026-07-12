@@ -130,8 +130,11 @@
   .hist { text-align:left; margin-top:10px; max-height:40vh; overflow-y:auto; }
   .hist .row { display:flex; justify-content:space-between; gap:8px; align-items:center; padding:8px 4px; border-bottom:1px dotted #a08a60; font-size:15px; }
   .hist .row b { white-space:nowrap; }
-  #gearBtn { cursor:pointer; user-select:none; }
-  #gearBtn:active { transform:scale(.94); }
+  #gearBtn, #flowBtn { cursor:pointer; user-select:none; padding:7px 10px; }
+  #gearBtn:active, #flowBtn:active { transform:scale(.94); }
+  .goalRow { display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px dotted #a08a60; font-size:15px; }
+  .goalRow .done { color:#1d6b24; font-weight:800; }
+  .goalRow .todo { color:#7a6340; font-weight:700; }
 
   /* ---------- overlays ---------- */
   .ovl {
@@ -179,6 +182,7 @@
       <div class="tag hand" id="monthTag">Месяц 1</div>
       <div class="tag" id="moneyTag">💰 <b>15 000 ₽</b></div>
       <div class="tag" id="debtTag">🩸 <b>0 ₽</b></div>
+      <div class="tag" id="flowBtn" onclick="G.openFlow()" title="Движение денег">📊</div>
       <div class="tag" id="gearBtn" onclick="G.openSettings()" title="Настройки">⚙️</div>
     </div>
     <div id="stats">
@@ -204,9 +208,9 @@
     <h1 class="hand">🃏 Подушка</h1>
     <p>Тебе 27. Зарплата — <b>80 000 ₽</b>. Аренда, еда, кредит за прошлый телефон и жизнь, которая постоянно чего-то хочет.</p>
     <p>Свайпай карточки влево или вправо. Каждое решение двигает деньги, здоровье, настроение и отношения.</p>
-    <p><b>Задача: прожить 6 месяцев и не скатиться в микрозаймы.</b></p>
-    <p class="small">Подсказка из будущего: кризисы приходят без предупреждения. Подушка — твоя броня.</p>
-    <p class="small"><b>Шкалы влияют на деньги:</b> здоровье или настроение ниже 25 — потеряешь часть зарплаты (больничные, срезанная премия). Здоровье и настроение выше 70 — премия +5 000. Забросишь друзей — накроет одиночество.</p>
+    <p><b>🎯 Цель — три отметки за 12 месяцев:</b><br>🛡 подушка 60 000 ₽ (3 месяца расходов)<br>💰 капитал 150 000 ₽<br>🌞 качество жизни не ниже 50</p>
+    <p class="small">Сначала выживи 6 месяцев без микрозаймов — накопишь 40 000, откроется уровень «Инвестор». Прогресс целей — в отчёте каждого месяца.</p>
+    <p class="small"><b>Шкалы влияют на деньги:</b> здоровье или настроение ниже 25 — потеряешь часть зарплаты. Оба выше 70 — премия +5 000. Забросишь друзей — накроет одиночество.</p>
     <div id="startBtns"><button class="btn hand" onclick="G.newSession()">Начать жизнь</button></div>
     <p class="small" id="startHist"></p>
   </div></div>
@@ -236,7 +240,16 @@
     <h2 class="hand" id="repTitle">Итоги месяца</h2>
     <div class="ledger" id="repLedger"></div>
     <p id="repVerdict"></p>
+    <p style="margin-bottom:2px"><b>🎯 Цели игры</b></p>
+    <div id="repGoals"></div>
     <button class="btn hand" onclick="G.openAlloc()">Дальше</button>
+  </div></div>
+
+  <div class="ovl" id="flowOvl"><div class="sheet">
+    <h2 class="hand" id="flowTitle">📊 Движение денег</h2>
+    <div class="hist" id="flowList"></div>
+    <div class="ledger" id="flowTotals"></div>
+    <button class="btn hand" onclick="G.closeFlow()">Закрыть</button>
   </div></div>
 
   <div class="ovl" id="allocOvl"><div class="sheet">
@@ -327,6 +340,22 @@ const POOL = [
   L:{lbl:'Купить билет',m:-4500,o:11,imp:1},R:{lbl:'Посидеть дома',o:-5}},
  {e:'🧦',cat:'быт',t:'Зима близко. Куртка «ещё норм», но молния уже философски смотрит на мир.',
   L:{lbl:'Новая куртка',m:-7000,h:3,o:4},R:{lbl:'Заклеить молнию',o:-3}},
+ {e:'💇',cat:'быт',t:'Барбершоп поднял цены до 2 500. «Ну а чё, аренда выросла».',
+  L:{lbl:'Красота требует',m:-2500,o:3},R:{lbl:'Машинка дома',m:-300,o:-3}},
+ {e:'🎁',cat:'семья',t:'День рождения мамы. Она скажет «ничего не надо», но это ловушка.',
+  L:{lbl:'Достойный подарок',m:-4000,r:8,o:3},R:{lbl:'Открытка и звонок',r:-5}},
+ {e:'📶',cat:'подписки',t:'Оператор тихо перевёл тебя на тариф подороже. Заботливо, без спроса.',
+  L:{lbl:'Не заметить',m:-400},R:{lbl:'Позвонить и вернуть',o:-2,note:'Раз в полгода проверяй тарифы и подписки — операторы считают твою невнимательность своей выручкой.'}},
+ {e:'🍱',cat:'привычки',t:'Бизнес-ланч у офиса подорожал до 450. Очередь не уменьшилась.',
+  L:{lbl:'Продолжать',m:-3500,o:2},R:{lbl:'Контейнеры из дома',o:-3,h:2}},
+ {e:'🧾',cat:'финансы',t:'За лечение зубов можно вернуть налоговый вычет 2 600 ₽. Но бумажки, госуслуги, вот это всё.',
+  L:{lbl:'Заполнить',m:2600,o:-2,note:'Вычеты — деньги, которые государство должно тебе. Лень — единственная причина их не забирать.'},R:{lbl:'Ну его',o:1}},
+ {e:'🛋',cat:'быт',t:'Друг отдаёт диван бесплатно. Нужен только грузовик и два часа страданий.',
+  L:{lbl:'Забрать',m:-1500,o:4,r:3},R:{lbl:'Пусть стоит',o:-1}},
+ {e:'📦',cat:'подписки',t:'«Коробка сюрпризов по подписке — всего 1 990/мес!» Внутри — сюрпризы.',
+  L:{lbl:'Подписаться',m:-1990,o:4,imp:1,note:'Подписка — это покупка, которую ты совершаешь каждый месяц, не решая её совершить.'},R:{lbl:'Мимо',o:-1}},
+ {e:'💎',cat:'соблазн',t:()=>`Мобилка предлагает «выгодный» набор кристаллов за 999 ₽. Осталось ${pick(['2 часа','40 минут','до полуночи'])}!`,
+  L:{lbl:'Задонатить',m:-999,o:3,imp:1},R:{lbl:'Удалить игру',o:-2}},
  /* ---- investor cards, months 7+ ---- */
  {e:'📉',cat:'инвестиции',min:7,t:'Рынок красный. Акции −8% за неделю. Палец сам тянется к кнопке «продать всё».',
   L:{lbl:'Продать всё',fx:'panicSell',imp:1},R:{lbl:'Ничего не делать',note:'Время в рынке важнее тайминга рынка. Просадки приходят и уходят — зафиксированный убыток остаётся.'}},
@@ -364,7 +393,7 @@ function newState(){ return {
   health:70, mood:70, rel:70,
   salary:SALARY, credit:8000, creditLeft:3, catCost:0, cashback:false, depositOpen:false, mfo:0,
   level:1, bonds:0, stocks:0,
-  deck:[], used:new Set(), usedCr:new Set(), flags:{}, pending:[],
+  deck:[], used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[],
   mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
 };}
 
@@ -412,9 +441,14 @@ let noteQueue = [];
 function toast(msg){ noteQueue.push(msg); maybeShowNote(); }
 function maybeShowNote(){
   if ($('noteOvl').classList.contains('show')) return;
-  if (!noteQueue.length) return;
-  $('noteText').textContent = noteQueue.shift();
-  show('noteOvl');
+  while (noteQueue.length){
+    const msg = noteQueue.shift();
+    if (S && S.seenNotes.has(msg)) continue; // each lesson shown once per run
+    if (S) S.seenNotes.add(msg);
+    $('noteText').textContent = msg;
+    show('noteOvl');
+    return;
+  }
 }
 function closeNote(){
   hide('noteOvl');
@@ -600,6 +634,7 @@ function resolve(side){
   el.style.opacity = 0;
   const eff = data[side];
   applyEff(eff, !!data.isCrisis);
+  if (eff.m) S.monthLog.push([data.e + ' ' + eff.lbl, eff.m]);
   if (!eff.m && !eff.h && !eff.o && !eff.r) floatDelta('✔ ' + eff.lbl, 'neu');
   if (data.isCrisis) S.crisesTotal++;
   renderHUD();
@@ -637,9 +672,39 @@ function payday(){
   $('payNote').textContent = S.creditLeft === 0 && S.month <= 3 ? 'Кредит за телефон скоро закончится. Держись.' :
     'Свободный остаток — твоё поле для манёвра. Или для глупостей.';
   renderHUD();
+  S.monthLog = rows.slice();
   saveGame();
   show('payOvl');
 }
+/* ---- goals ---- */
+const GOALS = { cushion:60000, capital:150000, quality:50 };
+function goalsHTML(){
+  const cap = totalCap();
+  const q = Math.round((S.health + S.mood + S.rel) / 3);
+  const row = (ico, label, cur, target, fmtFn) => {
+    const done = cur >= target;
+    return `<div class="goalRow"><span>${ico} ${label}</span><span class="${done?'done':'todo'}">${done?'✓ ':''}${fmtFn(cur)} / ${fmtFn(target)}</span></div>`;
+  };
+  return row('🛡','Подушка', S.cushion, GOALS.cushion, fmt)
+       + row('💰','Капитал', cap, GOALS.capital, fmt)
+       + row('🌞','Качество жизни', q, GOALS.quality, v=>v);
+}
+function goalsDone(){
+  const cap = totalCap();
+  const q = Math.round((S.health + S.mood + S.rel) / 3);
+  return (S.cushion >= GOALS.cushion) + (cap >= GOALS.capital) + (q >= GOALS.quality);
+}
+function openFlow(){
+  $('flowTitle').textContent = `📊 Месяц ${S.month}: движение денег`;
+  const log = S.monthLog || [];
+  $('flowList').innerHTML = log.length
+    ? log.map(([l,v])=>`<div class="row"><span>${l}</span><b class="${v>=0?'plus':'minus'}" style="color:${v>=0?'#1d6b24':'#a01818'}">${v>=0?'+':''}${fmt(v)}</b></div>`).join('')
+    : '<p class="small">Пока движений нет.</p>';
+  const plus = log.reduce((s,[,v])=>s+(v>0?v:0),0), minus = log.reduce((s,[,v])=>s+(v<0?-v:0),0);
+  $('flowTotals').innerHTML = ledgerHTML([['Приход', plus], ['Расход', -minus], ['Чистыми', plus-minus]]);
+  show('flowOvl');
+}
+function closeFlow(){ hide('flowOvl'); }
 function closePayday(){ hide('payOvl'); buildDeck(); saveGame(); showCard(); maybeShowNote(); }
 
 function endMonth(){
@@ -697,10 +762,12 @@ function endMonth(){
     verdict = 'Дожил. Впритык, но дожил.';
   }
   if (S.debt > 45000){ gameOver(); return; }
+  rows.slice(2).forEach(r=>S.monthLog.push(r));
   $('repTitle').textContent = `Итоги месяца ${S.month}`;
   $('repLedger').innerHTML = ledgerHTML(rows) +
     `<div><span>На карте сейчас</span><b class="${S.cash>=0?'plus':'minus'}">${fmt(S.cash)}</b></div>`;
   $('repVerdict').textContent = verdict;
+  $('repGoals').innerHTML = goalsHTML();
   renderHUD();
   show('repOvl');
 }
@@ -725,7 +792,7 @@ function alloc(kind){
   if (kind === 'deposit') S.deposit += 10000;
   if (kind === 'bonds') S.bonds += 10000;
   if (kind === 'stocks') S.stocks += 10000;
-  if (kind === 'fun'){ S.mood += 6; clamp('mood'); S.impulses++; }
+  if (kind === 'fun'){ S.mood += 6; clamp('mood'); S.impulses++; S.monthLog.push(['🎉 Потратил на себя', -10000]); }
   renderHUD(); updateAlloc(); saveGame();
   if (S.cash < 10000) setTimeout(nextMonth, 500);
 }
@@ -794,7 +861,9 @@ function finish(){
       ${S.debt?`<div><span>🩸 Долги</span><b class="minus">${fmt(-S.debt)}</b></div>`:''}
       <div><span><b>Итого</b></span><b class="${cap>=0?'plus':'minus'}">${fmt(cap)}</b></div>
     </div>
-    <p><b>${qIco} Качество жизни: ${qLabel} (${qAvg}/100)</b></p>
+    <p><b>🎯 Целей достигнуто: ${goalsDone()} из 3</b></p>
+    <div>${goalsHTML()}</div>
+    <p style="margin-top:12px"><b>${qIco} Качество жизни: ${qLabel} (${qAvg}/100)</b></p>
     <div class="ledger">
       <div><span>❤️ Здоровье</span><b>${Math.round(S.health)}</b></div>
       <div><span>😊 Настроение</span><b>${Math.round(S.mood)}</b></div>
@@ -848,6 +917,8 @@ function saveGame(){
     flags: S.flags,
     deck: S.deck.map(it=>it.crisis ? {c:CRISES.indexOf(it.crisis)} : {p:POOL.indexOf(it.card)}),
     pending: S.pending,
+    seenNotes: [...S.seenNotes],
+    monthLog: S.monthLog,
   });
 }
 function loadGame(){
@@ -860,6 +931,8 @@ function loadGame(){
   S.flags = d.flags || {};
   S.deck = (d.deck||[]).map(o=> o.c!=null ? {crisis:CRISES[o.c]} : {card:POOL[o.p]}).filter(it=>it.crisis||it.card);
   S.pending = d.pending || [];
+  S.seenNotes = new Set(d.seenNotes || []);
+  S.monthLog = d.monthLog || [];
   return true;
 }
 function pushHist(result){
@@ -924,7 +997,7 @@ function renderStart(){
   const hist = LS.get(HIST_KEY) || [];
   $('startHist').textContent = hist.length ? `Сыграно сессий: ${hist.length}. Лучший капитал: ${fmt(Math.max(...hist.map(h=>h.cap)))}` : '';
 }
-window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, finishNow: finish };
+window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, finishNow: finish, openFlow, closeFlow };
 renderStart();
 </script>
 </body>
