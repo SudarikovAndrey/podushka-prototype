@@ -164,6 +164,18 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .hist{text-align:left;margin-top:12px;max-height:44vh;overflow-y:auto;}
 .hist .row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--border);font-size:15px;color:var(--text);}
 .hist .row b{white-space:nowrap;font-family:var(--font-num);font-weight:700;font-size:15px;}
+/* ---- layout & input hardening ---- */
+.frame{user-select:none;-webkit-user-select:none;touch-action:manipulation;}
+.safety{flex-wrap:wrap;}
+.safety .chip{flex:1 1 46%;min-width:0;}
+.topbar{min-width:0;}
+.topbar .month{min-width:0;overflow:hidden;}
+.mProg{min-width:24px;}
+.mOf{white-space:nowrap;}
+.chip b{overflow:hidden;text-overflow:ellipsis;}
+.choice{min-width:0;}
+.choice .fx{white-space:normal;line-height:1.35;}
+.eff .g,.eff .b{white-space:normal;}
 /* ---- glossary terms ---- */
 .term{border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 60%,transparent);cursor:pointer;}
 .term:active{opacity:.65;}
@@ -817,12 +829,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (EX.i < EXAM_QS.length){ renderExam(); return; }
       const passed = EX.correct === EXAM_QS.length;
       hide('examOvl'); EX = null;
-      if (passed){
-        S.examPassed = true; saveGame();
-        toast('✅ Тест сдан: 3 из 3. Открыт демо-терминал — ищи «🕹 Торговая сессия» в конце месяца, при распределении денег.');
-      } else {
-        toast('Тест не сдан (' + '' + 'меньше 3 из 3). Как и у ЦБ — пересдача бесплатна: брокер предложит тест снова.');
-      }
+      if (passed){ S.examPassed = true; saveGame(); }
+      /* результат — сразу после закрытия листа теста, а не «через несколько шагов» */
+      setTimeout(()=>{
+        toast(passed
+          ? '✅ Тест сдан: 3 из 3. Открыт демо-терминал — ищи «🕹 Торговая сессия» в конце месяца, при распределении денег.'
+          : '❌ Тест не сдан: меньше 3 из 3 верных. Как и у ЦБ — пересдача бесплатна, брокер предложит тест снова.');
+      }, 250);
       renderHUD();
     }
 
@@ -855,12 +868,12 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
           <circle cx="320" cy="${(132 - (p - min) / (max - min) * 124).toFixed(1)}" r="4" fill="var(--accent)"/>
         </svg>
-        <div class="dRow"><span>День ${TR.idx - 29} из 16</span><span class="dv">Цена: ${p.toFixed(1)}</span></div>
+        <div class="dRow"><span>📅 День <b>${TR.idx - 29}</b> из 16</span><span class="dv">Цена: ${p.toFixed(1)}</span></div>
         <div class="dRow"><span>${TR.pos ? '📈 В бумаге' : '💰 В деньгах'}</span><span class="dv" style="color:${val>=10000?'var(--good)':'var(--bad)'}">${fmt(Math.round(val))}</span></div>
-        <p class="small" style="margin:8px 0 2px">${TR.real ? 'Играешь на свои 10 000 ₽' : 'Демо: денег на ставку не было'}</p>
-        <div class="alloc" style="margin-top:8px">
-          ${TR.pos ? '<button onclick="G.tradeAct(\'sell\')">Продать</button>' : '<button onclick="G.tradeAct(\'buy\')">Купить</button>'}
-          <button onclick="G.tradeAct('next')">День ▸</button>
+        <p class="small" style="margin:8px 0 2px">${TR.real ? 'Играешь на свои 10 000 ₽. ' : 'Демо: денег на ставку не было. '}Жми <b>«День ▸»</b> — время идёт только по кнопке. Купить/продать можно в любой день.</p>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:stretch">
+          ${TR.pos ? '<button class="btn sec" style="flex:1;margin:0" onclick="G.tradeAct(\'sell\')">Продать</button>' : '<button class="btn sec" style="flex:1;margin:0" onclick="G.tradeAct(\'buy\')">Купить</button>'}
+          <button class="btn" style="flex:1.5;margin:0" onclick="G.tradeAct('next')">День ▸</button>
         </div>`;
     }
     function tradeAct(a){
@@ -875,7 +888,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       renderTrade();
     }
     function endTrade(){
-      TR.done = true;
+      TR.done = true; TR.doneAt = Date.now();
       const last = TR.data[TR.end];
       const finalV = Math.round(TR.pos ? TR.shares * last : TR.value);
       const bh = Math.round(10000 * last / TR.data[30]);
@@ -894,6 +907,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <button class="btn" onclick="G.closeTrade()">${TR.real ? 'Забрать ' + fmt(finalV) : 'Понятно'}</button>`;
     }
     function closeTrade(){
+      /* защита от проклика: последний тап «День ▸» не должен закрыть результат */
+      if (TR && TR.doneAt && Date.now() - TR.doneAt < 600) return;
       TR = null;
       hide('tradeOvl');
       setTimeout(()=>{ updateAlloc(); show('allocOvl'); }, 230);
@@ -934,7 +949,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       applyMoney(-dmg, true);
       floatDelta(ICO.m + '<span>−' + Math.abs(dmg).toLocaleString('ru-RU') + ' ₽</span>', 'down');
       S.monthLog.push(['🚿 Прорвало кран', -dmg]);
-      toast(msg);
+      setTimeout(()=>toast(msg), 250); // после закрытия листа мини-игры — иначе застрянет в очереди
       renderHUD(); saveGame();
       setTimeout(showCard, 320);
     }
@@ -1070,6 +1085,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function openAlloc(){ hide('repOvl'); if (S.cash < 10000){ nextMonth(); return; } updateAlloc(); show('allocOvl'); }
     function updateAlloc(){
       $('allocLeft').textContent = fmt(S.cash);
+      /* что уже накоплено — видно прямо на экране распределения */
+      const st = [
+        ['🛡 Подушка', S.cushion], ['🏦 Депозит', S.deposit],
+        ['📜 Облигации', S.bonds], ['📈 Акции', S.stocks], ['📦 Фонд', S.fund],
+      ].filter(r=>r[1] > 0);
+      $('allocState').innerHTML = st.map(([l,v])=>`<div class="dRow"><span>${l}</span><span class="dv">${fmt(v)}</span></div>`).join('')
+        + `<div class="dRow" style="border-bottom:none"><span><b>Капитал всего</b></span><span class="dv">${fmt(totalCap())}</span></div>`;
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
       document.querySelectorAll('#allocOvl .alloc button').forEach(b=>{
         if (b.id === 'allocDep' || b.id === 'allocTrade' || b.id.startsWith('w')) return;
@@ -1499,6 +1521,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <h2>Свободные деньги</h2>
         <p class="small">Раскидай остаток. Что не спрячешь — останется на карте и будет искушать.</p>
         <div id="allocLeft">0 ₽</div>
+        <div id="allocState" style="margin-top:8px"></div>
         <div class="alloc">
           <button onclick="G.alloc('cushion')">🛡 В подушку<b>+10&nbsp;000</b></button>
           <button id="allocDep" onclick="G.alloc('deposit')" disabled>🏦 На депозит<b>+10&nbsp;000</b></button>
