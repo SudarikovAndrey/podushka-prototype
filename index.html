@@ -164,6 +164,9 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .hist{text-align:left;margin-top:12px;max-height:44vh;overflow-y:auto;}
 .hist .row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--border);font-size:15px;color:var(--text);}
 .hist .row b{white-space:nowrap;font-family:var(--font-num);font-weight:700;font-size:15px;}
+/* ---- glossary terms ---- */
+.term{border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 60%,transparent);cursor:pointer;}
+.term:active{opacity:.65;}
 /* ---- level 3: exam, trading, skill ---- */
 .qOpt{display:block;width:100%;margin:7px 0;padding:12px 13px;font-family:var(--font-text);font-weight:600;font-size:14.5px;text-align:left;cursor:pointer;background:var(--surface-2);border:1.5px solid var(--border);border-radius:13px;color:var(--text);transition:transform .1s;}
 .qOpt:active{transform:scale(.98);}
@@ -360,7 +363,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       health:70, mood:70, rel:70,
       salary:(props.salary ?? SALARY), credit:8000, creditLeft:3, catCost:0, cashback:false, depositOpen:false,
       mfo:0, level:1, bonds:0, stocks:0, bondsOpen:false, stocksOpen:false, fund:0, fundOpen:false, examPassed:false,
-      deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[],
+      deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[], capHist:[], glossary:new Set(),
       mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
     };}
 
@@ -403,7 +406,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         const msg = noteQueue.shift();
         if (S && S.seenNotes.has(msg)) continue; // each lesson shown once per run
         if (S) S.seenNotes.add(msg);
-        $('noteText').textContent = msg; show('noteOvl');
+        $('noteText').innerHTML = termify(msg); show('noteOvl');
         return;
       }
       if (noteThen){ const f = noteThen; noteThen = null; f(); }
@@ -467,7 +470,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         if (S.cushion <= 0) toast('Твой запас: 0 дней. Ты — в тех самых 60%. Без зарплаты первый же месяц станет микрозаймом. Начни с любой суммы в подушку — сегодня.');
         else {
           const weeks = Math.round(S.cushion / (monthly / 4.3));
-          toast('Твоя подушка ' + fmt(S.cushion) + ' — это примерно ' + weeks + ' нед. жизни без зарплаты (расходы ~58 000/мес). Цель — 3 месяца: 60 000 и больше.');
+          toast('Твоя подушка ' + fmt(S.cushion) + ' — это примерно ' + weeks + ' нед. жизни без зарплаты (расходы ~58 000/мес). Минимум — месяц расходов (60 000), в идеале 3–6 месяцев (180 000+).');
         }
       },
       mfoTrap(){ S.mfo += 10000; toast('Взял 10 000 «под 0%». Проверим в конце месяца, что там с нулём процентов.'); },
@@ -614,7 +617,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <div class="cStamp right">${stampLabel(data.R.lbl)}</div>
         <span class="cCat">${data.cat || ''}</span>
         <div class="cArt"><span class="cEmoji">${data.e}</span></div>
-        <div class="cText">${data.t}</div>
+        <div class="cText">${termify(data.t)}</div>
         <div class="choices">
           <div class="choice" data-side="L"><span class="dir">← влево</span><span class="lbl2">${data.L.lbl}</span><span class="fx eff">${effPreview(data.L)}</span></div>
           <div class="choice" data-side="R"><span class="dir">вправо →</span><span class="lbl2">${data.R.lbl}</span><span class="fx eff">${effPreview(data.R)}</span></div>
@@ -746,6 +749,48 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       show('flowOvl');
     }
     function closeFlow(){ hide('flowOvl'); }
+
+    /* ===== GLOSSARY: подчёркнутые термины, объяснение по тапу, копятся в словаре ===== */
+    const TERMS = {
+      cushion:{ w:'Подушка', re:/подушк[а-яё]*/i, d:'Запас денег на случай, если доход пропадёт: болезнь, увольнение, кризис. Лежит там, откуда можно забрать мгновенно (накопительный счёт). Минимум — месяц расходов, в идеале 3–6. Это не инвестиция — это броня.' },
+      deposit:{ w:'Депозит', re:/депозит[а-яё]*|вклад[а-яё]*/i, d:'Ты одалживаешь деньги банку под фиксированный процент. Надёжно (страховка до 1,4 млн ₽), но забрать досрочно обычно можно только потеряв проценты.' },
+      bond:{ w:'Облигация', re:/облигаци[а-яё]*|ОФЗ/i, d:'Ты одалживаешь деньги государству или компании. Взамен они регулярно платят купон, а в конце срока возвращают долг. Доходнее вклада, надёжнее акций.' },
+      coupon:{ w:'Купон', re:/купон[а-яё]*/i, d:'Регулярная выплата держателю облигации — как проценты по вкладу. Платится по расписанию, обычно раз в квартал или полгода.' },
+      stock:{ w:'Акция', re:/акци[а-яё]+/i, d:'Доля в бизнесе компании. Растёт бизнес — растёт акция, плюс могут платить дивиденды. Но и падать может сильно: в акции кладут только деньги, которые не понадобятся год и больше.' },
+      dividend:{ w:'Дивиденды', re:/дивиденд[а-яё]*/i, d:'Часть прибыли, которую компания раздаёт владельцам акций. Платят не все и не всегда — это решение компании, а не обязанность.' },
+      fund:{ w:'Фонд (БПИФ)', re:/фонд[а-яё]*|БПИФ/i, d:'Готовая корзина из десятков бумаг, продаётся как одна. Покупая пай, ты покупаешь «весь рынок сразу» — диверсификация встроена. Вход от 100 ₽. Больше половины новичков в России начинают именно с фонда.' },
+      divers:{ w:'Диверсификация', re:/диверсификаци[а-яё]*/i, d:'Не класть все яйца в одну корзину: разные активы, компании, отрасли. Когда одно падает, другое держит. Единственный «бесплатный обед» на рынке.' },
+      leverage:{ w:'Плечо', re:/плеч[оа][а-яё]*/i, d:'Торговля на деньги, взятые в долг у брокера. Умножает и прибыль, и убыток: с плечом ×5 падение акции на 20% сжигает весь твой капитал. Главный убийца новичков.' },
+      mfo:{ w:'Микрозайм', re:/микрозайм[а-яё]*|МФО/i, d:'Быстрый займ под огромный процент (у нас в игре 30% в месяц — сотни процентов годовых). «0% на первые дни» — крючок: один пропущенный срок, и долг начинает расти как снежный ком.' },
+      broker:{ w:'Брокер', re:/брокер[а-яё]*/i, d:'Посредник с лицензией, через которого покупают бумаги на бирже. Сам ничего не советует бесплатно: зарабатывает на комиссиях с твоих сделок — поэтому любит, когда ты торгуешь часто.' },
+      deduct:{ w:'Налоговый вычет', re:/вычет[а-яё]*/i, d:'Возврат части уплаченного налога за «правильные» траты: лечение, обучение, инвестиции через ИИС. Деньги, которые государство должно тебе — забери их.' },
+      bh:{ w:'Купи и держи', re:/купи и держи|buy-and-hold/i, d:'Стратегия: купить и не дёргаться годами. Скучно, но статистика беспощадна: активные трейдеры в среднем проигрывают ей 6+ п.п. в год (исследование на 66 000 реальных счетов).' },
+    };
+    function termify(text){
+      let out = text;
+      Object.entries(TERMS).forEach(([key, t])=>{
+        if (out.includes('data-t="' + key + '"')) return;
+        out = out.replace(t.re, m => `<span class="term" data-t="${key}">${m}</span>`);
+      });
+      return out;
+    }
+    function openTerm(key){
+      const t = TERMS[key]; if (!t) return;
+      const isNew = S && !S.glossary.has(key);
+      if (S){ S.glossary.add(key); saveGame(); }
+      $('termBody').innerHTML = `
+        <div class="nIco">📖</div>
+        <h2>${t.w}</h2>
+        <p style="text-align:left">${t.d}</p>
+        ${isNew ? '<p class="small">Слово добавлено в словарь (меню → 📖)</p>' : ''}
+        <button class="btn" onclick="G.closeTerm()">Понятно</button>`;
+      show('termOvl');
+    }
+    function closeTerm(){ hide('termOvl'); setTimeout(maybeShowNote, 240); }
+    document.addEventListener('click', e => {
+      const el = e.target.closest ? e.target.closest('.term') : null;
+      if (el){ e.stopPropagation(); openTerm(el.dataset.t); }
+    }, true);
 
     /* ===== LEVEL 3: broker exam (по мотивам реального теста ЦБ) ===== */
     const EXAM_QS = [
@@ -901,6 +946,9 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         return false;
       });
       if (S.depositOpen && S.deposit > 0){ const int_ = Math.round(S.deposit * 0.01); S.deposit += int_; rows.push(['Проценты по депозиту', int_]); }
+      /* подушка лежит на накопительном счёте: работает, но меньше депозита — цена мгновенного доступа */
+      if (S.cushion > 0){ const ci = Math.round(S.cushion * 0.005); S.cushion += ci; rows.push(['🛡 Подушка на накопительном счёте (+0,5%)', ci]); }
+      if (S.cushion >= 60000){ S.mood = Math.min(100, S.mood + 2); }
       /* level 2: markets move */
       if (S.level >= 2){
         if (S.bonds > 0){ const coupon = Math.round(S.bonds * 0.011); S.bonds += coupon; rows.push(['📜 Облигации: купон (~14% годовых)', coupon]); }
@@ -938,6 +986,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       else { verdict = 'Дожил. Впритык, но дожил.'; }
       if (S.debt > 45000){ gameOver(); return; }
       rows.slice(2).forEach(r=>S.monthLog.push(r));
+      S.capHist.push([S.month, totalCap()]);
       renderHUD();
       buildReport(rows, verdict);
       showNotesThen(()=>{
@@ -1007,6 +1056,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       const savedNow = (S.cushion + S.deposit + S.bonds + S.stocks) - ((snap.cushion||0) + (snap.deposit||0) + (snap.bonds||0) + (snap.stocks||0));
       if (savedNow > 0) good.push('📈 Отложено и инвестировано за месяц: +' + fmt(savedNow));
       if (S.gotBonus) good.push('⭐ Премия за бодрость и настрой: +5 000. Баланс окупается.');
+      if (S.cushion >= 180000) good.push('🧘 Подушка покрывает 3+ месяца жизни — редкий уровень надёжности. Спокойствие: +2 😊 каждый месяц.');
+      else if (S.cushion >= 60000) good.push('😴 Подушка покрывает месяц жизни — спишь спокойно (+2 😊 каждый месяц). Следующая планка — 3 месяца (180 000).');
       if (goalsDone() > (snap.goals || 0)) good.push('🎯 Достигнута новая цель игры!');
       if (cap > (S.bestCap || 0)){ if (S.bestCap) good.push('🏆 Новый рекорд капитала!'); S.bestCap = cap; }
       if (crit.length){ out += rev(`<div class="secT" style="color:var(--bad)">⚠ Критично</div>`); crit.forEach(b=>{ out += rev(`<div class="badge crit">${b}</div>`); }); }
@@ -1020,7 +1071,21 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function updateAlloc(){
       $('allocLeft').textContent = fmt(S.cash);
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
-      document.querySelectorAll('#allocOvl .alloc button').forEach(b=>{ if(b.id!=='allocDep') b.disabled = S.cash < 10000; });
+      document.querySelectorAll('#allocOvl .alloc button').forEach(b=>{
+        if (b.id === 'allocDep' || b.id === 'allocTrade' || b.id.startsWith('w')) return;
+        b.disabled = S.cash < 10000;
+      });
+      /* withdrawals / sells: turn assets back into cash */
+      const wMap = { wDep:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund' };
+      let anyW = false;
+      Object.entries(wMap).forEach(([id, key])=>{
+        const ok = S[key] >= 10000;
+        const el = $(id); if (!el) return;
+        el.style.display = ok ? '' : 'none'; el.disabled = !ok;
+        if (ok) anyW = true;
+      });
+      $('allocOut').style.display = anyW ? '' : 'none';
+      $('allocOutLbl').style.display = anyW ? '' : 'none';
       if (!S.depositOpen) $('allocDep').innerHTML = '🏦 Депозит<b>ещё не открыт</b>'; else $('allocDep').innerHTML = '🏦 На депозит<b>+10&nbsp;000</b>';
       $('allocLvl2').style.display = (S.bondsOpen || S.stocksOpen) ? '' : 'none';
       $('allocBonds').style.display = S.bondsOpen ? '' : 'none';
@@ -1032,6 +1097,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       $('allocTrade').innerHTML = '🕹 Торговая сессия<b>' + (S.cash >= 10000 ? 'ставка 10 000' : 'демо-режим') + '</b>';
     }
     function alloc(kind){
+      const w = { wDeposit:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund' }[kind];
+      if (w){
+        if (S[w] < 10000) return;
+        S[w] -= 10000; S.cash += 10000;
+        renderHUD(); updateAlloc(); saveGame();
+        return;
+      }
       if (S.cash < 10000) return;
       S.cash -= 10000;
       if (kind === 'cushion') S.cushion += 10000;
@@ -1105,36 +1177,101 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (avg >= 20) return [avg, '🥱', 'На износе'];
       return [avg, '🧟', 'Выгорел дотла'];
     }
-    function finish(){
-      pushHist('finished'); LS.del(SAVE_KEY); ended = true;
+    function finVerdict(){
+      const cap = totalCap(); const qAvg = Math.round((S.health + S.mood + S.rel) / 3);
+      if (cap >= 120000 && qAvg < 30) return '⚖️ Деньги есть — жизни нет. Богатство, которое некому и незачем тратить, — это просто цифры.';
+      if (cap >= 120000 && qAvg >= 60) return '🏆 Финансовый дзен: и капитал, и жизнь. Это и есть выигрыш.';
+      if (cap < 40000 && qAvg >= 70) return '🎈 Жил в кайф — но без запаса. Первый серьёзный кризис заберёт этот кайф с процентами.';
+      return S.level >= 2 ? 'Рынок попробован. Дальше — только опыт.' : 'Попробуй ещё раз: подушка до кризиса, а не после — в этом весь секрет.';
+    }
+    function donutSVG(parts){
+      const total = parts.reduce((s,p)=>s+p.v, 0) || 1;
+      const R = 52, C = 2 * Math.PI * R;
+      let off = 0, segs = '';
+      parts.forEach(p=>{
+        const frac = p.v / total; if (frac <= 0) return;
+        segs += `<circle r="${R}" cx="70" cy="70" fill="none" stroke="${p.c}" stroke-width="26" stroke-dasharray="${Math.max(0, frac*C - 1.5).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off*C).toFixed(1)}" transform="rotate(-90 70 70)"/>`;
+        off += frac;
+      });
+      return `<svg viewBox="0 0 140 140" style="width:150px;height:150px;margin:4px auto 8px;display:block">${segs}</svg>`;
+    }
+    function lineSVG(hist){
+      if (!hist || hist.length < 2) return '<p class="small">Слишком короткая история для графика.</p>';
+      const vals = hist.map(h=>h[1]);
+      const min = Math.min(...vals, 0), max = Math.max(...vals) * 1.05 || 1;
+      const W = 300, H = 110;
+      const X = i => (i * (W / (hist.length - 1))).toFixed(1);
+      const Y = v => (H - 4 - (v - min) / (max - min) * (H - 14)).toFixed(1);
+      const pts = hist.map((h,i)=>X(i) + ',' + Y(h[1])).join(' ');
+      const li = hist.length - 1;
+      return `<svg viewBox="0 0 ${W} ${H+16}" class="chartSvg" style="height:130px">
+        <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="${X(li)}" cy="${Y(hist[li][1])}" r="4" fill="var(--accent)"/>
+        <text x="2" y="${H+12}" font-size="10" fill="var(--muted)">мес ${hist[0][0]}</text>
+        <text x="${W-2}" y="${H+12}" font-size="10" text-anchor="end" fill="var(--muted)">мес ${hist[li][0]}</text>
+      </svg>`;
+    }
+    let FIN = null;
+    function finSlides(){
       const cap = totalCap(); const [ico, rank] = title(cap);
       const [qAvg, qIco, qLabel] = qualityOf();
-      let verdict;
-      if (cap >= 120000 && qAvg < 30) verdict = '⚖️ Деньги есть — жизни нет. Богатство, которое некому и незачем тратить, — это просто цифры. Попробуй ран, где живут и люди, а не только капитал.';
-      else if (cap >= 120000 && qAvg >= 60) verdict = '🏆 Финансовый дзен: и капитал, и жизнь. Это и есть выигрыш.';
-      else if (cap < 40000 && qAvg >= 70) verdict = '🎈 Жил в кайф — но без запаса. Первый же серьёзный кризис заберёт весь этот кайф с процентами.';
-      else verdict = S.level >= 2 ? 'Рынок попробован. Дальше — только опыт.' : 'Попробуй ещё раз: подушка до кризиса, а не после — в этом весь секрет.';
-      $('endSheet').innerHTML = `
-        <h1>${ico} ${rank}</h1>
-        <p>${S.month - 1} мес. прожито${S.level >= 3 ? ' · уровень «Брокер»' : (S.level >= 2 ? ' · уровень «Инвестор»' : '')}. Твой капитал:</p>
-        <div class="ledger">
-          <div><span>💰 На карте</span><b class="plus">${fmt(S.cash)}</b></div>
-          <div><span>🛡 Подушка</span><b class="plus">${fmt(S.cushion)}</b></div>
-          <div><span>🏦 Депозит</span><b class="plus">${fmt(S.deposit)}</b></div>
-          ${S.bonds?`<div><span>📜 Облигации</span><b class="plus">${fmt(S.bonds)}</b></div>`:''}
-          ${S.stocks?`<div><span>📈 Акции</span><b class="plus">${fmt(S.stocks)}</b></div>`:''}
-          ${S.fund?`<div><span>📦 Фонд</span><b class="plus">${fmt(S.fund)}</b></div>`:''}
-          ${S.debt?`<div><span>🩸 Долги</span><b class="minus">${fmt(-S.debt)}</b></div>`:''}
-          <div><span><b>Итого</b></span><b class="${cap>=0?'plus':'minus'}">${fmt(cap)}</b></div>
-        </div>
-        <p class="small">Лестница званий по капиталу: 💀 меньше нуля · 🐹 до 40К · 🪖 до 120К · 🏠 до 250К · 🥷 от 250К</p>
-        <p><b>🎯 Целей достигнуто: ${goalsDone()} из 3</b></p>
-        <div>${goalsHTML()}</div>
-        <p style="margin-top:12px"><b>${qIco} Качество жизни: ${qLabel} (${qAvg}/100)</b></p>
-        <p>${verdict}</p>
-        <p class="small">Импульсивных трат: ${S.impulses} · Кризисов пережито: ${S.crisesTotal}, из них подушкой: ${S.crisesAbsorbed} · Микрозаймов: ${S.loansTaken}</p>
+      const months = S.month - 1;
+      const lvlName = S.level >= 3 ? 'Брокер' : S.level >= 2 ? 'Инвестор' : 'Бюджет';
+      const s = [];
+      s.push(`<div style="text-align:center"><div style="font-size:58px;line-height:1">${ico}</div><h1>${rank}</h1>
+        <div class="capBig" id="finCap">${fmt(cap)}</div>
+        <p class="small" style="margin-top:4px">${months} мес. прожито · уровень «${lvlName}»</p>
+        <p style="margin-top:10px">${qIco} <b>${qLabel}</b> (${qAvg}/100)</p></div>`);
+      const parts = [
+        {v:S.cash, c:'var(--money)', ico:'💰', l:'На карте'},
+        {v:S.cushion, c:'var(--shield)', ico:'🛡', l:'Подушка'},
+        {v:S.deposit, c:'var(--rel)', ico:'🏦', l:'Депозит'},
+        {v:S.bonds, c:'var(--mood)', ico:'📜', l:'Облигации'},
+        {v:S.stocks, c:'var(--health)', ico:'📈', l:'Акции'},
+        {v:S.fund, c:'var(--good)', ico:'📦', l:'Фонд'},
+      ].filter(p=>p.v > 0);
+      const gross = parts.reduce((x,p)=>x+p.v, 0) || 1;
+      s.push(`<h2>💼 Структура капитала</h2>${donutSVG(parts)}
+        ${parts.map(p=>`<div class="dRow"><span>${p.ico} ${p.l}</span><span style="display:flex;gap:9px;align-items:center"><span class="dd zero">${Math.round(p.v/gross*100)}%</span><span class="dv">${fmt(p.v)}</span></span></div>`).join('')}
+        ${S.debt?`<div class="dRow"><span>🩸 Долг</span><span class="dv" style="color:var(--bad)">−${fmt(S.debt)}</span></div>`:''}`);
+      const peak = Math.max(...(S.capHist.length?S.capHist.map(h=>h[1]):[cap]), cap);
+      s.push(`<h2>📈 Путь капитала</h2>${lineSVG(S.capHist)}
+        <div class="dRow"><span>Старт</span><span class="dv">${fmt(S.capHist[0]?S.capHist[0][1]:0)}</span></div>
+        <div class="dRow"><span>Пик</span><span class="dv">${fmt(peak)}</span></div>
+        <div class="dRow"><span>Финиш</span><span class="dv" style="color:${cap>=0?'var(--good)':'var(--bad)'}">${fmt(cap)}</span></div>`);
+      const bar = (ico,l,v,c)=>`<div class="dRow" style="border:none;padding:4px 0"><span style="min-width:104px;text-align:left;font-size:13.5px">${ico} ${l}</span><span style="flex:1;margin:0 7px"><span style="display:block;height:10px;border-radius:6px;background:var(--surface-2);overflow:hidden"><i style="display:block;height:100%;width:${Math.round(v)}%;background:${c};border-radius:6px"></i></span></span><span class="dv">${Math.round(v)}</span></div>`;
+      s.push(`<h2>${qIco} Как ты жил</h2>
+        ${bar('❤️','Здоровье',S.health,'var(--health)')}${bar('😊','Настроение',S.mood,'var(--mood)')}${bar('👥','Отношения',S.rel,'var(--rel)')}
+        <p style="margin-top:12px">${finVerdict()}</p>`);
+      s.push(`<h2>🧭 Твои решения</h2>
+        <div class="dRow"><span>🛒 Импульсивные траты</span><span class="dv">${S.impulses}</span></div>
+        <div class="dRow"><span>⚡ Кризисов пережито</span><span class="dv">${S.crisesTotal}</span></div>
+        <div class="dRow"><span>🛡 …принято подушкой</span><span class="dv">${S.crisesAbsorbed}</span></div>
+        <div class="dRow"><span>🩸 Микрозаймов взято</span><span class="dv">${S.loansTaken}</span></div>
+        <div class="dRow"><span>🏆 Пик капитала</span><span class="dv">${fmt(peak)}</span></div>
+        <div class="dRow"><span>📖 Слов в словаре</span><span class="dv">${S.glossary.size}</span></div>`);
+      s.push(`<h2>🎯 Цели</h2><p><b>Достигнуто: ${goalsDone()} из 3</b></p>${goalsHTML()}
+        <p class="small" style="margin-top:12px">Лестница званий: 💀 &lt;0 · 🐹 &lt;40К · 🪖 &lt;120К · 🏠 &lt;250К · 🥷 250К+</p>
         <p class="small">Результат сохранён в историю сессий</p>
-        <button class="btn" onclick="G.newSession()">Прожить ещё раз</button>`;
+        <button class="btn" onclick="G.newSession()">Прожить ещё раз</button>`);
+      return s;
+    }
+    function renderFin(){
+      const slides = finSlides();
+      const dots = slides.map((_,i)=>`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i===FIN.i?'var(--accent)':'var(--border)'}"></span>`).join('');
+      $('endSheet').innerHTML = `<div class="rev" style="animation-delay:.05s">${slides[FIN.i]}</div>
+        <div style="margin-top:14px">${dots}</div>
+        <div style="margin-top:6px">
+          ${FIN.i>0?'<button class="btn sec" onclick="G.finGo(-1)">←</button>':''}
+          ${FIN.i<slides.length-1?'<button class="btn" onclick="G.finGo(1)">Далее →</button>':''}
+        </div>`;
+      if (FIN.i === 0) animateCount($('finCap'), 0, totalCap(), 900);
+    }
+    function finGo(d){ FIN.i = Math.max(0, Math.min(5, FIN.i + d)); renderFin(); }
+    function finish(){
+      pushHist('finished'); LS.del(SAVE_KEY); ended = true;
+      FIN = { i:0 };
+      renderFin();
       show('endOvl');
     }
     function gameOver(){
@@ -1180,6 +1317,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         seenNotes: [...S.seenNotes],
         monthLog: S.monthLog,
         snap: S.snap || null,
+        capHist: S.capHist,
+        glossary: [...S.glossary],
       });
     }
     function loadGame(){
@@ -1194,6 +1333,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       S.seenNotes = new Set(d.seenNotes || []);
       S.monthLog = d.monthLog || [];
       S.snap = d.snap || null;
+      S.capHist = d.capHist || [];
+      S.glossary = new Set(d.glossary || []);
       if (!S.monthTotal) S.monthTotal = S.deck.length || CARDS_PER_MONTH;
       return true;
     }
@@ -1228,7 +1369,14 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       ended = false; hide('startOvl'); hide('endOvl'); hide('setOvl'); renderHUD(); animateHUD();
       if (S.deck && S.deck.length) showCard(); else { buildDeck(); saveGame(); showCard(); }
     }
-    function openSettings(){ $('histList').innerHTML = histHTML(); show('setOvl'); }
+    function openSettings(){
+      $('histList').innerHTML = histHTML();
+      const gl = S ? [...S.glossary] : [];
+      $('glosList').innerHTML = gl.length
+        ? gl.map(k=>TERMS[k] ? `<div class="row" style="flex-direction:column;align-items:flex-start;gap:3px"><b>${TERMS[k].w}</b><span class="small" style="font-size:13px">${TERMS[k].d}</span></div>` : '').join('')
+        : '<p class="small">Пока пусто. Жми подчёркнутые слова в игре — они соберутся здесь.</p>';
+      show('setOvl');
+    }
     function closeSettings(){ hide('setOvl'); }
     /* dev: jump straight to level 2 with average level-1 results */
     function devLevel2(){
@@ -1314,6 +1462,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       <div class="ovl" id="setOvl"><div class="sheet">
         <h2>Сессии</h2>
         <div class="hist" id="histList"></div>
+        <p style="margin:12px 0 0;text-align:left"><b>📖 Словарь</b></p>
+        <div class="hist" id="glosList" style="max-height:30vh"></div>
         <p style="margin:12px 0 0;text-align:left"><b>Тема</b></p>
         <div class="themeRow">
           <button id="tp" onclick="G.setTheme('p')">📜 Пергамент</button>
@@ -1362,8 +1512,16 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           <button id="allocFund" onclick="G.alloc('fund')">📦 Фонд<b>рынок целиком, мягче</b></button>
           <button id="allocTrade" onclick="G.openTrade()">🕹 Торговая сессия<b>ставка 10 000</b></button>
         </div>
+        <p class="small" id="allocOutLbl" style="margin:10px 0 0;display:none">⇄ Вывести обратно в деньги:</p>
+        <div class="alloc" id="allocOut" style="display:none">
+          <button id="wDep" onclick="G.alloc('wDeposit')">🏦→💰<b>10 000</b></button>
+          <button id="wBonds" onclick="G.alloc('wBonds')">📜→💰<b>10 000</b></button>
+          <button id="wStocks" onclick="G.alloc('wStocks')">📈→💰<b>10 000</b></button>
+          <button id="wFund" onclick="G.alloc('wFund')">📦→💰<b>10 000</b></button>
+        </div>
         <button class="btn sec" style="margin-top:14px" onclick="G.nextMonth()">Хватит, живём дальше →</button>
       </div></div>
+      <div class="ovl" id="termOvl"><div class="sheet note" id="termBody"></div></div>
       <div class="ovl" id="examOvl"><div class="sheet">
         <h2>📋 Тест брокера</h2>
         <div id="examBody"></div>
@@ -1380,7 +1538,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     `;
 
     $('app').innerHTML = SHELL;
-    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, finishNow: finish, openFlow, closeFlow, setTheme, devLevel2, devLevel3, examAnswer, openTrade, tradeAct, closeTrade, skillStop };
+    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
     let _fitting=false, _lastS=-1;
