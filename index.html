@@ -289,14 +289,23 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Подписаться',m:-1990,o:4,imp:1,note:'Подписка — это покупка, которую ты совершаешь каждый месяц, не решая её совершить.'},R:{lbl:'Мимо',o:-1}},
      {e:'💎',cat:'соблазн',t:()=>`Мобилка предлагает «выгодный» набор кристаллов за 999 ₽. Осталось ${pick(['2 часа','40 минут','до полуночи'])}!`,
       L:{lbl:'Задонатить',m:-999,o:3,imp:1},R:{lbl:'Удалить игру',o:-2}},
-     /* ---- investor cards, months 7+ ---- */
-     {e:'📉',cat:'инвестиции',min:7,t:'Рынок красный. Акции −8% за неделю. Палец сам тянется к кнопке «продать всё».',
+     /* ---- level 2: narrative on-ramp to investing ---- */
+     {e:'🏛',cat:'финансы',min:7,req:'lvl2',t:'Приложение банка: «Ваш вклад работает. А мог бы работать лучше: облигации — надёжность близкая, доходность выше». Кнопка «Разобраться» прямо под пальцем.',
+      L:{lbl:'Разобраться',fx:'unlockBonds'},R:{lbl:'Как-нибудь потом',o:1,note:'Ок. Предложение никуда не денется — банк настойчив.'}},
+     {e:'🧑‍💼',cat:'финансы',min:7,req:'bonds',t:'Виталик из соседнего отдела: «Облигации? Для пенсионеров. Я в акциях: +30% за полгода. Ну, в этом полугодии».',
+      L:{lbl:'Открыть доступ к акциям',fx:'unlockStocks'},R:{lbl:'«Рано мне»',o:1,note:'Разумно не лезть в то, чего пока не понимаешь. Но и Виталик не совсем врёт — вернёмся к этому.'}},
+     /* ---- market event cards (only when you actually hold stocks) ---- */
+     {e:'🗞',cat:'рынок',min:7,req:'stocksHeld',t:'Рынок падает три дня подряд. Твой портфель акций просел на 7%. Аналитики: «возможна коррекция». Они всегда так говорят.',
+      L:{lbl:'Докупить на 10 000',m:-10000,fx:'dipBuy'},R:{lbl:'Переждать',fx:'dipHold',note:'Просадка — не убыток, пока ты не продал. Докупать хорошо, но только на свободные деньги — подушка не для этого.'}},
+     {e:'💌',cat:'рынок',min:7,req:'stocksHeld',t:'Дивидендный сезон! Компании из твоего портфеля делятся прибылью — примерно 3% от вложенного.',
+      L:{lbl:'Реинвестировать',fx:'divReinvest',note:'Реинвест дивидендов — тихий двигатель сложного процента.'},R:{lbl:'Вывести на карту',fx:'divCash'}},
+     {e:'📉',cat:'рынок',min:7,req:'stocksHeld',t:'Рынок красный. Акции −8% за неделю. Палец сам тянется к кнопке «продать всё».',
       L:{lbl:'Продать всё',fx:'panicSell',imp:1},R:{lbl:'Ничего не делать',note:'Время в рынке важнее тайминга рынка. Просадки приходят и уходят — зафиксированный убыток остаётся.'}},
-     {e:'🚀',cat:'инвестиции',min:7,t:()=>`Все вокруг покупают ${pick(['TechMegaCorp','QuantumAI Inc','NeuroDrive'])}: +40% за месяц! В лифте только о них и говорят.`,
+     {e:'🚀',cat:'инвестиции',min:7,req:'stocks',t:()=>`Все вокруг покупают ${pick(['TechMegaCorp','QuantumAI Inc','NeuroDrive'])}: +40% за месяц! В лифте только о них и говорят.`,
       L:{lbl:'Зайти на хайпе',m:-10000,fx:'hype',imp:1},R:{lbl:'Пропустить',note:'Когда об акции говорят в лифте — умные деньги уже выходят.'}},
-     {e:'🎪',cat:'инвестиции',min:7,t:'Брокер предлагает плечо ×5: «Умножь свой результат!» Мелким шрифтом: «в обе стороны».',
+     {e:'🎪',cat:'инвестиции',min:7,req:'stocks',t:'Брокер предлагает плечо ×5: «Умножь свой результат!» Мелким шрифтом: «в обе стороны».',
       L:{lbl:'Взять плечо',fx:'margin',imp:1},R:{lbl:'Торговать на свои',note:'Плечо умножает не доход, а исход. Чаще всего — печальный.'}},
-     {e:'🥚',cat:'инвестиции',min:7,t:'Коллега: «Я всё держу в одной акции. Чего мелочиться?»',
+     {e:'🥚',cat:'инвестиции',min:7,req:'stocks',t:'Коллега: «Я всё держу в одной акции. Чего мелочиться?»',
       L:{lbl:'«Гений!»',o:2,note:'Одна корзина для всех яиц — план на омлет. Диверсификация — единственный бесплатный обед на рынке.'},R:{lbl:'«Рискованно»',o:1,note:'Верно. Диверсификация — единственный бесплатный обед на рынке.'}},
     ];
 
@@ -322,7 +331,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       month:1, cash:(props.startCash ?? 15000), cushion:0, deposit:0, debt:0,
       health:70, mood:70, rel:70,
       salary:(props.salary ?? SALARY), credit:8000, creditLeft:3, catCost:0, cashback:false, depositOpen:false,
-      mfo:0, level:1, bonds:0, stocks:0,
+      mfo:0, level:1, bonds:0, stocks:0, bondsOpen:false, stocksOpen:false,
       deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[],
       mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
     };}
@@ -414,6 +423,12 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         renderHUD();
       },
       hype(){ S.pending.push({label:'Хайповая акция: успел выйти в плюс', amount:16000, chance:.25, failLabel:'Хайповая акция: купил на пике, −70%. Хайп — худший инвестсоветник.'}); },
+      unlockBonds(){ if(!S.bondsOpen){ S.bondsOpen = true; toast('Облигации открыты. Суть: ты одалживаешь деньги государству или компании, они платят купон — здесь ~14% годовых, стабильно, без качелей. Покупка — в конце месяца, при распределении денег.'); renderHUD(); } },
+      unlockStocks(){ if(!S.stocksOpen){ S.stocksOpen = true; toast('Акции открыты. Это доля в бизнесе: в среднем доходнее облигаций, но месяц к месяцу трясёт, а иногда роняет. Правило: в акции — только деньги, которые не понадобятся год и больше.'); renderHUD(); } },
+      dipBuy(){ S.stocks = Math.round(S.stocks * 0.93) + 10700; toast('Купил на просадке: те же акции, но на 7% дешевле — на 10 000 взял бумаг на 10 700.'); renderHUD(); },
+      dipHold(){ S.stocks = Math.round(S.stocks * 0.93); renderHUD(); },
+      divReinvest(){ const div = Math.round(S.stocks * 0.03); S.stocks += div; toast('Дивиденды ' + fmt(div) + ' реинвестированы в те же акции.'); renderHUD(); },
+      divCash(){ const div = Math.round(S.stocks * 0.03); S.cash += div; S.monthLog.push(['💌 Дивиденды', div]); toast('Дивиденды ' + fmt(div) + ' выведены на карту.'); renderHUD(); },
       margin(){ S.pending.push({label:'Плечо ×5: угадал движение', amount:15000, chance:.3, failLabel:'Плечо ×5: маржин-колл, −20 000 ₽. Плечо умножает в обе стороны.', failAmount:20000}); },
       unlockDeposit(){ if(!S.depositOpen){ S.depositOpen = true; toast('Открыт депозит: 1% в месяц на остаток. Деньги начали работать.'); renderHUD(); } },
     };
@@ -434,10 +449,17 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.L.fx === 'cat' && S.catCost > 0) ||
         (c.L.fx === 'cashback' && S.cashback) ||
         (c.L.fx === 'unlockDeposit' && S.depositOpen) ||
+        (c.L.fx === 'unlockBonds' && S.bondsOpen) ||
+        (c.L.fx === 'unlockStocks' && S.stocksOpen) ||
         (c.L.fx === 'gym' && S.flags.gym) ||
         (c.L.fx === 'dental' && S.flags.dental) ||
         (c.L.fx === 'upskill' && S.salary >= SALARY + 8000);
-      const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && !done(c));
+      const reqOk = c => !c.req ||
+        (c.req === 'lvl2' && S.level >= 2) ||
+        (c.req === 'bonds' && S.bondsOpen) ||
+        (c.req === 'stocks' && S.stocksOpen) ||
+        (c.req === 'stocksHeld' && S.stocksOpen && S.stocks > 0);
+      const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && !done(c) && reqOk(c));
       const fresh = avail.filter(c=>!S.used.has(c.t));
       const stale = avail.filter(c=>S.used.has(c.t));
       let picks = shuffle(fresh.slice()).slice(0, CARDS_PER_MONTH);
@@ -445,6 +467,15 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (!S.depositOpen && S.month >= 2){
         const depCard = POOL.find(c => c.L.fx === 'unlockDeposit');
         if (!picks.includes(depCard)) picks[Math.floor(Math.random()*picks.length)] = depCard;
+      }
+      /* level 2 on-ramp: the bank pitches bonds until you engage; a month later Vitalik pitches stocks */
+      if (S.level >= 2 && !S.bondsOpen){
+        const bCard = POOL.find(c => c.L.fx === 'unlockBonds');
+        if (!picks.includes(bCard)) picks[Math.floor(Math.random()*picks.length)] = bCard;
+      }
+      if (S.bondsOpen && !S.stocksOpen && S.month >= 8){
+        const sCard = POOL.find(c => c.L.fx === 'unlockStocks');
+        if (!picks.includes(sCard)) picks[Math.floor(Math.random()*picks.length)] = sCard;
       }
       picks.forEach(c=>S.used.add(c.t));
       // crises: no repeats until pool exhausted; prevention excludes linked crises
@@ -636,7 +667,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (S.depositOpen && S.deposit > 0){ const int_ = Math.round(S.deposit * 0.01); S.deposit += int_; rows.push(['Проценты по депозиту', int_]); }
       /* level 2: markets move */
       if (S.level >= 2){
-        if (S.bonds > 0){ const coupon = Math.round(S.bonds * 0.007); S.bonds += coupon; rows.push(['📜 Облигации: купон (~8,5% годовых)', coupon]); }
+        if (S.bonds > 0){ const coupon = Math.round(S.bonds * 0.011); S.bonds += coupon; rows.push(['📜 Облигации: купон (~14% годовых)', coupon]); }
         if (S.stocks > 0){
           if (Math.random() < 0.1){
             const drop = Math.round(S.stocks * 0.18); S.stocks -= drop; rows.push(['📉 ОБВАЛ РЫНКА: акции −18%', -drop]);
@@ -671,7 +702,9 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
       document.querySelectorAll('#allocOvl .alloc button').forEach(b=>{ if(b.id!=='allocDep') b.disabled = S.cash < 10000; });
       if (!S.depositOpen) $('allocDep').innerHTML = '🏦 Депозит<b>ещё не открыт</b>'; else $('allocDep').innerHTML = '🏦 На депозит<b>+10&nbsp;000</b>';
-      $('allocLvl2').style.display = S.level >= 2 ? '' : 'none';
+      $('allocLvl2').style.display = (S.bondsOpen || S.stocksOpen) ? '' : 'none';
+      $('allocBonds').style.display = S.bondsOpen ? '' : 'none';
+      $('allocStocks').style.display = S.stocksOpen ? '' : 'none';
     }
     function alloc(kind){
       if (S.cash < 10000) return;
@@ -697,17 +730,17 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function offerLevel2(){
       $('endSheet').innerHTML = `
         <h1>🔓 Уровень 2: Инвестор</h1>
-        <p>Полгода прожито, капитал <b>${fmt(totalCap())}</b>, долгов нет. Бюджет ты освоил.</p>
-        <p>Впереди месяцы 7–12. Открываются <b>📜 облигации</b> (стабильный купон ~8,5% годовых) и <b>📈 акции</b> (в среднем доходнее, но рынок трясёт, а иногда — обваливает).</p>
-        <p class="small">Жизнь продолжается: зарплата, кризисы и соблазны никуда не денутся. Теперь к ним добавится рынок.</p>
-        <button class="btn" onclick="G.startLevel2()">📈 Стать инвестором</button>
+        <p>Полгода прожито, капитал <b>${fmt(totalCap())}</b>, долгов нет. Бюджет ты освоил — и это заметили.</p>
+        <p>Впереди месяцы 7–12. У тебя появились свободные деньги, и мир это чувствует: банк, коллеги и рынок начнут подкидывать предложения. Какие принимать — решать тебе.</p>
+        <p class="small">Жизнь продолжается: зарплата, кризисы и соблазны никуда не денутся.</p>
+        <button class="btn" onclick="G.startLevel2()">Продолжить</button>
         <button class="btn sec" onclick="G.finishNow()">Завершить с этим результатом</button>`;
       show('endOvl');
     }
     function startLevel2(){
       hide('endOvl');
       S.level = 2;
-      toast('Уровень 2. Правило первое: подушка и депозит — фундамент. Инвестируй только то, что не понадобится завтра.');
+      toast('Уровень 2. Правило первое: подушка и депозит — фундамент. Всё, что предлагают дальше, — только на свободные деньги.');
       renderHUD(); payday();
     }
 
@@ -787,7 +820,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (!S || ended) return;
       const scal = {};
       ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
-       'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
+       'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
         .forEach(k=>scal[k]=S[k]);
       LS.set(SAVE_KEY, {
         scal,
@@ -857,6 +890,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       Object.assign(S, { month:7, level:2, cash:12000, cushion:40000, deposit:20000, depositOpen:true,
         salary:84000, creditLeft:0, health:60, mood:60, rel:60, impulses:3, crisesTotal:8, crisesAbsorbed:5 });
       renderHUD(); animateHUD(); payday();
+      // подводка к облигациям придёт карточкой банка в первой же колоде
     }
     function setTheme(k){ applyTheme(k); }
     function renderStart(){
@@ -958,8 +992,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           <button onclick="G.alloc('fun')">🎉 На себя<b>−10&nbsp;000, 😊+</b></button>
         </div>
         <div class="alloc" id="allocLvl2" style="display:none">
-          <button onclick="G.alloc('bonds')">📜 Облигации<b>~8,5%/год, стабильно</b></button>
-          <button onclick="G.alloc('stocks')">📈 Акции<b>больше, но трясёт</b></button>
+          <button id="allocBonds" onclick="G.alloc('bonds')">📜 Облигации<b>~14%/год, стабильно</b></button>
+          <button id="allocStocks" onclick="G.alloc('stocks')">📈 Акции<b>больше, но трясёт</b></button>
         </div>
         <button class="btn sec" style="margin-top:14px" onclick="G.nextMonth()">Хватит, живём дальше →</button>
       </div></div>
