@@ -362,10 +362,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       const f = document.createElement('div'); f.className = 'float ' + cls; f.innerHTML = html;
       $('floats').appendChild(f); setTimeout(()=>f.remove(), 1700);
     }
-    let noteQueue = [];
+    let noteQueue = [], noteThen = null;
     function toast(msg){ noteQueue.push(msg); maybeShowNote(); }
     function maybeShowNote(){
       if ($('noteOvl').classList.contains('show')) return;
+      /* notes are exclusive: never pop under/over another sheet — that's how advice
+         got stuck invisible and resurfaced on a random later card */
+      if (document.querySelector('.ovl.show:not(#noteOvl)')) return;
       while (noteQueue.length){
         const msg = noteQueue.shift();
         if (S && S.seenNotes.has(msg)) continue; // each lesson shown once per run
@@ -373,8 +376,21 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         $('noteText').textContent = msg; show('noteOvl');
         return;
       }
+      if (noteThen){ const f = noteThen; noteThen = null; f(); }
     }
-    function closeNote(){ hide('noteOvl'); if (noteQueue.length) setTimeout(maybeShowNote, 150); }
+    /* show queued notes first (in context), then continue with cb (e.g. month report) */
+    function showNotesThen(cb){
+      noteThen = cb;
+      maybeShowNote();
+      if (noteThen && !$('noteOvl').classList.contains('show')){ const f = noteThen; noteThen = null; f(); }
+    }
+    function closeNote(){
+      hide('noteOvl');
+      setTimeout(()=>{
+        if (noteQueue.length) maybeShowNote();
+        else if (noteThen){ const f = noteThen; noteThen = null; f(); }
+      }, 210);
+    }
 
     /* ===== EFFECTS ===== */
     function applyMoney(delta, isCrisis){
@@ -625,7 +641,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       $('payNote').textContent = S.creditLeft === 0 && S.month <= 3 ? 'Кредит за телефон скоро закончится. Держись.' : 'Свободный остаток — твоё поле для манёвра. Или для глупостей.';
       renderHUD(); S.monthLog = rows.slice(); saveGame(); show('payOvl');
     }
-    function closePayday(){ hide('payOvl'); buildDeck(); saveGame(); showCard(); setTimeout(maybeShowNote, 250); }
+    function closePayday(){ hide('payOvl'); buildDeck(); saveGame(); showCard(); setTimeout(maybeShowNote, 260); }
     /* ---- goals & cash flow ---- */
     const GOALS = { cushion:60000, capital:150000, quality:50 };
     function maxMonths(){ return S.level >= 2 ? 12 : MONTHS; }
@@ -694,9 +710,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       $('repLedger').innerHTML = ledgerHTML(rows) + `<div><span>На карте сейчас</span><b class="${S.cash>=0?'plus':'minus'}">${fmt(S.cash)}</b></div>`;
       $('repVerdict').textContent = verdict;
       $('repGoals').innerHTML = goalsHTML();
-      renderHUD(); show('repOvl');
+      renderHUD();
+      showNotesThen(()=>show('repOvl')); // outcomes first, in context — then the report
     }
-    function openAlloc(){ hide('repOvl'); maybeShowNote(); if (S.cash < 10000){ nextMonth(); return; } updateAlloc(); show('allocOvl'); }
+    function openAlloc(){ hide('repOvl'); if (S.cash < 10000){ nextMonth(); return; } updateAlloc(); show('allocOvl'); }
     function updateAlloc(){
       $('allocLeft').textContent = fmt(S.cash);
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
@@ -871,7 +888,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     }
 
     /* ===== SESSION FLOW ===== */
-    function startRun(){ hide('startOvl'); hide('endOvl'); hide('setOvl'); ended = false; noteQueue = []; S = newState(); renderHUD(); animateHUD(); payday(); }
+    function startRun(){ hide('startOvl'); hide('endOvl'); hide('setOvl'); ended = false; noteQueue = []; noteThen = null; S = newState(); renderHUD(); animateHUD(); payday(); }
     function newSession(){ if (S && !ended){ pushHist('abandoned'); } LS.del(SAVE_KEY); startRun(); }
     function continueRun(){
       if (!loadGame()){ startRun(); return; }
@@ -885,7 +902,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (S && !ended) pushHist('abandoned');
       LS.del(SAVE_KEY);
       hide('setOvl'); hide('startOvl'); hide('endOvl');
-      ended = false; noteQueue = [];
+      ended = false; noteQueue = []; noteThen = null;
       S = newState();
       Object.assign(S, { month:7, level:2, cash:12000, cushion:40000, deposit:20000, depositOpen:true,
         salary:84000, creditLeft:0, health:60, mood:60, rel:60, impulses:3, crisesTotal:8, crisesAbsorbed:5 });
