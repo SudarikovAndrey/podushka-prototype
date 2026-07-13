@@ -301,9 +301,23 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Взять «бесплатные» деньги',m:10000,imp:1,fx:'mfoTrap'},
       R:{lbl:'Заблокировать рекламу',o:2,note:'0% — это сыр. Мышеловка идёт в комплекте.'}},
      {e:'💼',cat:'работа',t:'Шеф: «Есть подработка на выходные. Плачу 15К. Ну как, есть планы?»',
-      L:{lbl:'Взять',m:15000,h:-8,o:-6},R:{lbl:'Выходные святое',o:4,h:3}},
+      L:{lbl:'Взять',m:15000,h:-8,o:-6,fx:'bossJob'},R:{lbl:'Выходные святое',o:4,h:3}},
      {e:'🧑‍💻',cat:'работа',t:'Знакомый предлагает фриланс-заказ на вечер. 6 000 за макет.',
-      L:{lbl:'Взять',m:6000,h:-4,o:-2},R:{lbl:'Вечер для себя',o:3}},
+      L:{lbl:'Взять',m:6000,h:-4,o:-2,fx:'frl1'},R:{lbl:'Вечер для себя',o:3}},
+     /* ---- career branches: unlock through choices ---- */
+     {e:'🧑‍💻',cat:'работа',once:true,req:'frl1',t:'Тот клиент вернулся: «Работа огонь. Есть крупный заказ — как договоримся?»',
+      L:{lbl:'Поднять ставку',m:9000,o:3,fx:'frlPro',note:'Ставку поднимают те, кто просит. Клиент, которому дорого, уходит — и это тоже результат.'},
+      R:{lbl:'Взять объёмом',m:16000,h:-7,o:-5,fx:'frlPro'}},
+     {e:'💻',cat:'работа',req:'frlPro',t:'Постоянный клиент прислал задачу. Уже без торга — по твоей ставке.',
+      L:{lbl:'Сделать',m:12000,h:-3,o:-1},R:{lbl:'Занят в этот раз',r:-2}},
+     {e:'🤝',cat:'работа',once:true,req:'boss',t:'Шеф: «Ты вывозишь. Бери проект под себя: плюс к зарплате, минус к свободным вечерам».',
+      L:{lbl:'Взять проект',fx:'lead',h:-4,o:-3},R:{lbl:'«Мне и так ок»',o:4}},
+     {e:'🏆',cat:'работа',once:true,req:'lead',t:'Проект сдан! Заказчик доволен, шеф сияет, финансовый отдел шевелится.',
+      L:{lbl:'Премия!',m:20000,o:8},R:{lbl:'Скромно кивнуть',m:20000,o:5,r:3}},
+     {e:'🇬🇧',cat:'работа',once:true,t:'Рекрутеры пишут, но интервью на английском. Курс — 5 000 ₽.',
+      L:{lbl:'Прокачать английский',m:-5000,fx:'eng'},R:{lbl:'«И так поймут»',o:1}},
+     {e:'🎓',cat:'финансы',req:'bonds',t:'Биржа зовёт на вечерний курс для частных инвесторов. 2 000 ₽, два вечера.',
+      L:{lbl:'Пойти',m:-2000,fx:'invCourse'},R:{lbl:'Ютуб бесплатный',o:1}},
      {e:'📚',cat:'работа',t:'Курс повышения квалификации за 3 000. Скучный, но с сертификатом.',
       L:{lbl:'Пройти',m:-3000,fx:'upskill',note:'Лучшая инвестиция на старте — в свой доход.'},R:{lbl:'Ютуб бесплатный',o:1}},
      {e:'👵',cat:'семья',t:'Мама: «Сынок, лекарства подорожали...» Она никогда не просит просто так.',
@@ -517,6 +531,12 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       cat(){ S.catCost = 2000; },
       cashback(){ S.cashback = true; },
       dental(){ S.flags.dental = true; S.flags.dentalSpend = (S.flags.dentalSpend || 0) + 1; purgeCrisis('tooth'); },
+      frl1(){ S.flags.frl1 = true; },
+      frlPro(){ S.flags.frlPro = true; },
+      bossJob(){ S.flags.boss = true; },
+      lead(){ S.flags.lead = true; S.salary += 6000; toast('Проект твой: зарплата +6 000 ₽ навсегда. Вечера — уже не совсем твои.'); },
+      eng(){ S.pending.push({label:'Английский сработал: оффер!', amount:0, chance:.5, salaryUp:8000, failLabel:'Интервью на английском пока мимо. Но навык остался — рекрутеры не последние.'}); },
+      invCourse(){ S.flags.invEdu = true; ['bond','stock','divers'].forEach(k=>S.glossary.add(k)); toast('Курс пройден: три термина легли в словарь, а в демо-терминале теперь видна скользящая средняя — линия тренда сквозь шум.'); },
       gym(){ S.flags.gym = true; purgeCrisis('back'); },
       taxDeduct(){ S.flags.deductUsed = S.flags.dentalSpend || 0; },
       runway(){
@@ -569,6 +589,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.L.fx === 'openExam' && S.examPassed) ||
         (c.L.fx === 'gym' && S.flags.gym) ||
         (c.L.fx === 'dental' && S.flags.dental) ||
+        (c.L.fx === 'invCourse' && S.flags.invEdu) ||
         (c.L.fx === 'upskill' && S.salary >= SALARY + 8000);
       const reqOk = c => !c.req ||
         (c.req === 'lvl2' && S.level >= 2) ||
@@ -576,6 +597,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.req === 'stocks' && S.stocksOpen) ||
         (c.req === 'stocksHeld' && S.stocksOpen && S.stocks > 0) ||
         (c.req === 'lvl3' && S.level >= 3) ||
+        (c.req === 'frl1' && S.flags.frl1) ||
+        (c.req === 'frlPro' && S.flags.frlPro) ||
+        (c.req === 'boss' && S.flags.boss) ||
+        (c.req === 'lead' && S.flags.lead) ||
         (c.req === 'deduct' && (S.flags.dentalSpend || 0) > (S.flags.deductUsed || 0));
       const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && !done(c) && reqOk(c));
       const fresh = avail.filter(c=>!S.used.has(c.t));
@@ -902,14 +927,28 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function renderTrade(){
       const view = TR.data.slice(TR.idx - 29, TR.idx + 1);
       const min = Math.min(...view) * 0.98, max = Math.max(...view) * 1.02;
-      const pts = view.map((v, i) => (i * (320/29)).toFixed(1) + ',' + (132 - (v - min) / (max - min) * 124).toFixed(1)).join(' ');
+      const px = (v)=> (132 - (v - min) / (max - min) * 124).toFixed(1);
+      const pts = view.map((v, i) => (i * (320/29)).toFixed(1) + ',' + px(v)).join(' ');
+      /* инвест-курс пройден → видна скользящая средняя (линия тренда) */
+      let smaLine = '';
+      if (S.flags.invEdu){
+        const smaPts = view.map((v, i) => {
+          const gi = TR.idx - 29 + i;
+          const win = TR.data.slice(Math.max(0, gi - 6), gi + 1);
+          const avg = win.reduce((s,x)=>s+x,0) / win.length;
+          return (i * (320/29)).toFixed(1) + ',' + px(avg);
+        }).join(' ');
+        smaLine = `<polyline points="${smaPts}" fill="none" stroke="var(--rel)" stroke-width="1.8" stroke-dasharray="5 4" opacity=".85"/>`;
+      }
       const p = TR.data[TR.idx];
       const val = TR.pos ? TR.shares * p : TR.value;
       $('tradeBody').innerHTML = `
         <svg class="chartSvg" viewBox="0 0 320 140" preserveAspectRatio="none">
+          ${smaLine}
           <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
-          <circle cx="320" cy="${(132 - (p - min) / (max - min) * 124).toFixed(1)}" r="4" fill="var(--accent)"/>
+          <circle cx="320" cy="${px(p)}" r="4" fill="var(--accent)"/>
         </svg>
+        ${S.flags.invEdu ? '<p class="small" style="margin:0 0 4px">╌╌ скользящая средняя (курс биржи): цена выше линии — тренд скорее вверх</p>' : ''}
         <div class="dRow"><span>📅 День <b>${TR.idx - 29}</b> из 16</span><span class="dv">Цена: ${p.toFixed(1)}</span></div>
         <div class="dRow"><span>${TR.pos ? '📈 В бумаге' : '💰 В деньгах'}</span><span class="dv" style="color:${val>=10000?'var(--good)':'var(--bad)'}">${fmt(Math.round(val))}</span></div>
         <p class="small" style="margin:8px 0 2px">${TR.real ? 'Играешь на свои 10 000 ₽. ' : 'Демо: денег на ставку не было. '}Жми <b>«День ▸»</b> — время идёт только по кнопке. Купить/продать можно в любой день.</p>
@@ -998,7 +1037,11 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function endMonth(){
       const rows = [['Заработано за месяц', S.mEarn], ['Потрачено', -S.mSpend]];
       S.pending = S.pending.filter(p=>{
-        if (Math.random() < p.chance){ S.cash += p.amount; if (p.amount) rows.push([p.label, p.amount]); if (p.label) noteQueue.push('✅ ' + p.label + ': +' + (p.amount.toLocaleString('ru-RU') + ' ₽').replace(/\s/g,'\u00A0')); }
+        if (Math.random() < p.chance){
+          S.cash += p.amount; if (p.amount) rows.push([p.label, p.amount]);
+          if (p.salaryUp){ S.salary += p.salaryUp; noteQueue.push('✅ ' + p.label + ' Зарплата +' + p.salaryUp.toLocaleString('ru-RU') + ' ₽ навсегда.'); }
+          else if (p.label) noteQueue.push('✅ ' + p.label + ': +' + (p.amount.toLocaleString('ru-RU') + ' ₽').replace(/\s/g,'\u00A0'));
+        }
         else if (p.failLabel) noteQueue.push(p.failLabel);
         return false;
       });
@@ -1402,7 +1445,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     }
 
     /* ===== UTIL / PERSISTENCE ===== */
-    function show(id){ const el=$(id); if(!el) return; el.classList.remove('closing'); el.classList.add('show'); const sh=el.querySelector('.sheet'); if(sh){ sh.style.animation='none'; void sh.offsetWidth; sh.style.animation=''; } }
+    function show(id){ const el=$(id); if(!el) return; el.classList.remove('closing'); el.classList.add('show'); const sh=el.querySelector('.sheet'); if(sh){ sh.style.animation='none'; void sh.offsetWidth; sh.style.animation=''; sh.scrollTop = 0; } }
     function hide(id){ const el=$(id); if(!el) return; if(!el.classList.contains('show')){ el.classList.remove('closing'); return; } el.classList.add('closing'); setTimeout(()=>{ el.classList.remove('show','closing'); }, 195); }
     const SAVE_KEY = 'podushka.save.v1', HIST_KEY = 'podushka.hist.v1';
     const LS = {
