@@ -188,9 +188,11 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .cText .term{display:inline;}
 /* ---- allocation particles ---- */
 #allocOvl .sheet{position:relative;}
+#allocMoneyCard{position:sticky;top:-24px;z-index:6;margin-top:4px;}
 .particle{
-  position:absolute;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:70;
-  background:var(--accent);box-shadow:0 0 8px var(--glow-right);opacity:.95;
+  position:absolute;width:15px;height:15px;border-radius:50%;pointer-events:none;z-index:70;
+  background:var(--accent);border:2px solid rgba(255,255,255,.7);
+  box-shadow:0 0 14px 3px var(--glow-right);opacity:.98;
   transition:transform .6s cubic-bezier(.25,.6,.3,1), opacity .6s;
 }
 /* ---- glossary terms ---- */
@@ -739,6 +741,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       const chR = el.querySelector('.choice[data-side="R"]');
       el.addEventListener('pointerdown', e=>{
         if (!topCard || topCard.el !== el) return;
+        /* тап по подчёркнутому термину не начинает свайп — иначе pointer capture съедает клик по слову */
+        if (e.target.closest && e.target.closest('.term')) return;
         drag = {x0:e.clientX, dx:0}; dragMoved = false; el.classList.add('drag'); el.style.transition = 'none'; el.style.animation = 'none';
         el.setPointerCapture(e.pointerId);
       });
@@ -1241,18 +1245,18 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function openAlloc(){ hide('repOvl'); if (S.cash < 10000){ nextMonth(); return; } updateAlloc(); show('allocOvl'); }
     function updateAlloc(){
       $('allocLeft').textContent = fmt(S.cash);
-      /* сквозная панель: все открытые счета видны всегда — сюда прилетают частицы покупок */
+      $('allocCap').textContent = fmtK(totalCap()) + ' ₽';
+      /* шапка как в основном интерфейсе: ячейки активов — они же цели для частиц */
       const st = [
-        ['stCushion','🛡 Подушка', S.cushion, true],
-        ['stDeposit','🏦 Депозит', S.deposit, S.depositOpen || S.deposit > 0],
-        ['stBonds','📜 Облигации', S.bonds, S.bondsOpen || S.bonds > 0],
-        ['stStocks','📈 Акции', S.stocks, S.stocksOpen || S.stocks > 0],
-        ['stFund','📦 Фонд', S.fund, S.fundOpen || S.fund > 0],
-        ['stIis','🏛 ИИС (заперт до финала)', S.iis, S.iisOpen || S.iis > 0],
-        ['stCrypto','🪙 Крипта', S.crypto, S.cryptoOpen || S.crypto > 0],
-      ].filter(r=>r[3]);
-      $('allocState').innerHTML = st.map(([id,l,v])=>`<div class="dRow" id="${id}"><span>${l}</span><span class="dv">${fmt(v)}</span></div>`).join('')
-        + `<div class="dRow" style="border-bottom:none"><span><b>Капитал всего</b></span><span class="dv">${fmt(totalCap())}</span></div>`;
+        ['stCushion','🛡','Подушка', S.cushion, true],
+        ['stDeposit','🏦','Вклад', S.deposit, S.depositOpen || S.deposit > 0],
+        ['stBonds','📜','Облигации', S.bonds, S.bondsOpen || S.bonds > 0],
+        ['stStocks','📈','Акции', S.stocks, S.stocksOpen || S.stocks > 0],
+        ['stFund','📦','Фонд', S.fund, S.fundOpen || S.fund > 0],
+        ['stIis','🏛','ИИС 🔒', S.iis, S.iisOpen || S.iis > 0],
+        ['stCrypto','🪙','Крипта', S.crypto, S.cryptoOpen || S.crypto > 0],
+      ].filter(r=>r[4]);
+      $('allocAssets').innerHTML = st.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
       document.querySelectorAll('#allocOvl .alloc button').forEach(b=>{
         if (b.id === 'allocDep' || b.id === 'allocTrade' || b.id.startsWith('w')) return;
@@ -1307,7 +1311,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         }));
         setTimeout(()=>p.remove(), 1000 + i*38);
       }
-      if (toEl) setTimeout(()=>pulse(toEl, true), 520);
+      if (toEl) setTimeout(()=>{
+        pulse(toEl, true);
+        toEl.classList.remove('hit'); void toEl.offsetWidth; toEl.classList.add('hit'); // конкретная ячейка «ловит» частицы
+      }, 520);
     }
     function alloc(kind){
       const w = { wDeposit:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund', wCrypto:'crypto' }[kind];
@@ -1769,8 +1776,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       <div class="ovl" id="allocOvl"><div class="sheet">
         <h2>Свободные деньги</h2>
         <p class="small">Раскидай остаток. Что не спрячешь — останется на карте и будет искушать.</p>
-        <div id="allocLeft">0 ₽</div>
-        <div id="allocState" style="margin-top:8px"></div>
+        <div class="money" id="allocMoneyCard" style="cursor:default">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px">
+            <div style="min-width:0;text-align:left"><div class="moneyLbl">На карте</div><div class="moneyVal" id="allocLeft">0 ₽</div></div>
+            <div style="text-align:right;flex:0 0 auto"><div class="moneyLbl">Капитал</div><div class="capMini" id="allocCap">0</div></div>
+          </div>
+          <div class="assetLine" id="allocAssets"></div>
+        </div>
         <div class="alloc">
           <button id="allocCush" onclick="G.alloc('cushion')">🛡 В подушку<b>+10&nbsp;000</b></button>
           <button id="allocDep" onclick="G.alloc('deposit')" disabled>🏦 На депозит<b>+10&nbsp;000</b></button>
