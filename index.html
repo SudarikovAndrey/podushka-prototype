@@ -52,11 +52,18 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .iconbtn{width:38px;height:38px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:transform .12s;}
 .iconbtn svg{width:20px;height:20px;} .iconbtn:active{transform:scale(.94);}
 
-.money{margin-top:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 16px;display:flex;flex-direction:column;gap:1px;position:relative;box-shadow:var(--card-shadow);}
-.moneyLbl{font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.moneyVal{font-family:var(--font-num);font-weight:800;font-size:34px;line-height:1.05;color:var(--money);letter-spacing:-.5px;}
+.money{margin-top:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px 8px;display:flex;flex-direction:column;gap:1px;position:relative;box-shadow:var(--card-shadow);cursor:pointer;}
+.money:active{transform:scale(.99);}
+.moneyLbl{font-family:var(--font-display);font-weight:700;font-size:11px;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase;}
+.moneyVal{font-family:var(--font-num);font-weight:800;font-size:26px;line-height:1.05;color:var(--money);letter-spacing:-.5px;white-space:nowrap;}
 .moneyVal.neg{color:var(--bad);}
-.debt{position:absolute;top:13px;right:15px;font-size:12px;font-weight:700;color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--surface));padding:4px 10px;border-radius:20px;display:none;}
+.capMini{font-family:var(--font-num);font-weight:800;font-size:19px;line-height:1.1;color:var(--text);white-space:nowrap;}
+.assetLine{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:6px;min-height:0;}
+.assetLine:empty{display:none;}
+.aChip{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;}
+.aChip b{font-family:var(--font-num);font-weight:800;color:var(--text);}
+.aChip.hit{animation:shield .6s;display:inline-block;}
+.debt{position:absolute;top:-9px;right:12px;font-size:11.5px;font-weight:700;color:#fff;background:var(--bad);padding:3px 9px;border-radius:12px;display:none;box-shadow:0 2px 6px rgba(0,0,0,.3);}
 .debt b{font-weight:800;}
 
 .stats{display:flex;gap:8px;margin-top:7px;}
@@ -384,27 +391,52 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 
     /* ===== HUD ===== */
     function pulse(el, up){ if(!el) return; el.classList.remove('pulseG','pulseR'); void el.offsetWidth; el.classList.add(up?'pulseG':'pulseR'); }
+    const fmtK = n => {
+      const a = Math.abs(n);
+      if (a >= 1e6) return (n/1e6).toFixed(1).replace('.', ',').replace(',0','') + 'М';
+      if (a >= 10000) return Math.round(n/1000) + 'К';
+      if (a > 0) return (n/1000).toFixed(1).replace('.', ',').replace(',0','') + 'К';
+      return '0';
+    };
+    let cushionFx = false;
     function renderHUD(){
       $('monthNum').textContent = S.month;
-      $('monthOf').textContent = '/ ' + (S.level >= 2 ? 12 : MONTHS) + (S.level >= 2 ? ' 📈' : '');
+      $('monthOf').textContent = '/ ' + maxMonths() + (S.level >= 3 ? ' 🏦' : (S.level >= 2 ? ' 📈' : ''));
       const prog = S.monthTotal ? (S.monthTotal - S.deck.length)/S.monthTotal : 0;
       $('mProgFill').style.width = Math.max(0,Math.min(1,prog))*100 + '%';
       const mv = $('vMoney'); mv.textContent = fmt(S.cash); mv.classList.toggle('neg', S.cash<0);
+      $('vCap').textContent = fmtK(totalCap()) + ' ₽';
       const dt = $('debtTag'); dt.style.display = S.debt>0 ? '' : 'none'; if(S.debt>0) dt.querySelector('b').textContent = fmt(S.debt);
       [['Health','health'],['Mood','mood'],['Rel','rel']].forEach(([id,k])=>{
         $('v'+id).textContent = Math.round(S[k]);
         $('b'+id).firstElementChild.style.width = S[k]+'%';
       });
-      $('vCushion').textContent = fmt(S.cushion);
-      $('depositChip').style.display = S.depositOpen ? '' : 'none';
-      $('vDeposit').textContent = fmt(S.deposit);
-      $('bondsChip').style.display = S.bonds > 0 ? '' : 'none';
-      $('vBonds').textContent = fmt(S.bonds);
-      $('stocksChip').style.display = S.stocks > 0 ? '' : 'none';
-      $('vStocks').textContent = fmt(S.stocks);
-      $('fundChip').style.display = S.fund > 0 ? '' : 'none';
-      $('vFund').textContent = fmt(S.fund);
+      /* все активы — одной компактной строкой */
+      const chips = [
+        ['cushionChip','🛡','Подушка', S.cushion, true],
+        ['depChipA','🏦','Вклад', S.deposit, S.depositOpen],
+        ['bondChipA','📜','Облиг.', S.bonds, S.bonds > 0],
+        ['stockChipA','📈','Акции', S.stocks, S.stocks > 0],
+        ['fundChipA','📦','Фонд', S.fund, S.fund > 0],
+      ].filter(c=>c[4]);
+      $('assetLine').innerHTML = chips.map(([id,ico,l,v])=>`<span class="aChip" id="${id}">${ico} ${l} <b>${fmtK(v)}</b></span>`).join('');
+      if (cushionFx){ cushionFx = false; const el = $('cushionChip'); if (el){ el.classList.add('hit'); } }
     }
+    function openPortfolio(){
+      const rows = [
+        ['💰', 'На карте', S.cash],
+        ['🛡', 'Подушка (накопительный счёт, +0,5%/мес)', S.cushion],
+        ['🏦', 'Депозит (+1%/мес)', S.deposit],
+        ['📜', 'Облигации (купон ~14%/год)', S.bonds],
+        ['📈', 'Акции (доходнее, но трясёт)', S.stocks],
+        ['📦', 'Фонд (весь рынок разом)', S.fund],
+      ].filter((r,i)=>i===0 || r[2] > 0);
+      $('portBody').innerHTML = rows.map(([ico,l,v])=>`<div class="dRow"><span style="min-width:0">${ico} ${termify(l)}</span><span class="dv">${fmt(v)}</span></div>`).join('')
+        + (S.debt ? `<div class="dRow"><span>🩸 Долг (30%/мес)</span><span class="dv" style="color:var(--bad)">−${fmt(S.debt)}</span></div>` : '')
+        + `<div class="dRow" style="border-bottom:none"><span><b>Капитал всего</b></span><span class="dv">${fmt(totalCap())}</span></div>`;
+      show('portOvl');
+    }
+    function closePortfolio(){ hide('portOvl'); setTimeout(maybeShowNote, 240); }
     function floatDelta(html, up){
       const cls = up === 'neu' ? 'neu' : (up ? 'up' : 'down');
       const f = document.createElement('div'); f.className = 'float ' + cls; f.innerHTML = html;
@@ -447,7 +479,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (isCrisis && S.cushion > 0){
         cushioned = Math.min(S.cushion, need); S.cushion -= cushioned; need -= cushioned;
         S.crisesAbsorbed += cushioned === -delta ? 1 : 0;
-        $('cushionChip').classList.remove('hit'); void $('cushionChip').offsetWidth; $('cushionChip').classList.add('hit');
+        cushionFx = true; // подсветится после перерисовки HUD
       }
       S.cash -= need; S.mSpend += -delta; return {cushioned};
     }
@@ -1446,22 +1478,18 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           <button class="iconbtn" onclick="G.openFlow()" aria-label="Движение денег" style="font-size:17px">📊</button>
           <button class="iconbtn" onclick="G.openSettings()" aria-label="Меню">${GEAR}</button>
         </div>
-        <div class="money" id="moneyCard">
-          <div class="moneyLbl">На карте</div>
-          <div class="moneyVal" id="vMoney">15 000 ₽</div>
+        <div class="money" id="moneyCard" onclick="G.openPortfolio()">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px">
+            <div style="min-width:0"><div class="moneyLbl">На карте</div><div class="moneyVal" id="vMoney">15 000 ₽</div></div>
+            <div style="text-align:right;flex:0 0 auto"><div class="moneyLbl">Капитал ›</div><div class="capMini" id="vCap">15К</div></div>
+          </div>
+          <div class="assetLine" id="assetLine"></div>
           <div class="debt" id="debtTag">долг <b>0 ₽</b></div>
         </div>
         <div class="stats">
           <div class="meter" id="stHealth"><div class="mTop"><span class="mIco" style="color:var(--health)">${ICO.h}</span><span class="mVal" id="vHealth">70</span></div><div class="mBar" id="bHealth"><i style="width:70%;background:var(--health)"></i></div></div>
           <div class="meter" id="stMood"><div class="mTop"><span class="mIco" style="color:var(--mood)">${ICO.o}</span><span class="mVal" id="vMood">70</span></div><div class="mBar" id="bMood"><i style="width:70%;background:var(--mood)"></i></div></div>
           <div class="meter" id="stRel"><div class="mTop"><span class="mIco" style="color:var(--rel)">${ICO.r}</span><span class="mVal" id="vRel">70</span></div><div class="mBar" id="bRel"><i style="width:70%;background:var(--rel)"></i></div></div>
-        </div>
-        <div class="safety">
-          <div class="chip" id="cushionChip"><span class="cIco">🛡</span> Подушка <b id="vCushion">0 ₽</b></div>
-          <div class="chip" id="depositChip" style="display:none"><span class="cIco">🏦</span> Депозит <b id="vDeposit">0 ₽</b></div>
-          <div class="chip" id="bondsChip" style="display:none"><span class="cIco">📜</span> <b id="vBonds">0 ₽</b></div>
-          <div class="chip" id="stocksChip" style="display:none"><span class="cIco">📈</span> <b id="vStocks">0 ₽</b></div>
-          <div class="chip" id="fundChip" style="display:none"><span class="cIco">📦</span> <b id="vFund">0 ₽</b></div>
         </div>
       </div>
       <div id="table">
@@ -1548,6 +1576,12 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <button class="btn sec" style="margin-top:14px" onclick="G.nextMonth()">Хватит, живём дальше →</button>
       </div></div>
       <div class="ovl" id="termOvl"><div class="sheet note" id="termBody"></div></div>
+      <div class="ovl" id="portOvl"><div class="sheet">
+        <h2>💼 Портфель</h2>
+        <div id="portBody"></div>
+        <p class="small" style="margin-top:8px">Подчёркнутые названия — тапни, чтобы узнать, что это.</p>
+        <button class="btn" onclick="G.closePortfolio()">Закрыть</button>
+      </div></div>
       <div class="ovl" id="examOvl"><div class="sheet">
         <h2>📋 Тест брокера</h2>
         <div id="examBody"></div>
@@ -1564,7 +1598,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     `;
 
     $('app').innerHTML = SHELL;
-    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm };
+    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
     let _fitting=false, _lastS=-1;
