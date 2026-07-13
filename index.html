@@ -58,11 +58,11 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .moneyVal{font-family:var(--font-num);font-weight:800;font-size:26px;line-height:1.05;color:var(--money);letter-spacing:-.5px;white-space:nowrap;}
 .moneyVal.neg{color:var(--bad);}
 .capMini{font-family:var(--font-num);font-weight:800;font-size:19px;line-height:1.1;color:var(--text);white-space:nowrap;}
-.assetLine{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:6px;min-height:0;}
+.assetLine{display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;margin-top:8px;}
 .assetLine:empty{display:none;}
-.aChip{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;}
-.aChip b{font-family:var(--font-num);font-weight:800;color:var(--text);}
-.aChip.hit{animation:shield .6s;display:inline-block;}
+.aChip{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--muted);white-space:nowrap;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:5px 9px;min-width:0;}
+.aChip b{font-family:var(--font-num);font-weight:800;font-size:14.5px;color:var(--text);}
+.aChip.hit{animation:shield .6s;}
 .debt{position:absolute;top:-9px;right:12px;font-size:11.5px;font-weight:700;color:#fff;background:var(--bad);padding:3px 9px;border-radius:12px;display:none;box-shadow:0 2px 6px rgba(0,0,0,.3);}
 .debt b{font-weight:800;}
 
@@ -219,6 +219,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .badge{display:flex;align-items:flex-start;gap:7px;padding:9px 12px;border-radius:12px;font-size:13.5px;font-weight:700;margin:5px 0;text-align:left;line-height:1.35;}
 .badge.crit{background:color-mix(in srgb,var(--bad) 12%,var(--surface));color:var(--bad);border:1.5px solid color-mix(in srgb,var(--bad) 38%,transparent);}
 .badge.good{background:color-mix(in srgb,var(--good) 12%,var(--surface));color:var(--good);border:1.5px solid color-mix(in srgb,var(--good) 38%,transparent);}
+.badge.warn{background:color-mix(in srgb,var(--mood) 14%,var(--surface));color:color-mix(in srgb,var(--mood) 75%,var(--text));border:1.5px solid color-mix(in srgb,var(--mood) 45%,transparent);}
 .pulseG{animation:pg .9s;} .pulseR{animation:pr .9s;}
 @keyframes pg{0%{box-shadow:0 0 0 3px var(--good),0 0 20px 4px var(--glow-right)}100%{box-shadow:0 0 0 10px transparent}}
 @keyframes pr{0%{box-shadow:0 0 0 3px var(--bad),0 0 20px 4px var(--glow-left)}100%{box-shadow:0 0 0 10px transparent}}
@@ -381,6 +382,15 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Разобраться',fx:'unlockFund'},R:{lbl:'Я сам себе фонд',o:1,note:'Смело. Но факт: больше половины первых покупок новичков в России — именно фонды.'}},
      {e:'📋',cat:'брокер',min:13,req:'lvl3',t:'Брокер: «Для сложных инструментов — обязательный тест. Как настоящий тест ЦБ: три вопроса, пересдача бесплатно».',
       L:{lbl:'Пройти тест',fx:'openExam'},R:{lbl:'Потом',o:1}},
+     /* ---- level 4: капитал, ставки выше ---- */
+     {e:'🏛',cat:'капитал',min:19,req:'lvl4',t:'Брокер: «ИИС: государство вернёт 13% от взносов. Условие одно — не трогать деньги до конца срока».',
+      L:{lbl:'Открыть ИИС',fx:'unlockIIS'},R:{lbl:'Не люблю обязательства',o:1,note:'Вычет — редкий случай, когда государство доплачивает за дисциплину. Подумай ещё раз.'}},
+     {e:'🪙',cat:'капитал',min:20,req:'lvl4',t:'Крипта снова в заголовках. Друзья делятся скринами «иксов». Кошелёк заводится за минуту.',
+      L:{lbl:'Разобраться и открыть',fx:'unlockCrypto'},R:{lbl:'Мимо этих качелей',o:1,note:'Легально: пропустить пузырь — это тоже инвестиционное решение. Часто лучшее.'}},
+     {e:'🚀',cat:'капитал',once:true,min:20,req:'lvl4',t:'Однокурсник зовёт в стартап: «50 000 за долю. Через пару месяцев либо иксы, либо…» — он честный.',
+      L:{lbl:'Войти в долю',m:-50000,imp:1,fx:'venture'},R:{lbl:'«Удачи, брат»',o:1,note:'База венчура: 3 из 4 стартапов сгорают. Инвестируют туда портфелем ставок, а не последними деньгами.'}},
+     {e:'🏠',cat:'капитал',once:true,min:19,req:'lvl4',t:'Ты можешь позволить себе съехать в квартиру получше: +15 000 к аренде, зато район, свет и тишина.',
+      L:{lbl:'Переехать',o:12,h:4,fx:'moveOut'},R:{lbl:'И так нормально',o:-3,note:'Рост дохода не обязан превращаться в рост расходов — это называется «инфляция образа жизни». Ты только что её притормозил.'}},
     ];
 
     const CRISES = [
@@ -406,6 +416,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       health:70, mood:70, rel:70,
       salary:(props.salary ?? SALARY), credit:8000, creditLeft:3, catCost:0, cashback:false, depositOpen:false,
       mfo:0, level:1, bonds:0, stocks:0, bondsOpen:false, stocksOpen:false, fund:0, fundOpen:false, examPassed:false,
+      iis:0, iisPaid:0, iisOpen:false, crypto:0, cryptoOpen:false, extraRent:0,
       deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[], capHist:[], glossary:new Set(),
       mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
     };}
@@ -436,11 +447,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       const chips = [
         ['cushionChip','🛡','Подушка', S.cushion, true],
         ['depChipA','🏦','Вклад', S.deposit, S.depositOpen],
-        ['bondChipA','📜','Облиг.', S.bonds, S.bonds > 0],
+        ['bondChipA','📜','Облигации', S.bonds, S.bonds > 0],
         ['stockChipA','📈','Акции', S.stocks, S.stocks > 0],
         ['fundChipA','📦','Фонд', S.fund, S.fund > 0],
+        ['iisChipA','🏛','ИИС', S.iis, S.iis > 0],
+        ['cryptoChipA','🪙','Крипта', S.crypto, S.crypto > 0],
       ].filter(c=>c[4]);
-      $('assetLine').innerHTML = chips.map(([id,ico,l,v])=>`<span class="aChip" id="${id}">${ico} ${l} <b>${fmtK(v)}</b></span>`).join('');
+      $('assetLine').innerHTML = chips.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       if (cushionFx){ cushionFx = false; const el = $('cushionChip'); if (el){ el.classList.add('hit'); } }
     }
     function openPortfolio(){
@@ -451,6 +464,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['📜', 'Облигации (купон ~14%/год)', S.bonds],
         ['📈', 'Акции (доходнее, но трясёт)', S.stocks],
         ['📦', 'Фонд (весь рынок разом)', S.fund],
+        ['🏛', 'ИИС (заперт, +13% в финале)', S.iis],
+        ['🪙', 'Крипта (дикие качели)', S.crypto],
       ].filter((r,i)=>i===0 || r[2] > 0);
       $('portBody').innerHTML = rows.map(([ico,l,v])=>`<div class="dRow"><span style="min-width:0">${ico} ${termify(l)}</span><span class="dv">${fmt(v)}</span></div>`).join('')
         + (S.debt ? `<div class="dRow"><span>🩸 Долг (30%/мес)</span><span class="dv" style="color:var(--bad)">−${fmt(S.debt)}</span></div>` : '')
@@ -565,6 +580,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       unlockDeposit(){ if(!S.depositOpen){ S.depositOpen = true; toast('Открыт депозит: 1% в месяц на остаток. Деньги начали работать.'); renderHUD(); } },
       unlockFund(){ if(!S.fundOpen){ S.fundOpen = true; toast('Фонд открыт. Внутри — сразу весь рынок: диверсификация встроена, качает мягче отдельных акций. Реальный факт: больше половины первых покупок новичков в России — фонды.'); renderHUD(); } },
       openExam(){ startExam(); },
+      unlockIIS(){ if(!S.iisOpen){ S.iisOpen = true; toast('ИИС открыт. Взносы делаешь в конце месяца, вывести до конца игры нельзя — зато в финале государство вернёт 13% от всего внесённого. Награда за длинную волю.'); renderHUD(); } },
+      unlockCrypto(){ if(!S.cryptoOpen){ S.cryptoOpen = true; toast('Крипто-кошелёк открыт. Честно: месяц может дать +50% и −35%, страховки нет, дна тоже. Железное правило — только деньги, потерю которых переживёшь молча.'); renderHUD(); } },
+      venture(){ S.pending.push({label:'Стартап однокурсника выстрелил: твоя доля выкуплена', amount:200000, chance:.25, delay:3, failLabel:'Стартап однокурсника закрылся. −50 000. Так выглядит база венчура: 3 из 4 сгорают — поэтому туда ходят портфелем ставок.'}); toast('Доля куплена. Теперь ждать: у стартапов новости приходят не по расписанию.'); },
+      moveOut(){ S.extraRent = 15000; toast('Переехал! Аренда теперь на 15 000 дороже — каждый месяц. Комфорт куплен в рассрочку у собственного бюджета.'); },
     };
 
     /* ===== DECK ===== */
@@ -587,6 +606,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.L.fx === 'unlockStocks' && S.stocksOpen) ||
         (c.L.fx === 'unlockFund' && S.fundOpen) ||
         (c.L.fx === 'openExam' && S.examPassed) ||
+        (c.L.fx === 'unlockIIS' && S.iisOpen) ||
+        (c.L.fx === 'unlockCrypto' && S.cryptoOpen) ||
         (c.L.fx === 'gym' && S.flags.gym) ||
         (c.L.fx === 'dental' && S.flags.dental) ||
         (c.L.fx === 'invCourse' && S.flags.invEdu) ||
@@ -597,6 +618,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.req === 'stocks' && S.stocksOpen) ||
         (c.req === 'stocksHeld' && S.stocksOpen && S.stocks > 0) ||
         (c.req === 'lvl3' && S.level >= 3) ||
+        (c.req === 'lvl4' && S.level >= 4) ||
         (c.req === 'frl1' && S.flags.frl1) ||
         (c.req === 'frlPro' && S.flags.frlPro) ||
         (c.req === 'boss' && S.flags.boss) ||
@@ -629,6 +651,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (S.level >= 3 && S.fundOpen && !S.examPassed){
         const eCard = POOL.find(c => c.L.fx === 'openExam');
         if (!picks.includes(eCard)) picks[Math.floor(Math.random()*picks.length)] = eCard;
+      }
+      if (S.level >= 4 && !S.iisOpen){
+        const iCard = POOL.find(c => c.L.fx === 'unlockIIS');
+        if (!picks.includes(iCard)) picks[Math.floor(Math.random()*picks.length)] = iCard;
       }
       picks.forEach(c=>S.used.add(c.t));
       // crises: no repeats until pool exhausted; prevention excludes linked crises
@@ -775,7 +801,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function payday(){
       S.mEarn = 0; S.mSpend = 0; S.gotBonus = false;
       /* snapshot of month start — the animated report shows deltas against it */
-      S.snap = { cash:S.cash, cushion:S.cushion, deposit:S.deposit, bonds:S.bonds, stocks:S.stocks, fund:S.fund, debt:S.debt,
+      S.snap = { cash:S.cash, cushion:S.cushion, deposit:S.deposit, bonds:S.bonds, stocks:S.stocks, fund:S.fund, iis:S.iis, crypto:S.crypto, debt:S.debt,
                  health:S.health, mood:S.mood, rel:S.rel, cap:totalCap(), crisesAbsorbed:S.crisesAbsorbed, goals:goalsDone() };
       const rows = [['Зарплата', S.salary]]; let total = S.salary;
       /* stats drive the paycheck */
@@ -787,6 +813,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         noteQueue.push('Микрозайм: за взятые 10 000 отдал 13 000. «0% на 7 дней» — это крючок, а не подарок. Эффективная ставка — сотни процентов годовых.'); }
       FIX.forEach(([l,v])=>{ rows.push([l,v]); total += v; });
       if (S.creditLeft > 0){ rows.push([`Кредит за телефон (ещё ${S.creditLeft} мес)`, -S.credit]); total -= S.credit; S.creditLeft--; }
+      if (S.extraRent){ rows.push(['Квартира получше (переезд)', -S.extraRent]); total -= S.extraRent; }
       if (S.catCost){ rows.push(['Кот (корм, наполнитель, вайб)', -S.catCost]); total -= S.catCost; }
       if (S.cashback){ rows.push(['Кэшбэк', 600]); total += 600; }
       if (S.debt > 0){ const pay = Math.min(S.debt, Math.max(0, S.cash + total)); rows.push(['Погашение микрозайма', -pay]); total -= pay; S.debt -= pay; }
@@ -799,8 +826,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function closePayday(){ hide('payOvl'); buildDeck(); saveGame(); showCard(); setTimeout(maybeShowNote, 260); }
     /* ---- goals & cash flow ---- */
     const GOALS = { cushion:60000, capital:150000, quality:50 };
-    function maxMonths(){ return S.level >= 3 ? 18 : (S.level >= 2 ? 12 : MONTHS); }
-    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund - S.debt; }
+    function maxMonths(){ return S.level >= 4 ? 24 : (S.level >= 3 ? 18 : (S.level >= 2 ? 12 : MONTHS)); }
+    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund + S.iis + S.crypto - S.debt; }
     function goalsHTML(){
       const cap = totalCap();
       const q = Math.round((S.health + S.mood + S.rel) / 3);
@@ -844,6 +871,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       broker:{ w:'Брокер', re:/брокер[а-яё]*/i, d:'Посредник с лицензией, через которого покупают бумаги на бирже. Сам ничего не советует бесплатно: зарабатывает на комиссиях с твоих сделок — поэтому любит, когда ты торгуешь часто.' },
       deduct:{ w:'Налоговый вычет', re:/вычет[а-яё]*/i, d:'Возврат части уплаченного налога за «правильные» траты: лечение, обучение, инвестиции через ИИС. Деньги, которые государство должно тебе — забери их.' },
       bh:{ w:'Купи и держи', re:/купи и держи|buy-and-hold/i, d:'Стратегия: купить и не дёргаться годами. Скучно, но статистика беспощадна: активные трейдеры в среднем проигрывают ей 6+ п.п. в год (исследование на 66 000 реальных счетов).' },
+      iis:{ w:'ИИС', re:/ИИС/i, d:'Индивидуальный инвестиционный счёт: государство возвращает 13% от взносов (до 52–88 тыс. ₽ в год) — но деньги нельзя выводить несколько лет, иначе вычеты вернёшь обратно. Плата за дисциплину — реальная и щедрая.' },
+      crypto:{ w:'Крипта', re:/крипт[а-яё]*/i, d:'Криптовалюты: экстремальная волатильность (±30–50% за месяц — норма), никакой страховки и гарантий, в РФ розничная покупка ещё и юридически ограничена. Если и заходить — только на деньги, потерю которых переживёшь молча.' },
     };
     function termify(text){
       let out = text;
@@ -1037,6 +1066,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function endMonth(){
       const rows = [['Заработано за месяц', S.mEarn], ['Потрачено', -S.mSpend]];
       S.pending = S.pending.filter(p=>{
+        if (p.delay && p.delay > 0){ p.delay--; return true; } // ставка ещё зреет
         if (Math.random() < p.chance){
           S.cash += p.amount; if (p.amount) rows.push([p.label, p.amount]);
           if (p.salaryUp){ S.salary += p.salaryUp; noteQueue.push('✅ ' + p.label + ' Зарплата +' + p.salaryUp.toLocaleString('ru-RU') + ' ₽ навсегда.'); }
@@ -1074,6 +1104,34 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
             rows.push(['📦 Фонд: рынок за месяц ' + (r>0?'+':'') + (Math.round(r*1000)/10) + '%', d]);
           }
         }
+        if (S.crypto > 0){
+          const r = pick([-0.35, -0.15, -0.05, 0.1, 0.25, 0.5]);
+          const d = Math.round(S.crypto * r); S.crypto += d;
+          rows.push(['🪙 Крипта: ' + (r>0?'+':'') + Math.round(r*100) + '% за месяц', d]);
+        }
+      }
+      /* level 4: экономический шторм — один на ран, месяц 21 */
+      if (S.level >= 4 && S.month === 21){
+        const hits = [];
+        if (S.stocks > 0){ const d = Math.round(S.stocks*0.25); S.stocks -= d; hits.push(['🌪 ШТОРМ: акции −25%', -d]); }
+        if (S.fund > 0){ const d = Math.round(S.fund*0.15); S.fund -= d; hits.push(['🌪 ШТОРМ: фонд −15%', -d]); }
+        if (S.crypto > 0){ const d = Math.round(S.crypto*0.5); S.crypto -= d; hits.push(['🌪 ШТОРМ: крипта −50%', -d]); }
+        if (hits.length){ hits.forEach(h=>rows.push(h));
+          noteQueue.push('🌪 Экономический шторм: рынки рухнули разом. Это случается — и это лучший тест твоей структуры: подушка и облигации сейчас держат удар. Исторически после таких падений приходит восстановление — паникуют и продают на дне только новички.');
+        } else {
+          noteQueue.push('🌪 Экономический шторм прошёл мимо: рынки рухнули, но у тебя не было рисковых активов. Консервативно — и в этот раз это сработало.');
+        }
+      }
+      if (S.level >= 4 && S.month === 22){
+        if (S.stocks > 0){ const d = Math.round(S.stocks*0.12); S.stocks += d; rows.push(['📈 Восстановление: акции +12%', d]); }
+        if (S.fund > 0){ const d = Math.round(S.fund*0.08); S.fund += d; rows.push(['📦 Восстановление: фонд +8%', d]); }
+        if (S.crypto > 0){ const d = Math.round(S.crypto*0.2); S.crypto += d; rows.push(['🪙 Отскок: крипта +20%', d]); }
+      }
+      /* ИИС: в конце рана государство доплачивает вычет 13% от взносов */
+      if (S.level >= 4 && S.month === 24 && S.iisPaid > 0){
+        const refund = Math.round(S.iisPaid * 0.13);
+        S.cash += refund; rows.push(['🏛 Налоговый вычет по ИИС (13% взносов)', refund]);
+        noteQueue.push('🏛 ИИС сработал: государство вернуло ' + fmt(refund) + ' — 13% от твоих взносов. Плата за обещание не трогать деньги. В реальности так каждый год.');
       }
       if (S.debt > 0){ const gr = Math.round(S.debt * 0.3); S.debt += gr; rows.push(['Проценты по микрозайму (30%/мес)', -gr]); }
       let verdict = '';
@@ -1140,6 +1198,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       dd('📜','Облигации',S.bonds,snap.bonds);
       dd('📈','Акции',S.stocks,snap.stocks);
       dd('📦','Фонд',S.fund,snap.fund);
+      dd('🏛','ИИС',S.iis,snap.iis);
+      dd('🪙','Крипта',S.crypto,snap.crypto);
       dd('🩸','Долг',S.debt,snap.debt,true);
       if (aRows.length){ out += rev(`<div class="secT">Активы · сейчас / изменение</div>`); aRows.forEach(r=>{ out += rev(r); }); }
       /* 4. you */
@@ -1188,6 +1248,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['stBonds','📜 Облигации', S.bonds, S.bondsOpen || S.bonds > 0],
         ['stStocks','📈 Акции', S.stocks, S.stocksOpen || S.stocks > 0],
         ['stFund','📦 Фонд', S.fund, S.fundOpen || S.fund > 0],
+        ['stIis','🏛 ИИС (заперт до финала)', S.iis, S.iisOpen || S.iis > 0],
+        ['stCrypto','🪙 Крипта', S.crypto, S.cryptoOpen || S.crypto > 0],
       ].filter(r=>r[3]);
       $('allocState').innerHTML = st.map(([id,l,v])=>`<div class="dRow" id="${id}"><span>${l}</span><span class="dv">${fmt(v)}</span></div>`).join('')
         + `<div class="dRow" style="border-bottom:none"><span><b>Капитал всего</b></span><span class="dv">${fmt(totalCap())}</span></div>`;
@@ -1197,7 +1259,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         b.disabled = S.cash < 10000;
       });
       /* withdrawals / sells: turn assets back into cash */
-      const wMap = { wDep:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund' };
+      const wMap = { wDep:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund', wCrypto:'crypto' };
       let anyW = false;
       Object.entries(wMap).forEach(([id, key])=>{
         const ok = S[key] >= 10000;
@@ -1214,6 +1276,9 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       $('allocLvl3').style.display = (S.fundOpen || S.examPassed) ? '' : 'none';
       $('allocFund').style.display = S.fundOpen ? '' : 'none';
       $('allocTrade').style.display = S.examPassed ? '' : 'none';
+      $('allocLvl4').style.display = (S.iisOpen || S.cryptoOpen) ? '' : 'none';
+      $('allocIis').style.display = S.iisOpen ? '' : 'none';
+      $('allocCrypto').style.display = S.cryptoOpen ? '' : 'none';
       $('allocTrade').disabled = false;
       $('allocTrade').innerHTML = '🕹 Торговая сессия<b>' + (S.cash >= 10000 ? 'ставка 10 000' : 'демо-режим') + '</b>';
     }
@@ -1245,10 +1310,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (toEl) setTimeout(()=>pulse(toEl, true), 520);
     }
     function alloc(kind){
-      const w = { wDeposit:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund' }[kind];
-      const srcId = { cushion:'allocCush', deposit:'allocDep', bonds:'allocBonds', stocks:'allocStocks', fund:'allocFund', fun:'allocFun',
-                      wDeposit:'wDep', wBonds:'wBonds', wStocks:'wStocks', wFund:'wFund' }[kind];
-      const tgtId = { cushion:'stCushion', deposit:'stDeposit', bonds:'stBonds', stocks:'stStocks', fund:'stFund' }[kind];
+      const w = { wDeposit:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund', wCrypto:'crypto' }[kind];
+      const srcId = { cushion:'allocCush', deposit:'allocDep', bonds:'allocBonds', stocks:'allocStocks', fund:'allocFund', iis:'allocIis', crypto:'allocCrypto', fun:'allocFun',
+                      wDeposit:'wDep', wBonds:'wBonds', wStocks:'wStocks', wFund:'wFund', wCrypto:'wCrypto' }[kind];
+      const tgtId = { cushion:'stCushion', deposit:'stDeposit', bonds:'stBonds', stocks:'stStocks', fund:'stFund', iis:'stIis', crypto:'stCrypto' }[kind];
       if (w){
         if (S[w] < 10000) return;
         S[w] -= 10000; S.cash += 10000;
@@ -1263,6 +1328,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (kind === 'bonds') S.bonds += 10000;
       if (kind === 'stocks') S.stocks += 10000;
       if (kind === 'fund') S.fund += 10000;
+      if (kind === 'iis'){ S.iis += 10000; S.iisPaid += 10000; }
+      if (kind === 'crypto') S.crypto += 10000;
       if (kind === 'fun'){ S.mood += 6; clamp('mood'); S.impulses++; S.monthLog.push(['🎉 Потратил на себя', -10000]); }
       renderHUD(); updateAlloc(); saveGame();
       flyParticles($(srcId), tgtId ? $(tgtId) : null);
@@ -1279,8 +1346,28 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         if (totalCap() >= 100000 && S.debt === 0){ offerLevel3(); return; }
         finish(); return;
       }
+      if (S.level === 3 && S.month > 18){
+        if (totalCap() >= 200000 && S.debt === 0){ offerLevel4(); return; }
+        finish(); return;
+      }
       if (S.month > maxMonths()){ finish(); return; }
       payday();
+    }
+    function offerLevel4(){
+      $('endSheet').innerHTML = `
+        <h1>🔓 Уровень 4: Капитал</h1>
+        <p>Полтора года прожито, капитал <b>${fmt(totalCap())}</b>. Деньги перестали быть проблемой — теперь они инструмент. И искушение.</p>
+        <p>Впереди месяцы 19–24: <b>🏛 ИИС</b> (государство доплатит 13% за долгосрочность), <b>🪙 крипта</b> (дикие качели), <b>🚀 венчурные ставки</b> и большие жизненные решения. Где-то впереди — экономический шторм. Он не спросит, готов ли ты.</p>
+        <p class="small">Ставки выросли. Правила — те же: подушка первее всего, рискуй только тем, что можешь потерять целиком.</p>
+        <button class="btn" onclick="G.startLevel4()">Поднять ставки</button>
+        <button class="btn sec" onclick="G.finishNow()">Завершить с этим результатом</button>`;
+      show('endOvl');
+    }
+    function startLevel4(){
+      hide('endOvl');
+      S.level = 4;
+      toast('Уровень 4. Чем больше капитал, тем дороже ошибки — и тем громче советчики. Фильтруй.');
+      renderHUD(); payday();
     }
     function offerLevel3(){
       $('endSheet').innerHTML = `
@@ -1369,7 +1456,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       const cap = totalCap(); const [ico, rank] = title(cap);
       const [qAvg, qIco, qLabel] = qualityOf();
       const months = S.month - 1;
-      const lvlName = S.level >= 3 ? 'Брокер' : S.level >= 2 ? 'Инвестор' : 'Бюджет';
+      const lvlName = S.level >= 4 ? 'Капитал' : S.level >= 3 ? 'Брокер' : S.level >= 2 ? 'Инвестор' : 'Бюджет';
       const s = [];
       s.push(`<div style="text-align:center"><div style="font-size:58px;line-height:1">${ico}</div><h1>${rank}</h1>
         <div class="capBig" id="finCap">${fmt(cap)}</div>
@@ -1382,11 +1469,32 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         {v:S.bonds, c:'var(--mood)', ico:'📜', l:'Облигации'},
         {v:S.stocks, c:'var(--health)', ico:'📈', l:'Акции'},
         {v:S.fund, c:'var(--good)', ico:'📦', l:'Фонд'},
+        {v:S.iis, c:'var(--accent)', ico:'🏛', l:'ИИС'},
+        {v:S.crypto, c:'var(--bad)', ico:'🪙', l:'Крипта'},
       ].filter(p=>p.v > 0);
       const gross = parts.reduce((x,p)=>x+p.v, 0) || 1;
+      /* оценка структуры: эффективно ли, безопасно ли — и что делать */
+      const risk = (S.stocks + S.fund + S.crypto) / gross;
+      const cashS = S.cash / gross;
+      const cushOk = S.cushion >= 60000;
+      const tips = [];
+      let tone = 'good', pTitle = '🟢 Сбалансировано: броня на месте, деньги работают, риск дозирован';
+      if (!cushOk && risk > 0.4){ tone = 'crit'; pTitle = '🔴 Опасный перекос: рискуешь без брони';
+        tips.push({c:'crit', t:'Подушка меньше месяца расходов, а ' + Math.round(risk*100) + '% капитала — в рыночном риске. Одна просадка плюс один кризис = микрозайм. Правило: сначала подушка 60 000, потом рынок.'}); }
+      else if (!cushOk){ tone = 'warn'; pTitle = '🟡 Не хватает брони';
+        tips.push({c:'crit', t:'Подушка меньше месяца расходов (60 000 ₽) — любой кризис бьёт прямо по карте.'}); }
+      if (S.stocks / gross > 0.5) tips.push({c:'warn', t:'Больше половины капитала — в акциях. Обвал −18% ударит по всему сразу. Диверсификация (часть в фонд и облигации) сгладит качели почти бесплатно.'});
+      if (S.crypto / gross > 0.25) tips.push({c:'crit', t:'Крипта — больше четверти капитала. Месяц −35% здесь норма, а не катастрофа. Урежь до доли, потерю которой переживёшь молча.'});
+      if (cashS > 0.3) tips.push({c:'warn', t:Math.round(cashS*100) + '% капитала простаивает на карте: не работает и тает от соблазнов. Раскидывай остаток в конце месяца.'});
+      if (S.debt > 0) tips.push({c:'crit', t:'Есть долг под 30%/мес — ни один актив столько не зарабатывает. Гасить долг выгоднее любой инвестиции.'});
+      if (cushOk && risk < 0.15 && gross > 100000) tips.push({c:'warn', t:'Очень консервативно: почти всё в подушке и вкладах. Надёжно, но на длинной дистанции такой капитал едва обгоняет инфляцию — часть можно доверить фонду.'});
+      if (tips.length && tone === 'good'){ tone = 'warn'; pTitle = '🟡 В целом здорово, но есть перекосы'; }
+      if (!tips.length) tips.push({c:'good', t:'Подушка на месте, риск дозирован, деньги не простаивают, долгов нет. Так выглядит здоровый личный портфель.'});
       s.push(`<h2>💼 Структура капитала</h2>${donutSVG(parts)}
         ${parts.map(p=>`<div class="dRow"><span>${p.ico} ${p.l}</span><span style="display:flex;gap:9px;align-items:center"><span class="dd zero">${Math.round(p.v/gross*100)}%</span><span class="dv">${fmt(p.v)}</span></span></div>`).join('')}
-        ${S.debt?`<div class="dRow"><span>🩸 Долг</span><span class="dv" style="color:var(--bad)">−${fmt(S.debt)}</span></div>`:''}`);
+        ${S.debt?`<div class="dRow"><span>🩸 Долг</span><span class="dv" style="color:var(--bad)">−${fmt(S.debt)}</span></div>`:''}
+        <p style="margin:14px 0 4px;text-align:left"><b>${pTitle}</b></p>
+        ${tips.map(t=>`<div class="badge ${t.c}">${t.t}</div>`).join('')}`);
       const peak = Math.max(...(S.capHist.length?S.capHist.map(h=>h[1]):[cap]), cap);
       s.push(`<h2>📈 Путь капитала</h2>${lineSVG(S.capHist)}
         <div class="dRow"><span>Старт</span><span class="dv">${fmt(S.capHist[0]?S.capHist[0][1]:0)}</span></div>
@@ -1458,7 +1566,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (!S || ended) return;
       const scal = {};
       ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
-       'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','fund','fundOpen','examPassed','bestCap','gotBonus','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
+       'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','fund','fundOpen','examPassed',
+       'iis','iisPaid','iisOpen','crypto','cryptoOpen','extraRent','bestCap','gotBonus','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
         .forEach(k=>scal[k]=S[k]);
       LS.set(SAVE_KEY, {
         scal,
@@ -1555,6 +1664,18 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         salary:84000, creditLeft:0, health:60, mood:60, rel:60, impulses:5, crisesTotal:14, crisesAbsorbed:9 });
       renderHUD(); animateHUD(); payday();
     }
+    /* dev: jump to level 4 with solid level-3 results */
+    function devLevel4(){
+      if (S && !ended) pushHist('abandoned');
+      LS.del(SAVE_KEY);
+      hide('setOvl'); hide('startOvl'); hide('endOvl');
+      ended = false; noteQueue = []; noteThen = null;
+      S = newState();
+      Object.assign(S, { month:19, level:4, cash:20000, cushion:70000, deposit:40000, depositOpen:true,
+        bonds:40000, stocks:30000, fund:30000, bondsOpen:true, stocksOpen:true, fundOpen:true, examPassed:true,
+        salary:90000, creditLeft:0, health:62, mood:62, rel:62, impulses:7, crisesTotal:20, crisesAbsorbed:14, bestCap:230000 });
+      renderHUD(); animateHUD(); payday();
+    }
     function setTheme(k){ applyTheme(k); }
     function renderStart(){
       const saved = LS.get(SAVE_KEY); const btns = $('startBtns');
@@ -1623,8 +1744,9 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <button class="btn sec" onclick="G.closeSettings()">← Вернуться</button>
         <button class="btn" onclick="G.newSession()">Новая сессия</button>
         <div style="margin-top:10px">
-          <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel2()">⚡ Dev: уровень 2</button>
-          <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel3()">⚡ Dev: уровень 3</button>
+          <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel2()">⚡ Dev: ур.2</button>
+          <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel3()">⚡ Dev: ур.3</button>
+          <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel4()">⚡ Dev: ур.4</button>
         </div>
       </div></div>
       <div class="ovl" id="payOvl"><div class="sheet">
@@ -1662,12 +1784,17 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           <button id="allocFund" onclick="G.alloc('fund')">📦 Фонд<b>рынок целиком, мягче</b></button>
           <button id="allocTrade" onclick="G.openTrade()">🕹 Торговая сессия<b>ставка 10 000</b></button>
         </div>
+        <div class="alloc" id="allocLvl4" style="display:none">
+          <button id="allocIis" onclick="G.alloc('iis')">🏛 ИИС<b>+13% в финале, без вывода</b></button>
+          <button id="allocCrypto" onclick="G.alloc('crypto')">🪙 Крипта<b>дикие качели</b></button>
+        </div>
         <p class="small" id="allocOutLbl" style="margin:10px 0 0;display:none">⇄ Вывести обратно в деньги:</p>
         <div class="alloc" id="allocOut" style="display:none">
           <button id="wDep" onclick="G.alloc('wDeposit')">🏦→💰<b>10 000</b></button>
           <button id="wBonds" onclick="G.alloc('wBonds')">📜→💰<b>10 000</b></button>
           <button id="wStocks" onclick="G.alloc('wStocks')">📈→💰<b>10 000</b></button>
           <button id="wFund" onclick="G.alloc('wFund')">📦→💰<b>10 000</b></button>
+          <button id="wCrypto" onclick="G.alloc('wCrypto')">🪙→💰<b>10 000</b></button>
         </div>
         <button class="btn sec" style="margin-top:14px" onclick="G.nextMonth()">Хватит, живём дальше →</button>
       </div></div>
@@ -1694,7 +1821,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     `;
 
     $('app').innerHTML = SHELL;
-    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio };
+    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
     let _fitting=false, _lastS=-1;
