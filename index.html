@@ -186,6 +186,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 /* card text must be normal text flow: flex split inline spans (glossary terms) into columns */
 .cText{display:block;text-align:center;overflow:hidden;}
 .cText .term{display:inline;}
+/* ---- allocation particles ---- */
+#allocOvl .sheet{position:relative;}
+.particle{
+  position:absolute;width:9px;height:9px;border-radius:50%;pointer-events:none;z-index:70;
+  background:var(--accent);box-shadow:0 0 8px var(--glow-right);opacity:.95;
+  transition:transform .6s cubic-bezier(.25,.6,.3,1), opacity .6s;
+}
 /* ---- glossary terms ---- */
 .term{border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 60%,transparent);cursor:pointer;}
 .term:active{opacity:.65;}
@@ -799,7 +806,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 
     /* ===== GLOSSARY: подчёркнутые термины, объяснение по тапу, копятся в словаре ===== */
     const TERMS = {
-      cushion:{ w:'Подушка', re:/подушк[а-яё]*/i, d:'Запас денег на случай, если доход пропадёт: болезнь, увольнение, кризис. Лежит там, откуда можно забрать мгновенно (накопительный счёт). Минимум — месяц расходов, в идеале 3–6. Это не инвестиция — это броня.' },
+      cushion:{ w:'Подушка', re:/подушк[а-яё]*/i, d:'Запас денег на случай, если доход пропадёт: болезнь, увольнение, кризис. Лежит там, откуда можно забрать мгновенно (накопительный счёт). Минимум — месяц расходов, в идеале 3–6. Это не инвестиция — это броня. В игре правило простое: обычные траты идут с карты, а удары кризисов ⚡ первой принимает подушка — и только остаток бьёт по карте.' },
       deposit:{ w:'Депозит', re:/депозит[а-яё]*|вклад[а-яё]*/i, d:'Ты одалживаешь деньги банку под фиксированный процент. Надёжно (страховка до 1,4 млн ₽), но забрать досрочно обычно можно только потеряв проценты.' },
       bond:{ w:'Облигация', re:/облигаци[а-яё]*|ОФЗ/i, d:'Ты одалживаешь деньги государству или компании. Взамен они регулярно платят купон, а в конце срока возвращают долг. Доходнее вклада, надёжнее акций.' },
       coupon:{ w:'Купон', re:/купон[а-яё]*/i, d:'Регулярная выплата держателю облигации — как проценты по вкладу. Платится по расписанию, обычно раз в квартал или полгода.' },
@@ -1068,29 +1075,40 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       /* 2. money flow */
       out += rev(`<div class="secT">Движение денег</div>`);
       rows.forEach(([l,v])=>{ out += rev(`<div class="dRow"><span>${l}</span><span class="dv" style="color:${v>=0?'var(--good)':'var(--bad)'}">${v>=0?'+':''}${fmt(v)}</span></div>`); });
-      /* 3. asset deltas */
+      /* 3. asset deltas — «сейчас» сверху, «за месяц» подписью снизу */
+      const absorbed0 = S.crisesAbsorbed - (snap.crisesAbsorbed || 0);
       const aRows = [];
-      const dd = (ico,label,cur,prev,invert)=>{
+      const dd = (ico,label,cur,prev,invert,note)=>{
         const d = cur - (prev || 0);
         if (!cur && !d) return;
         const up = invert ? d < 0 : d > 0;
         const cls = d === 0 ? 'zero' : (up ? 'up' : 'down');
-        aRows.push(`<div class="dRow"><span>${ico} ${label}</span><span style="display:flex;gap:9px;align-items:center"><span class="dd ${cls}">${d===0?'=':(d>0?'▲ +':'▼ −')+fmt(Math.abs(d))}</span><span class="dv">${fmt(cur)}</span></span></div>`);
+        aRows.push(`<div class="dRow"><span style="align-self:flex-start;padding-top:2px">${ico} ${label}</span>
+          <span style="text-align:right">
+            <span class="dv" style="display:block">${fmt(cur)}</span>
+            <span class="dd ${cls}" style="display:block;font-size:12px">${d===0?'без изменений':(d>0?'▲ +':'▼ −')+fmt(Math.abs(d))+' за месяц'}</span>
+          </span></div>`
+          + (note ? `<div style="font-size:12px;color:var(--muted);text-align:left;padding:2px 0 6px;border-bottom:1px solid var(--border)">${note}</div>` : ''));
       };
       dd('💰','На карте',S.cash,snap.cash);
-      dd('🛡','Подушка',S.cushion,snap.cushion);
+      dd('🛡','Подушка',S.cushion,snap.cushion,false,
+        absorbed0 > 0 ? '↳ подушка первой приняла удары кризисов — обычные траты идут с карты' : null);
       dd('🏦','Депозит',S.deposit,snap.deposit);
       dd('📜','Облигации',S.bonds,snap.bonds);
       dd('📈','Акции',S.stocks,snap.stocks);
       dd('📦','Фонд',S.fund,snap.fund);
       dd('🩸','Долг',S.debt,snap.debt,true);
-      if (aRows.length){ out += rev(`<div class="secT">Активы</div>`); aRows.forEach(r=>{ out += rev(r); }); }
+      if (aRows.length){ out += rev(`<div class="secT">Активы · сейчас / изменение</div>`); aRows.forEach(r=>{ out += rev(r); }); }
       /* 4. you */
-      out += rev(`<div class="secT">Ты</div>`);
+      out += rev(`<div class="secT">Ты · сейчас / изменение</div>`);
       [['❤️','Здоровье','health'],['😊','Настроение','mood'],['👥','Отношения','rel']].forEach(([ico,label,k])=>{
         const d = Math.round(S[k] - (snap[k] != null ? snap[k] : S[k]));
         const cls = d === 0 ? 'zero' : (d > 0 ? 'up' : 'down');
-        out += rev(`<div class="dRow"><span>${ico} ${label}</span><span style="display:flex;gap:9px;align-items:center"><span class="dd ${cls}">${d===0?'=':(d>0?'▲ +':'▼ −')+Math.abs(d)}</span><span class="dv">${Math.round(S[k])}</span></span></div>`);
+        out += rev(`<div class="dRow"><span>${ico} ${label}</span>
+          <span style="text-align:right">
+            <span class="dv" style="display:block">${Math.round(S[k])}</span>
+            <span class="dd ${cls}" style="display:block;font-size:12px">${d===0?'без изменений':(d>0?'▲ +':'▼ −')+Math.abs(d)+' за месяц'}</span>
+          </span></div>`);
       });
       /* 5. critical spots & wins */
       const crit = [], good = [];
@@ -1120,12 +1138,15 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function openAlloc(){ hide('repOvl'); if (S.cash < 10000){ nextMonth(); return; } updateAlloc(); show('allocOvl'); }
     function updateAlloc(){
       $('allocLeft').textContent = fmt(S.cash);
-      /* что уже накоплено — видно прямо на экране распределения */
+      /* сквозная панель: все открытые счета видны всегда — сюда прилетают частицы покупок */
       const st = [
-        ['🛡 Подушка', S.cushion], ['🏦 Депозит', S.deposit],
-        ['📜 Облигации', S.bonds], ['📈 Акции', S.stocks], ['📦 Фонд', S.fund],
-      ].filter(r=>r[1] > 0);
-      $('allocState').innerHTML = st.map(([l,v])=>`<div class="dRow"><span>${l}</span><span class="dv">${fmt(v)}</span></div>`).join('')
+        ['stCushion','🛡 Подушка', S.cushion, true],
+        ['stDeposit','🏦 Депозит', S.deposit, S.depositOpen || S.deposit > 0],
+        ['stBonds','📜 Облигации', S.bonds, S.bondsOpen || S.bonds > 0],
+        ['stStocks','📈 Акции', S.stocks, S.stocksOpen || S.stocks > 0],
+        ['stFund','📦 Фонд', S.fund, S.fundOpen || S.fund > 0],
+      ].filter(r=>r[3]);
+      $('allocState').innerHTML = st.map(([id,l,v])=>`<div class="dRow" id="${id}"><span>${l}</span><span class="dv">${fmt(v)}</span></div>`).join('')
         + `<div class="dRow" style="border-bottom:none"><span><b>Капитал всего</b></span><span class="dv">${fmt(totalCap())}</span></div>`;
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
       document.querySelectorAll('#allocOvl .alloc button').forEach(b=>{
@@ -1153,12 +1174,43 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       $('allocTrade').disabled = false;
       $('allocTrade').innerHTML = '🕹 Торговая сессия<b>' + (S.cash >= 10000 ? 'ставка 10 000' : 'демо-режим') + '</b>';
     }
+    /* частицы: из кнопки — в строку актива (или обратно в «свободно» при выводе) */
+    function flyParticles(fromEl, toEl){
+      const sheet = document.querySelector('#allocOvl .sheet');
+      if (!sheet || !fromEl) return;
+      const sr = sheet.getBoundingClientRect(), fr = fromEl.getBoundingClientRect();
+      const fx = fr.left + fr.width/2 - sr.left, fy = fr.top + fr.height/2 - sr.top;
+      let tx, ty;
+      if (toEl){
+        const tr = toEl.getBoundingClientRect();
+        tx = tr.left + tr.width*0.82 - sr.left; ty = tr.top + tr.height/2 - sr.top;
+      }
+      for (let i = 0; i < 7; i++){
+        const p = document.createElement('span'); p.className = 'particle';
+        p.style.left = fx + 'px'; p.style.top = fy + 'px';
+        sheet.appendChild(p);
+        const dx = (Math.random()-0.5)*36, dy = (Math.random()-0.5)*18;
+        const gx = toEl ? (tx - fx + dx) : (Math.random()-0.5)*140;
+        const gy = toEl ? (ty - fy + dy) : (-70 - Math.random()*70);
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          p.style.transitionDelay = (i*38) + 'ms';
+          p.style.transform = `translate(${gx.toFixed(0)}px, ${gy.toFixed(0)}px) scale(.45)`;
+          p.style.opacity = '0';
+        }));
+        setTimeout(()=>p.remove(), 1000 + i*38);
+      }
+      if (toEl) setTimeout(()=>pulse(toEl, true), 520);
+    }
     function alloc(kind){
       const w = { wDeposit:'deposit', wBonds:'bonds', wStocks:'stocks', wFund:'fund' }[kind];
+      const srcId = { cushion:'allocCush', deposit:'allocDep', bonds:'allocBonds', stocks:'allocStocks', fund:'allocFund', fun:'allocFun',
+                      wDeposit:'wDep', wBonds:'wBonds', wStocks:'wStocks', wFund:'wFund' }[kind];
+      const tgtId = { cushion:'stCushion', deposit:'stDeposit', bonds:'stBonds', stocks:'stStocks', fund:'stFund' }[kind];
       if (w){
         if (S[w] < 10000) return;
         S[w] -= 10000; S.cash += 10000;
         renderHUD(); updateAlloc(); saveGame();
+        flyParticles($(srcId), $('allocLeft'));
         return;
       }
       if (S.cash < 10000) return;
@@ -1170,7 +1222,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (kind === 'fund') S.fund += 10000;
       if (kind === 'fun'){ S.mood += 6; clamp('mood'); S.impulses++; S.monthLog.push(['🎉 Потратил на себя', -10000]); }
       renderHUD(); updateAlloc(); saveGame();
-      if (S.cash < 10000) setTimeout(nextMonth, 500);
+      flyParticles($(srcId), tgtId ? $(tgtId) : null);
+      if (S.cash < 10000) setTimeout(nextMonth, 900);
     }
     function nextMonth(){
       hide('allocOvl');
@@ -1554,9 +1607,9 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <div id="allocLeft">0 ₽</div>
         <div id="allocState" style="margin-top:8px"></div>
         <div class="alloc">
-          <button onclick="G.alloc('cushion')">🛡 В подушку<b>+10&nbsp;000</b></button>
+          <button id="allocCush" onclick="G.alloc('cushion')">🛡 В подушку<b>+10&nbsp;000</b></button>
           <button id="allocDep" onclick="G.alloc('deposit')" disabled>🏦 На депозит<b>+10&nbsp;000</b></button>
-          <button onclick="G.alloc('fun')">🎉 На себя<b>−10&nbsp;000, 😊+</b></button>
+          <button id="allocFun" onclick="G.alloc('fun')">🎉 На себя<b>−10&nbsp;000, 😊+</b></button>
         </div>
         <div class="alloc" id="allocLvl2" style="display:none">
           <button id="allocBonds" onclick="G.alloc('bonds')">📜 Облигации<b>~14%/год, стабильно</b></button>
