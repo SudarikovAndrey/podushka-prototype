@@ -176,6 +176,9 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .choice{min-width:0;}
 .choice .fx{white-space:normal;line-height:1.35;}
 .eff .g,.eff .b{white-space:normal;}
+/* card text must be normal text flow: flex split inline spans (glossary terms) into columns */
+.cText{display:block;text-align:center;overflow:hidden;}
+.cText .term{display:inline;}
 /* ---- glossary terms ---- */
 .term{border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 60%,transparent);cursor:pointer;}
 .term:active{opacity:.65;}
