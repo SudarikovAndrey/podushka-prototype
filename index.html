@@ -455,6 +455,26 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Купить билетик',m:-150,fx:'miniLotto'},R:{lbl:'Пройти мимо',note:'В слове «до 1 000 000» главное слово — «до». Средний билет возвращает меньше половины своей цены.'}},
      {e:'🤳',cat:'события',mini:1,once:true,min:5,t:'Селфи у парапета. Телефон выскальзывает из рук!',
       L:{lbl:'Ловить!!!',fx:'miniCatch'},R:{lbl:'Прощай, дружок',m:-3500,o:-2}},
+     /* ---- ребалансировка: доля риска растёт сама, решение — за игроком ---- */
+     {e:'⚖️',cat:'инвестиции',req:'stocksHeld',min:10,once:true,t:'Акции подросли и распухли в портфеле. Коллега: «фиксируй прибыль!» Блогер: «холд до луны!» Кто прав?',
+      L:{lbl:'Ребалансировать',fx:'rebalance'},R:{lbl:'Пусть растут',note:'Можно и так. Но заметь: когда акции растут быстрее остального, доля риска в портфеле ползёт вверх сама — без твоего решения. Ребалансировка возвращает контроль.'}},
+     /* ---- level 5: недвижимость ---- */
+     {e:'🏦',cat:'жильё',req:'lvl5',t:'Банк: «Одобрим ипотеку, но сначала короткий тест. Мы обязаны убедиться, что вы понимаете, что подписываете».',
+      L:{lbl:'Пройти тест',fx:'openExam3'},R:{lbl:'Позже',o:0}},
+     {e:'🏠',cat:'жильё',req:'mortOk',t:'Студия за 3 млн: взнос 450 000, платёж 33 000/мес на годы. Риелтор: «цены только вверх, все берут».',
+      L:{lbl:'Взять ипотеку',fx:'homeBuy'},R:{lbl:'Снимать и инвестировать',fx:'homeSkip',note:'Тоже стратегия, и не худшая: аренда дешевле платежа, а разница, вложенная в рынок, часто обгоняет рост квартиры. Финал покажет, как сыграло у тебя.'}},
+     {e:'📉',cat:'жильё',req:'home',min:29,once:true,t:'Ключевая ставка снизилась. Банк-конкурент зазывает рефинансировать ипотеку: «платёж меньше на 4 000!»',
+      L:{lbl:'Рефинансировать (беготня)',o:-2,fx:'refi'},R:{lbl:'Лень возиться',note:'Минус 4 000 с платежа — это ~48 000 в год. Рефинансирование — самая высокооплачиваемая бумажная волокита в жизни.'}},
+     {e:'🚿',cat:'жильё',req:'homeLive',once:true,min:27,t:'Стояк потёк — уже в ТВОЕЙ квартире. Раньше звонил собственнику. Теперь собственник — ты.',
+      L:{lbl:'Перекрывать!',fx:'__skill',skillCost:22000},R:{lbl:'Ждать сантехника',m:-22000,h:-2}},
+     {e:'🪑',cat:'жильё',req:'homeLive',once:true,t:'Соседи сверху начали ремонт. Перфоратор им явно роднее будильника.',
+      L:{lbl:'Наушники с шумодавом',m:-8000,o:3},R:{lbl:'Терпеть. Это закалка',o:-4}},
+     {e:'📵',cat:'жильё',req:'homeRent',once:true,t:'Арендатор второй день не выходит на связь. Оплата — послезавтра.',
+      L:{lbl:'Съездить проверить',o:-2,r:2,note:'Всё в порядке — он утопил телефон. Заглядывать к жильцу раз в квартал — нормальная практика, а не паранойя.'},R:{lbl:'Нервно ждать',o:-3}},
+     {e:'🧾',cat:'жильё',req:'homeRent',once:true,min:28,t:'Арендатор: «Смеситель капает, плитка в ванной треснула. Почините?» Он прав — это твоя забота.',
+      L:{lbl:'Починить всё',m:-14000,r:2,note:'Содержание — скрытая статья доходной недвижимости: в среднем 1–2 месяца аренды в год уходит на ремонт и простои.'},R:{lbl:'«Потом»',r:-4,o:-2}},
+     {e:'📈',cat:'жильё',req:'renting',once:true,min:27,t:'Собственник: «Рынок вырос, аренда теперь +4 000». Классика жанра.',
+      L:{lbl:'Согласиться',fx:'rentUp'},R:{lbl:'Переехать дешевле',o:-5,note:'Переезд съел выходные и нервы, зато платёж прежний. Аренда — это гибкость, но не стабильность.'}},
      {e:'🧦',cat:'соблазн',t:'Подписка на носки: каждый месяц — коробка дизайнерских носков. Да, это существует.',
       L:{lbl:'Подписаться на носки',m:-990,o:2,imp:1,note:'Подписаться можно на что угодно. Отписаться — сложнее психологически.'},R:{lbl:'Носки и так есть',o:1}},
      {e:'📺',cat:'подписки',t:'Новый сериал выходит эксклюзивно на пятой платформе. У тебя подписки на четыре.',
@@ -620,6 +640,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       iis:0, iisPaid:0, iisOpen:false, crypto:0, cryptoOpen:false, extraRent:0,
       gold:0, goldOpen:false, reit:0, reitOpen:false, unemployed:0, split:0, loveCost:0,
       step:0, miniAt:-99, miniGap:12,
+      home:0, mortgage:0, mortPay:0, rentUp:0,
       deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[], capHist:[], glossary:new Set(),
       mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
     };}
@@ -636,7 +657,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     let cushionFx = false;
     function renderHUD(){
       $('monthNum').textContent = S.month;
-      $('monthOf').textContent = '/ ' + maxMonths() + (S.level >= 3 ? ' 🏦' : (S.level >= 2 ? ' 📈' : ''));
+      $('monthOf').textContent = '/ ' + maxMonths() + (S.level >= 5 ? ' 🏠' : (S.level >= 3 ? ' 🏦' : (S.level >= 2 ? ' 📈' : '')));
       const prog = S.monthTotal ? (S.monthTotal - S.deck.length)/S.monthTotal : 0;
       $('mProgFill').style.width = Math.max(0,Math.min(1,prog))*100 + '%';
       const mv = $('vMoney'); mv.textContent = fmt(S.cash); mv.classList.toggle('neg', S.cash<0);
@@ -657,6 +678,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['cryptoChipA','🪙','Крипта', S.crypto, S.crypto > 0],
         ['goldChipA','🥇','Золото', S.gold, S.gold > 0],
         ['reitChipA','🏢','REIT', S.reit, S.reit > 0],
+        ['homeChipA','🏠','Квартира', S.home - S.mortgage, S.home > 0],
       ].filter(c=>c[4]);
       $('assetLine').innerHTML = chips.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       if (cushionFx){ cushionFx = false; const el = $('cushionChip'); if (el){ el.classList.add('hit'); } }
@@ -673,8 +695,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['🪙', 'Крипта (дикие качели)', S.crypto],
         ['🥇', 'Золото (страховка от обвалов)', S.gold],
         ['🏢', 'REIT (аренда без квартиры)', S.reit],
+        ['🏠', 'Квартира (дорожает ~4%/год)', S.home],
       ].filter((r,i)=>i===0 || r[2] > 0);
       $('portBody').innerHTML = rows.map(([ico,l,v])=>`<div class="dRow"><span style="min-width:0">${ico} ${termify(l)}</span><span class="dv">${fmt(v)}</span></div>`).join('')
+        + (S.mortgage ? `<div class="dRow"><span>🏦 ${termify('Ипотека')} (остаток)</span><span class="dv" style="color:var(--bad)">−${fmt(S.mortgage)}</span></div>` : '')
         + (S.debt ? `<div class="dRow"><span>🩸 Долг (30%/мес)</span><span class="dv" style="color:var(--bad)">−${fmt(S.debt)}</span></div>` : '')
         + `<div class="dRow" style="border-bottom:none"><span><b>Капитал всего</b></span><span class="dv">${fmt(totalCap())}</span></div>`;
       show('portOvl');
@@ -746,6 +770,30 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (eff.fx) FX[eff.fx]();
       if (eff.note) toast(eff.note);
     }
+    /* первый взнос собирается из ликвидного: карта → депозит → подушка */
+    function drawFunds(amount){
+      if (S.cash + S.deposit + S.cushion < amount) return false;
+      let need = amount;
+      const c = Math.min(S.cash, need); S.cash -= c; need -= c;
+      if (need > 0){ const d = Math.min(S.deposit, need); S.deposit -= d; need -= d; }
+      if (need > 0){ S.cushion -= need; }
+      return true;
+    }
+    function openHomeMode(){
+      $('miniTitle').textContent = '🏠 Квартира твоя. Что с ней делать?';
+      $('miniBody').innerHTML =
+        '<button class="qOpt" onclick="G.homeMode(\'live\')">🛋 <b>Жить самому</b><br>аренда 30 000 уходит из расходов, вместо неё платёж 33 000</button>' +
+        '<button class="qOpt" onclick="G.homeMode(\'rent\')">🔑 <b>Сдавать за 25 000</b><br>сам продолжаешь снимать; арендатор почти закрывает ипотеку, но бывают простои</button>';
+      show('miniOvl');
+    }
+    function homeMode(mode){
+      if (S.flags.homeLive || S.flags.homeRent) return;
+      S.flags.homeLive = mode === 'live'; S.flags.homeRent = mode === 'rent';
+      hide('miniOvl'); renderHUD(); saveGame();
+      setTimeout(()=>toast(mode === 'live'
+        ? '🏠 Свой угол! Платёж чуть больше аренды, зато каждый месяц ~8 000 из него гасит твой же долг, а не чужую ипотеку. Помни про аннуитет: досрочные платежи в первые годы экономят больше всего.'
+        : '🔑 Сдал! Арендатор платит почти всю ипотеку, квартира дорожает, долг тает. Минусы в комплекте: простои, ремонты и «я тут гвоздь забил в вашу плитку».'), 260);
+    }
     const FX = {
       miniBoxes(){ markMini(); setTimeout(openBoxes, 400); },
       miniSlots(){ markMini(); setTimeout(openSlots, 400); },
@@ -804,6 +852,27 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         else { S.unemployed = 2; toast('Не помогло — уволен, причём без компенсации. Впереди ~2 месяца без зарплаты. Теперь всё решает подушка.'); }
       },
       openExam2(){ startExam('invest2'); },
+      openExam3(){ startExam('mortgage'); },
+      homeBuy(){
+        if (!drawFunds(450000)){
+          toast('На первый взнос нужно 450 000 живыми деньгами (карта + депозит + подушка). Пока не хватает — предложение вернётся, а рынок никуда не денется.');
+          return;
+        }
+        S.home = 3000000; S.mortgage = 2550000; S.mortPay = 33000;
+        S.flags.homeDecided = true; S.flags.homeBoughtAt = S.month;
+        S.monthLog.push(['🏠 Первый взнос за квартиру', -450000]);
+        setTimeout(openHomeMode, 420);
+      },
+      homeSkip(){ S.flags.homeDecided = true; },
+      refi(){ S.mortPay = Math.max(20000, S.mortPay - 4000); toast('📉 Рефинансирование: платёж −4 000 ₽/мес навсегда. ~48 000 ₽ в год за неделю бумажной беготни — лучшая почасовая ставка в твоей жизни.'); },
+      rentUp(){ S.rentUp = (S.rentUp || 0) + 4000; toast('Аренда теперь дороже на 4 000 ₽/мес. У съёма есть цена, которую не пишут в объявлении: её назначает собственник, когда захочет.'); },
+      rebalance(){
+        const mv = Math.round(S.stocks * 0.3);
+        if (mv < 1000){ toast('Пока нечего ребалансировать — акций мало.'); return; }
+        S.stocks -= mv;
+        if (S.bondsOpen) S.bonds += mv; else S.deposit += mv;
+        toast('⚖️ Ребалансировка: ' + fmt(mv) + ' из акций → в ' + (S.bondsOpen ? 'облигации' : 'депозит') + '. Правило: раз в квартал возвращай доли к плану — продаёшь выросшее дорого, докупаешь просевшее дёшево. Дисциплина вместо прогнозов.');
+      },
       split(){ S.split = 3; toast('Сплит оформлен: ещё 3 платежа по 2 475 будут тихо списываться в день зарплаты. Итого вещь стоила 9 900 — просто мозгу показали четверть.'); },
       airdrop(){
         if (S.crypto > 0){ const lost = S.crypto; S.crypto = 0; renderHUD(); toast('Кошелёк подключён... и опустошён: −' + fmt(lost) + '. «Бесплатные токены» стоили всей крипты. Сид-фразу и подпись транзакций не дают никому.'); }
@@ -856,6 +925,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.L.fx === 'unlockIIS' && S.iisOpen) ||
         (c.L.fx === 'unlockCrypto' && S.cryptoOpen) ||
         (c.L.fx === 'openExam2' && S.goldOpen) ||
+        (c.L.fx === 'openExam3' && S.flags.mortgageOk) ||
+        (c.L.fx === 'homeBuy' && S.flags.homeDecided) ||
         (c.L.fx === 'gym' && S.flags.gym) ||
         (c.L.fx === 'dental' && S.flags.dental) ||
         (c.L.fx === 'invCourse' && S.flags.invEdu) ||
@@ -872,6 +943,12 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.req === 'boss' && S.flags.boss) ||
         (c.req === 'lead' && S.flags.lead) ||
         (c.req === 'love' && S.flags.love) ||
+        (c.req === 'lvl5' && S.level >= 5) ||
+        (c.req === 'mortOk' && S.level >= 5 && S.flags.mortgageOk) ||
+        (c.req === 'home' && S.home > 0) ||
+        (c.req === 'homeLive' && S.flags.homeLive) ||
+        (c.req === 'homeRent' && S.flags.homeRent) ||
+        (c.req === 'renting' && S.level >= 5 && !S.home && S.flags.homeDecided) ||
         (c.req === 'deduct' && (S.flags.dentalSpend || 0) > (S.flags.deductUsed || 0));
       /* казуальные мини-активности — не чаще каждого 10–15 свайпа */
       const miniOk = (S.step || 0) - (S.miniAt ?? -99) >= (S.miniGap || 12);
@@ -909,6 +986,15 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (S.level >= 4 && !S.iisOpen){
         const iCard = POOL.find(c => c.L.fx === 'unlockIIS');
         if (!picks.includes(iCard)) picks[Math.floor(Math.random()*picks.length)] = iCard;
+      }
+      /* level 5 on-ramp: сначала ипотечный тест, потом предложение о покупке */
+      if (S.level >= 5 && !S.flags.mortgageOk){
+        const mCard = POOL.find(c => c.L.fx === 'openExam3');
+        if (!picks.includes(mCard)) picks[Math.floor(Math.random()*picks.length)] = mCard;
+      }
+      if (S.level >= 5 && S.flags.mortgageOk && !S.flags.homeDecided){
+        const hCard = POOL.find(c => c.L.fx === 'homeBuy');
+        if (!picks.includes(hCard)) picks[Math.floor(Math.random()*picks.length)] = hCard;
       }
       picks.forEach(c=>S.used.add(c.t));
       // crises: no repeats until pool exhausted; prevention excludes linked crises
@@ -1077,9 +1163,21 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (S.rel < 25){ S.mood = Math.max(0, S.mood - 8); noteQueue.push('Ты всех продинамил — звать перестали. Одиночество бьёт по настроению (😞 −8). Отношения — тоже актив.'); }
       if (S.mfo > 0){ const owe = Math.round(S.mfo * 1.3); rows.push(['🧾 Микрозайм: «0%» закончились, набежало', -owe]); total -= owe; S.mfo = 0;
         noteQueue.push('Микрозайм: за взятые 10 000 отдал 13 000. «0% на 7 дней» — это крючок, а не подарок. Эффективная ставка — сотни процентов годовых.'); }
-      FIX.forEach(([l,v])=>{ rows.push([l,v]); total += v; });
+      FIX.forEach(([l,v])=>{ if (S.flags.homeLive && l === 'Аренда') return; rows.push([l,v]); total += v; });
       if (S.creditLeft > 0){ rows.push([`Кредит за телефон (ещё ${S.creditLeft} мес)`, -S.credit]); total -= S.credit; S.creditLeft--; }
-      if (S.extraRent){ rows.push(['Квартира получше (переезд)', -S.extraRent]); total -= S.extraRent; }
+      if (S.extraRent && !S.flags.homeLive){ rows.push(['Квартира получше (переезд)', -S.extraRent]); total -= S.extraRent; }
+      if (S.rentUp > 0 && !S.flags.homeLive){ rows.push(['Аренда подорожала', -S.rentUp]); total -= S.rentUp; }
+      /* ипотека: платёж уходит, но ~8К из него гасит твой же долг */
+      if (S.mortPay > 0){
+        rows.push([`🏠 Ипотека (остаток ${fmtK(S.mortgage)})`, -S.mortPay]); total -= S.mortPay;
+        S.mortgage = Math.max(0, S.mortgage - 8000);
+        if (S.flags.homeRent){
+          if (Math.random() < 0.12){
+            rows.push(['🔑 Простой: арендатор съехал', 0]);
+            noteQueue.push('🔑 Месяц простоя: арендатор съехал, ищем нового. Ипотека ждать не будет — вот почему у арендодателя тоже должна быть подушка.');
+          } else { rows.push(['🔑 Доход от сдачи', 25000]); total += 25000; }
+        }
+      }
       if (S.split > 0){ rows.push([`Сплит-платёж (осталось ${S.split})`, -2475]); total -= 2475; S.split--; }
       if (S.loveCost > 0){ rows.push(['💞 Свидания, цветы, кино', -S.loveCost]); total -= S.loveCost; S.mood = Math.min(100, S.mood + 3); S.rel = Math.min(100, S.rel + 2); }
       if (S.catCost){ rows.push(['Кот (корм, наполнитель, вайб)', -S.catCost]); total -= S.catCost; }
@@ -1104,8 +1202,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     function closePayday(){ hide('payOvl'); buildDeck(); saveGame(); showCard(); maybeOnboard(); setTimeout(maybeShowNote, 260); }
     /* ---- goals & cash flow ---- */
     const GOALS = { cushion:60000, capital:150000, quality:50 };
-    function maxMonths(){ return S.level >= 4 ? 24 : (S.level >= 3 ? 18 : (S.level >= 2 ? 12 : MONTHS)); }
-    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund + S.iis + S.crypto + S.gold + S.reit - S.debt; }
+    function maxMonths(){ return S.level >= 5 ? 36 : (S.level >= 4 ? 24 : (S.level >= 3 ? 18 : (S.level >= 2 ? 12 : MONTHS))); }
+    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund + S.iis + S.crypto + S.gold + S.reit + S.home - S.mortgage - S.debt; }
     function goalsHTML(){
       const cap = totalCap();
       const q = Math.round((S.health + S.mood + S.rel) / 3);
@@ -1136,6 +1234,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 
     /* ===== GLOSSARY: подчёркнутые термины, объяснение по тапу, копятся в словаре ===== */
     const TERMS = {
+      mortgage:{ w:'Ипотека', re:/ипотек[а-яё]*/i, d:'Кредит под залог квартиры: жильё твоё, но пока долг не выплачен, банк держит его в залоге. Три главные цифры перед подписью: первый взнос, ставка и ПСК. И помни: в аннуитете первые годы ты платишь в основном проценты.' },
+      annuity:{ w:'Аннуитет', re:/аннуитет[а-яё]*/i, d:'Способ платить кредит одинаковыми суммами каждый месяц. Хитрость внутри: в первые годы платёж почти целиком состоит из процентов, тело долга тает медленно. Поэтому досрочные платежи в начале срока экономят больше всего.' },
+      psk:{ w:'ПСК', re:/ПСК/, d:'Полная стоимость кредита: ставка плюс все обязательные платежи, страховки и комиссии. Именно её, а не рекламную ставку из баннера, нужно сравнивать между банками.' },
+      rebal:{ w:'Ребалансировка', re:/ребаланс[а-яё]*/i, d:'Возврат портфеля к плановым долям: выросшее продаёшь, просевшее докупаешь. Делается по календарю (раз в квартал-год), а не по эмоциям. Так прибыль фиксируется сама, а доля риска не расползается незаметно.' },
       cushion:{ w:'Подушка', re:/подушк[а-яё]*/i, d:'Запас денег на случай, если доход пропадёт: болезнь, увольнение, кризис. Лежит там, откуда можно забрать мгновенно (накопительный счёт). Минимум — месяц расходов, в идеале 3–6. Это не инвестиция — это броня. В игре правило простое: обычные траты идут с карты, а удары кризисов ⚡ первой принимает подушка — и только остаток бьёт по карте.' },
       deposit:{ w:'Депозит', re:/депозит[а-яё]*|вклад[а-яё]*/i, d:'Ты одалживаешь деньги банку под фиксированный процент. Надёжно (страховка до 1,4 млн ₽), но забрать досрочно обычно можно только потеряв проценты.' },
       bond:{ w:'Облигация', re:/облигаци[а-яё]*|ОФЗ/i, d:'Ты одалживаешь деньги государству или компании. Взамен они регулярно платят купон, а в конце срока возвращают долг. Доходнее вклада, надёжнее акций.' },
@@ -1207,6 +1309,19 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ],
         onPass(){ S.goldOpen = true; S.reitOpen = true; },
         passMsg: '✅ Сдано: 3 из 3. Открыты 🥇 золото (страховка от обвалов) и 🏢 REIT (аренда без квартиры) — ищи их при распределении денег.',
+      },
+      mortgage: {
+        title: '📋 Ипотечный тест',
+        qs: [
+          { q:'Аннуитетный платёж — это…',
+            a:['Одинаковая сумма каждый месяц, причём в первые годы она почти целиком из процентов','Платёж, который уменьшается с каждым месяцем','Разовый взнос при оформлении'], ok:0 },
+          { q:'ПСК (полная стоимость кредита) — это…',
+            a:['Цена квартиры вместе с ремонтом','Ставка плюс все обязательные платежи и страховки — её и надо сравнивать между банками','Сумма первого взноса'], ok:1 },
+          { q:'Почему банк даёт ставку ниже при большом первом взносе?',
+            a:['Из благодарности','Меньше кредит относительно залога (LTV) — меньше риск банка, и он делится этим с тобой','Это требование налоговой'], ok:1 },
+        ],
+        onPass(){ S.flags.mortgageOk = true; },
+        passMsg: '✅ Сдано: 3 из 3. Банк готов одобрить ипотеку — жди предложение о покупке.',
       },
     };
     let EX = null;
@@ -1578,6 +1693,20 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         if (S.fund > 0){ const d = Math.round(S.fund*0.08); S.fund += d; rows.push(['📦 Восстановление: фонд +8%', d]); }
         if (S.crypto > 0){ const d = Math.round(S.crypto*0.2); S.crypto += d; rows.push(['🪙 Отскок: крипта +20%', d]); }
       }
+      /* level 5: квартира дорожает, вычет приходит */
+      if (S.home > 0){
+        const hg = Math.round(S.home * 0.003);
+        S.home += hg; rows.push(['🏠 Квартира: переоценка +0,3%', hg]);
+        if (S.flags.homeBoughtAt && S.month === S.flags.homeBoughtAt + 3){
+          S.cash += 45000; rows.push(['🏛 Налоговый вычет за квартиру (первая часть)', 45000]);
+          noteQueue.push('🏛 Вычет 13% за покупку жилья: первая часть пришла. В реальности можно вернуть до 260 000 ₽ с цены квартиры и ещё до 390 000 ₽ с процентов по ипотеке — про вторую часть забывают почти все.');
+        }
+      }
+      /* доля риска расползлась — мягкий пинок про ребалансировку (раз за ран) */
+      if (S.level >= 2 && S.cushion >= 60000){
+        const riskyNow = S.stocks + S.crypto, grossNow = Math.max(1, totalCap() + S.debt + S.mortgage - S.home);
+        if (riskyNow / grossNow > 0.55) noteQueue.push('⚖️ Акции и крипта — уже больше половины ликвидного капитала. Они выросли — и вместе с ними вырос твой риск, сам по себе. Ребалансировка (продать часть выросшего, докупить остальное) возвращает портфель под контроль.');
+      }
       /* ИИС: в конце рана государство доплачивает вычет 13% от взносов */
       if (S.level >= 4 && S.month === 24 && S.iisPaid > 0){
         const refund = Math.round(S.iisPaid * 0.13);
@@ -1723,6 +1852,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['stCrypto','🪙','Крипта', S.crypto, S.cryptoOpen || S.crypto > 0],
         ['stGold','🥇','Золото', S.gold, S.goldOpen || S.gold > 0],
         ['stReit','🏢','REIT', S.reit, S.reitOpen || S.reit > 0],
+        ['stHome','🏠','Квартира', S.home - S.mortgage, S.home > 0],
       ].filter(r=>r[4]);
       $('allocAssets').innerHTML = st.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
@@ -1830,8 +1960,28 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         if (totalCap() >= 200000 && S.debt === 0){ offerLevel4(); return; }
         finish(); return;
       }
+      if (S.level === 4 && S.month > 24){
+        if (totalCap() >= 400000 && S.debt === 0){ offerLevel5(); return; }
+        finish(); return;
+      }
       if (S.month > maxMonths()){ finish(); return; }
       payday();
+    }
+    function offerLevel5(){
+      $('endSheet').innerHTML = `
+        <h1>🔓 Уровень 5: Недвижимость</h1>
+        <p>Два года прожито, капитал <b>${fmt(totalCap())}</b>. Пора решать главный жилищный вопрос страны.</p>
+        <p>Впереди месяцы 25–36: <b>🏦 ипотечный тест</b> (аннуитет, ПСК, первый взнос), затем выбор — <b>🏠 своя квартира</b> (жить или сдавать) против <b>«снимать и инвестировать»</b>. У каждого пути своя математика, финал её покажет.</p>
+        <p class="small">Недвижимость — самый крупный и самый неликвидный актив в жизни. Тест перед ипотекой — не формальность: подпись под аннуитетом на годы стоит трёх правильных ответов.</p>
+        <button class="btn" onclick="G.startLevel5()">Решать жилищный вопрос</button>
+        <button class="btn sec" onclick="G.finishNow()">Завершить с этим результатом</button>`;
+      show('endOvl');
+    }
+    function startLevel5(){
+      hide('endOvl');
+      S.level = 5;
+      toast('Уровень 5. Квартирный вопрос испортил не только москвичей. Правило прежнее: сначала считаем, потом подписываем.');
+      renderHUD(); payday();
     }
     function offerLevel4(){
       $('endSheet').innerHTML = `
@@ -1953,6 +2103,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         {v:S.crypto, c:'var(--bad)', ico:'🪙', l:'Крипта'},
         {v:S.gold, c:'var(--mood)', ico:'🥇', l:'Золото'},
         {v:S.reit, c:'var(--muted)', ico:'🏢', l:'REIT'},
+        {v:S.home - S.mortgage, c:'var(--text)', ico:'🏠', l:'Квартира (своя доля)'},
       ].filter(p=>p.v > 0);
       const gross = parts.reduce((x,p)=>x+p.v, 0) || 1;
       /* оценка структуры: эффективно ли, безопасно ли — и что делать */
@@ -1969,6 +2120,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (S.crypto / gross > 0.25) tips.push({c:'crit', t:'Крипта — больше четверти капитала. Месяц −35% здесь норма, а не катастрофа. Урежь до доли, потерю которой переживёшь молча.'});
       if (cashS > 0.3) tips.push({c:'warn', t:Math.round(cashS*100) + '% капитала простаивает на карте: не работает и тает от соблазнов. Раскидывай остаток в конце месяца.'});
       if (S.debt > 0) tips.push({c:'crit', t:'Есть долг под 30%/мес — ни один актив столько не зарабатывает. Гасить долг выгоднее любой инвестиции.'});
+      if ((S.stocks + S.crypto) / gross > 0.55 && cushOk) tips.push({c:'warn', t:'Выросшие активы раздули долю риска. Ребалансировка — раз в квартал возвращать доли к плану, продавая выросшее и докупая просевшее, — фиксирует прибыль без прогнозов.'});
       if (cushOk && risk < 0.15 && gross > 100000) tips.push({c:'warn', t:'Очень консервативно: почти всё в подушке и вкладах. Надёжно, но на длинной дистанции такой капитал едва обгоняет инфляцию — часть можно доверить фонду.'});
       if (tips.length && tone === 'good'){ tone = 'warn'; pTitle = '🟡 В целом здорово, но есть перекосы'; }
       if (!tips.length) tips.push({c:'good', t:'Подушка на месте, риск дозирован, деньги не простаивают, долгов нет. Так выглядит здоровый личный портфель.'});
@@ -2052,7 +2204,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
        'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','fund','fundOpen','examPassed',
        'iis','iisPaid','iisOpen','crypto','cryptoOpen','extraRent','gold','goldOpen','reit','reitOpen','unemployed','split','loveCost',
-       'step','miniAt','miniGap',
+       'step','miniAt','miniGap','home','mortgage','mortPay','rentUp',
        'bestCap','gotBonus','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
         .forEach(k=>scal[k]=S[k]);
       LS.set(SAVE_KEY, {
@@ -2162,6 +2314,19 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         salary:90000, creditLeft:0, health:62, mood:62, rel:62, impulses:7, crisesTotal:20, crisesAbsorbed:14, bestCap:230000 });
       renderHUD(); animateHUD(); payday();
     }
+    /* dev: jump to level 5 with enough liquid for the down payment */
+    function devLevel5(){
+      if (S && !ended) pushHist('abandoned');
+      LS.del(SAVE_KEY);
+      hide('setOvl'); hide('startOvl'); hide('endOvl');
+      ended = false; noteQueue = []; noteThen = null;
+      S = newState();
+      Object.assign(S, { month:25, level:5, cash:120000, cushion:100000, deposit:250000, depositOpen:true,
+        bonds:60000, stocks:50000, fund:40000, bondsOpen:true, stocksOpen:true, fundOpen:true, examPassed:true,
+        goldOpen:true, reitOpen:true, iisOpen:true,
+        salary:95000, creditLeft:0, health:62, mood:62, rel:60, impulses:9, crisesTotal:26, crisesAbsorbed:19, bestCap:620000 });
+      renderHUD(); animateHUD(); payday();
+    }
     function setTheme(k){ applyTheme(k); }
     function renderStart(){
       const saved = LS.get(SAVE_KEY); const btns = $('startBtns');
@@ -2242,6 +2407,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel2()">⚡ Dev: ур.2</button>
           <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel3()">⚡ Dev: ур.3</button>
           <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel4()">⚡ Dev: ур.4</button>
+          <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel5()">⚡ Dev: ур.5</button>
         </div>
       </div></div>
       <div class="ovl" id="payOvl"><div class="sheet">
@@ -2331,7 +2497,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     `;
 
     $('app').innerHTML = SHELL;
-    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch };
+    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, startLevel5, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, devLevel5, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch, homeMode };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
     let _fitting=false, _lastS=-1;
