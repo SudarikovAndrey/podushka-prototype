@@ -187,21 +187,25 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .cText{display:block;text-align:center;overflow:hidden;}
 .cText .term{display:inline;}
 /* ---- onboarding: показать свайп ---- */
-#onbOvl{position:absolute;inset:0;z-index:46;display:none;background:rgba(8,12,10,.55);border-radius:var(--radius);cursor:pointer;align-items:center;justify-content:center;}
-#onbOvl.show{display:flex;animation:fade .3s;}
-.onbHand{font-size:72px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));animation:onbSwipe 1.7s ease-in-out infinite;position:relative;z-index:2;}
+#onbOvl{position:absolute;inset:0;z-index:46;display:none;background:rgba(10,13,11,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:var(--radius);cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:36px;}
+#onbOvl.show{display:flex;animation:fade .35s;}
+.onbStage{position:relative;width:230px;height:150px;display:flex;align-items:center;justify-content:center;}
+.onbMove{position:relative;animation:onbSwipe 2.4s ease-in-out infinite;}
+.onbGhost{width:88px;height:120px;border:1.5px solid rgba(255,255,255,.75);border-radius:16px;background:rgba(255,255,255,.05);}
+.onbDot{position:absolute;left:50%;bottom:-22px;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:rgba(255,255,255,.9);}
 @keyframes onbSwipe{
-  0%,100%{transform:translateX(-72px) rotate(-14deg);}
-  50%{transform:translateX(72px) rotate(14deg);}
+  0%,100%{transform:translateX(-44px) rotate(-6deg);}
+  50%{transform:translateX(44px) rotate(6deg);}
 }
-.onbSide{position:absolute;top:38%;font-family:var(--font-display);font-weight:800;font-size:34px;color:#fff;text-align:center;line-height:1.05;text-shadow:0 2px 8px rgba(0,0,0,.6);}
-.onbSide span{display:block;font-size:13px;font-weight:700;letter-spacing:.5px;opacity:.85;margin-top:4px;}
-.onbSide.l{left:7%;color:#ffb3a3;}
-.onbSide.r{right:7%;color:#b8f0c0;}
-.onbTxt{position:absolute;bottom:12%;width:100%;text-align:center;color:#fff;font-size:16.5px;font-weight:700;line-height:1.6;text-shadow:0 2px 8px rgba(0,0,0,.6);}
-.onbTxt span{font-size:13.5px;font-weight:600;opacity:.85;}
-.onbTxt b{display:inline-block;margin-top:8px;padding:8px 18px;background:var(--accent);color:var(--accent-ink);border-radius:14px;animation:onbPulse 1.4s infinite;}
-@keyframes onbPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.onbChev{position:absolute;top:50%;transform:translateY(-50%);font-size:34px;font-weight:300;line-height:1;color:rgba(255,255,255,.9);font-family:var(--font-display);}
+.onbChev.l{left:0;animation:onbChevL 2.4s ease-in-out infinite;}
+.onbChev.r{right:0;animation:onbChevR 2.4s ease-in-out infinite;}
+@keyframes onbChevL{0%,100%{opacity:.95;}50%{opacity:.2;}}
+@keyframes onbChevR{0%,100%{opacity:.2;}50%{opacity:.95;}}
+.onbTxt{text-align:center;color:rgba(255,255,255,.95);font-size:16px;font-weight:600;line-height:1.5;letter-spacing:.1px;}
+.onbTxt span{display:block;margin-top:8px;font-size:13px;font-weight:500;color:rgba(255,255,255,.55);}
+.onbCta{padding:10px 26px;border:1px solid rgba(255,255,255,.35);border-radius:999px;color:#fff;font-size:13px;font-weight:600;letter-spacing:.4px;animation:onbBreathe 2s ease-in-out infinite;}
+@keyframes onbBreathe{0%,100%{opacity:.55;}50%{opacity:1;}}
 /* ---- allocation particles ---- */
 #allocOvl .sheet{position:relative;}
 #allocMoneyCard{position:sticky;top:-24px;z-index:6;margin-top:4px;}
@@ -430,8 +434,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Подписаться на носки',m:-990,o:2,imp:1,note:'Подписаться можно на что угодно. Отписаться — сложнее психологически.'},R:{lbl:'Носки и так есть',o:1}},
      {e:'📺',cat:'подписки',t:'Новый сериал выходит эксклюзивно на пятой платформе. У тебя подписки на четыре.',
       L:{lbl:'Пятая подписка',m:-499,o:3},R:{lbl:'Подождать месяц',o:-1,note:'Сериалы никуда не убегают. Подписки — убегают из кошелька.'}},
-     {e:'🗣',cat:'подписки',t:'Умная колонка услышала рекламу и заказала три килограмма корма. Кота у тебя может и не быть.',
-      L:{lbl:'Оставить (вдруг кот будет)',m:-2400,o:2},R:{lbl:'Оформить возврат',o:-2,note:'Голосовые покупки — включи подтверждение по PIN. Колонка не спрашивает, есть ли у тебя кот.'}},
+     {e:'🗣',cat:'подписки',t:'Дал племяннице телефон «поиграть 5 минут». Она купила кристаллов на 2 400 ₽. «Она же ребёнок».',
+      L:{lbl:'Простить, она же ребёнок',m:-2400,o:2},R:{lbl:'Возврат через магазин',o:-2,note:'Встроенные покупки — включи подтверждение по PIN. Магазины возвращают детские покупки, если попросить.'}},
      {e:'💘',cat:'события',t:'Приложение знакомств: «Премиум +500% к вниманию!» 1 999 в месяц.',
       L:{lbl:'Купить премиум',m:-1999,imp:1,fx:'datePremium'},R:{lbl:'Работать над профилем',o:2}},
      {e:'🏃',cat:'здоровье',t:'Все побежали марафон — и ты побежал. Слот участника: 3 500 ₽.',
@@ -440,8 +444,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Сходить',m:-4000,o:8,h:2,note:'Голова — главный актив. Обслуживание дешевле капремонта.'},R:{lbl:'«Сам разберусь»',o:-2}},
      {e:'🤖',cat:'работа',t:'Нейросеть-помощник для работы: подписка 1 990/мес. Коллеги уже строчат отчёты в два клика.',
       L:{lbl:'Подписаться',m:-1990,o:3,note:'Инструменты, ускоряющие работу, — почти всегда хорошая инвестиция. В отличие от курсов о том, как ими пользоваться, за 50 000.'},R:{lbl:'Я и сам неплохо пишу',o:1}},
-     {e:'📦',cat:'быт',t:'Собака соседа съела твой заказ с маркетплейса прямо у двери. Сосед разводит руками. Собака довольна.',
-      L:{lbl:'Спор с поддержкой',o:-3,note:'Час переписки — деньги вернули. Настойчивость — недооценённый финансовый навык.'},R:{lbl:'Плюнуть',m:-1800,o:-1}},
+     {e:'📦',cat:'быт',t:'Вместо наушников с маркетплейса приехал кирпич в плёнке. Продавец: «вы всё выдумываете».',
+      L:{lbl:'Спор с поддержкой',o:-3,note:'Час переписки с фото кирпича — деньги вернули. Настойчивость — недооценённый финансовый навык.'},R:{lbl:'Плюнуть',m:-1800,o:-1}},
      {e:'🛋',cat:'события',t:'Разобрал антресоли: старый телефон, гитара без струны и хлебопечка. Авито ждёт.',
       L:{lbl:'Выставить всё',m:4000,o:3,note:'Хлам — это замороженные деньги. Раз в год размораживай.'},R:{lbl:'«Ещё пригодится»',o:-1}},
      {e:'🎫',cat:'соблазн',t:'Билеты на главный концерт года закончились за час. У перекупов — втрое дороже.',
@@ -2027,10 +2031,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <div class="swipeGlow right" id="glowR"></div>
         <div class="hint">свайп · ← → · тап по варианту</div>
         <div id="onbOvl" onclick="G.closeOnboard()">
-          <div class="onbSide l">⟵<br><span>один<br>выбор</span></div>
-          <div class="onbHand">👆</div>
-          <div class="onbSide r">⟶<br><span>другой<br>выбор</span></div>
-          <div class="onbTxt">Свайпай карточку влево или вправо<br><span>или просто тапни по варианту внизу</span><br><b>Тапни, чтобы начать</b></div>
+          <div class="onbStage">
+            <div class="onbChev l">‹</div>
+            <div class="onbMove"><div class="onbGhost"></div><div class="onbDot"></div></div>
+            <div class="onbChev r">›</div>
+          </div>
+          <div class="onbTxt">Свайп влево или вправо —<br>два разных решения<span>можно и тапнуть по варианту внизу</span></div>
+          <div class="onbCta">Тапни, чтобы начать</div>
         </div>
       </div>
 
