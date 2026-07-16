@@ -227,6 +227,22 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .skillZone.y{left:20%;right:20%;background:color-mix(in srgb,var(--mood) 38%,var(--surface-2));}
 .skillZone.g{left:37%;right:37%;background:color-mix(in srgb,var(--good) 55%,var(--surface-2));}
 .skillMk{position:absolute;top:-5px;width:6px;height:40px;border-radius:3px;background:var(--text);box-shadow:0 2px 6px rgba(0,0,0,.35);}
+/* ---- casual mini-activities ---- */
+.miniHint{text-align:center;font-size:13.5px;color:var(--muted);font-weight:600;min-height:2.6em;margin:8px 0;}
+.boxGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 6px;}
+.boxCell{aspect-ratio:1;font-size:34px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);border-radius:14px;background:var(--surface-2);cursor:pointer;transition:transform .12s;user-select:none;}
+.boxCell:active{transform:scale(.92);}
+.boxCell.open{background:transparent;border-style:dashed;opacity:.65;cursor:default;font-size:26px;color:var(--muted);}
+.boxCell.win{border-color:var(--good);border-style:solid;opacity:1;font-size:34px;}
+.slotRow{display:flex;justify-content:center;gap:10px;margin:16px 0 4px;}
+.slotReel{width:64px;height:74px;font-size:38px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);border-radius:12px;background:var(--surface-2);}
+.slotReel.spin{filter:blur(1.5px);}
+.scrRow{display:flex;justify-content:center;gap:12px;margin:16px 0;}
+.scrCell{width:76px;height:76px;font-size:34px;font-weight:800;display:flex;align-items:center;justify-content:center;border-radius:12px;background:repeating-linear-gradient(45deg,#b3a88f,#b3a88f 6px,#a2977e 6px,#a2977e 12px);color:rgba(0,0,0,.25);cursor:pointer;user-select:none;transition:transform .12s;}
+.scrCell:active{transform:scale(.94);}
+.scrCell.open{background:var(--surface-2);border:1.5px solid var(--border);color:var(--text);cursor:default;}
+.catchZone{position:relative;height:230px;border:1.5px dashed var(--border);border-radius:14px;margin:12px 0 4px;overflow:hidden;background:linear-gradient(to bottom,transparent 82%,var(--surface-2) 82%);}
+.catchPhone{position:absolute;font-size:44px;left:50%;top:-48px;margin-left:-24px;padding:2px 6px;cursor:pointer;user-select:none;z-index:2;}
 /* ---- animated month report ---- */
 .rev{opacity:0;animation:revIn .45s cubic-bezier(.2,.8,.3,1) forwards;}
 @keyframes revIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -430,6 +446,15 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Крутить',m:-2900,imp:1,fx:'gacha'},R:{lbl:'Выйти из игры',o:-2,note:'Гача — казино с аниме-обёрткой. Математика та же.'}},
      {e:'🧿',cat:'соблазн',t:'Маркетплейс рекомендует «энергетический браслет с турмалином». 4,9 звезды, 12 000 отзывов.',
       L:{lbl:'Зарядиться энергией',m:-2900,o:1,imp:1,note:'Ты только что купил плацебо в розницу. Работает, пока веришь.'},R:{lbl:'Читать отзывы ради смеха',o:3}},
+     /* ---- казуальные мини-активности (не чаще каждого 10–15 свайпа) ---- */
+     {e:'📦',cat:'события',mini:1,min:3,t:'В ТЦ розыгрыш: девять коробок, в одной — сертификат на 5 000 ₽. Участие бесплатное, три попытки.',
+      L:{lbl:'Играть!',fx:'miniBoxes'},R:{lbl:'Наверняка разводка',o:-1,note:'Бесплатный розыгрыш без ввода карты — редкий случай, когда матожидание на твоей стороне. Разводка начинается там, где просят «символическую оплату за доставку приза».'}},
+     {e:'🎰',cat:'соблазн',mini:1,min:4,t:'Бар. В углу переливается однорукий бандит. Спин — 300 ₽, джекпот сверкает.',
+      L:{lbl:'Крутнуть пару раз',fx:'miniSlots'},R:{lbl:'Смотреть, как проигрывают другие',o:1}},
+     {e:'🎟',cat:'соблазн',mini:1,min:2,t:'У кассы — моментальная лотерея. 150 ₽, «выигрыш до 1 000 000!»',
+      L:{lbl:'Купить билетик',m:-150,fx:'miniLotto'},R:{lbl:'Пройти мимо',note:'В слове «до 1 000 000» главное слово — «до». Средний билет возвращает меньше половины своей цены.'}},
+     {e:'🤳',cat:'события',mini:1,once:true,min:5,t:'Селфи у парапета. Телефон выскальзывает из рук!',
+      L:{lbl:'Ловить!!!',fx:'miniCatch'},R:{lbl:'Прощай, дружок',m:-3500,o:-2}},
      {e:'🧦',cat:'соблазн',t:'Подписка на носки: каждый месяц — коробка дизайнерских носков. Да, это существует.',
       L:{lbl:'Подписаться на носки',m:-990,o:2,imp:1,note:'Подписаться можно на что угодно. Отписаться — сложнее психологически.'},R:{lbl:'Носки и так есть',o:1}},
      {e:'📺',cat:'подписки',t:'Новый сериал выходит эксклюзивно на пятой платформе. У тебя подписки на четыре.',
@@ -594,6 +619,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       mfo:0, level:1, bonds:0, stocks:0, bondsOpen:false, stocksOpen:false, fund:0, fundOpen:false, examPassed:false,
       iis:0, iisPaid:0, iisOpen:false, crypto:0, cryptoOpen:false, extraRent:0,
       gold:0, goldOpen:false, reit:0, reitOpen:false, unemployed:0, split:0, loveCost:0,
+      step:0, miniAt:-99, miniGap:12,
       deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[], capHist:[], glossary:new Set(),
       mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
     };}
@@ -721,6 +747,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       if (eff.note) toast(eff.note);
     }
     const FX = {
+      miniBoxes(){ markMini(); setTimeout(openBoxes, 400); },
+      miniSlots(){ markMini(); setTimeout(openSlots, 400); },
+      miniLotto(){ markMini(); setTimeout(openLotto, 400); },
+      miniCatch(){ markMini(); setTimeout(openCatch, 400); },
       friendLoan(){ S.pending.push({label:'Друг вернул долг (о, чудо)', amount:10000, chance:.55, failLabel:'Друг «вернёт с зарплаты». Уже третьей.'}); },
       shitcoin(){ S.pending.push({label:'Та самая монета внезапно сделала иксы. Успел продать', amount:25000, chance:.1, failLabel:'Та самая монета: −97%. Советчик уже топит за новую. (Шанс иксов был ~10% — казино с лишними шагами.)'}); },
       upskill(){ S.salary += 4000; toast('Со следующего месяца зарплата +4 000 ₽ — навсегда. Навыки платят.'); },
@@ -843,12 +873,17 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.req === 'lead' && S.flags.lead) ||
         (c.req === 'love' && S.flags.love) ||
         (c.req === 'deduct' && (S.flags.dentalSpend || 0) > (S.flags.deductUsed || 0));
-      const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && !done(c) && reqOk(c));
+      /* казуальные мини-активности — не чаще каждого 10–15 свайпа */
+      const miniOk = (S.step || 0) - (S.miniAt ?? -99) >= (S.miniGap || 12);
+      const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && !done(c) && reqOk(c) && (!c.mini || miniOk));
       const fresh = avail.filter(c=>!S.used.has(c.t));
       /* one-per-run cards (мамин ДР, свадьба, айфон...) never come back from the stale pile */
       const stale = avail.filter(c=>S.used.has(c.t) && !c.once);
       let picks = shuffle(fresh.slice()).slice(0, CARDS_PER_MONTH);
       if (picks.length < CARDS_PER_MONTH) picks = picks.concat(shuffle(stale.slice()).slice(0, CARDS_PER_MONTH - picks.length));
+      /* максимум одна мини-активность в колоде месяца */
+      let gotMini = false;
+      picks = picks.filter(c=>{ if (!c.mini) return true; if (gotMini) return false; gotMini = true; return true; });
       if (!S.depositOpen && S.month >= 2){
         const depCard = POOL.find(c => c.L.fx === 'unlockDeposit');
         if (!picks.includes(depCard)) picks[Math.floor(Math.random()*picks.length)] = depCard;
@@ -1001,6 +1036,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       g.style.opacity = 1; go.style.opacity = 0;
       setTimeout(()=>{ g.style.transition='opacity .4s'; g.style.opacity=0; setTimeout(()=>{ g.style.transition='opacity .1s'; },420); }, 120);
       const eff = data[side];
+      S.step = (S.step || 0) + 1;
       if (eff.fx === '__skill'){
         /* dexterity moment: crisis resolved via timing minigame */
         if (data.isCrisis) S.crisesTotal++;
@@ -1288,9 +1324,142 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       setTimeout(()=>{ updateAlloc(); show('allocOvl'); }, 230);
     }
 
+    /* ===== casual mini-activities: пейсинг не чаще каждого 10–15 свайпа ===== */
+    function markMini(){ S.miniAt = S.step || 0; S.miniGap = 10 + Math.floor(Math.random() * 6); saveGame(); }
+    let MI = null;
+    function closeMini(msg, delay){
+      setTimeout(()=>{
+        hide('miniOvl'); MI = null; renderHUD(); saveGame();
+        if (msg) setTimeout(()=>toast(msg), 250);
+      }, delay ?? 900);
+    }
+    /* 🎁 розыгрыш: найди приз в 9 коробках за 3 попытки (шанс 1/3) */
+    function openBoxes(){
+      MI = { kind:'box', win: Math.floor(Math.random()*9), tries: 3, done: false };
+      $('miniTitle').textContent = '🎁 Розыгрыш: 3 попытки';
+      $('miniBody').innerHTML = '<p style="text-align:center">В одной из девяти коробок — сертификат на 5 000 ₽.</p>' +
+        '<div class="boxGrid">' + Array.from({length:9},(_,i)=>`<div class="boxCell" id="bx${i}" onclick="G.miniBox(${i})">🎁</div>`).join('') + '</div>' +
+        '<p class="miniHint" id="boxHint">Осталось попыток: 3</p>';
+      show('miniOvl');
+    }
+    function miniBox(i){
+      if (!MI || MI.kind !== 'box' || MI.done) return;
+      const el = $('bx'+i); if (!el || el.classList.contains('open')) return;
+      el.classList.add('open');
+      if (i === MI.win){
+        el.textContent = '💳'; el.classList.add('win'); MI.done = true;
+        S.cash += 5000; S.monthLog.push(['🎁 Выигрыш в розыгрыше', 5000]);
+        floatDelta(ICO.m + '<span>+5 000 ₽</span>', 'up');
+        closeMini('🎉 Сертификат твой: +5 000 ₽! Шанс за три попытки был ровно 1 к 3. Бесплатные розыгрыши — единственная лотерея, где матожидание на твоей стороне.');
+      } else {
+        el.textContent = '·'; MI.tries--;
+        if (MI.tries <= 0){
+          MI.done = true;
+          const w = $('bx'+MI.win); if (w){ w.classList.add('open','win'); w.textContent = '💳'; }
+          closeMini('Пусто — приз лежал вон там. Шанс был 1 к 3. Проигрыш в бесплатном розыгрыше не стоит ничего. В платном — стоит всегда.');
+        } else $('boxHint').textContent = 'Осталось попыток: ' + MI.tries;
+      }
+    }
+    /* 🎰 слоты: честная демонстрация отрицательного матожидания */
+    const SLOT_SYM = ['🍒','🍋','🔔','7️⃣'];
+    function openSlots(){
+      MI = { kind:'slot', spins: 0, spent: 0, won: 0, busy: false, done: false, iv: null };
+      $('miniTitle').textContent = '🎰 Однорукий бандит';
+      $('miniBody').innerHTML =
+        '<div class="slotRow"><div class="slotReel" id="sr0">🍒</div><div class="slotReel" id="sr1">🍋</div><div class="slotReel" id="sr2">🔔</div></div>' +
+        '<p class="miniHint" id="slotInfo">Спин — 300 ₽. Три одинаковых — 3 000 ₽.</p>' +
+        '<button class="btn" onclick="G.miniSpin()">Крутить (−300 ₽)</button>' +
+        '<button class="btn sec" onclick="G.miniSlotsDone()">Хватит</button>';
+      show('miniOvl');
+    }
+    function miniSpin(){
+      if (!MI || MI.kind !== 'slot' || MI.busy || MI.done) return;
+      if (S.cash < 300){ $('slotInfo').textContent = 'На спин не хватает. Автомат — единственный, кто тут никогда не проигрывает.'; return; }
+      MI.busy = true; MI.spins++; MI.spent += 300; S.cash -= 300; S.mSpend += 300; renderHUD();
+      const res = [0,1,2].map(()=>SLOT_SYM[Math.floor(Math.random()*4)]);
+      [0,1,2].forEach(i=>$('sr'+i).classList.add('spin'));
+      let tick = 0;
+      MI.iv = setInterval(()=>{
+        if (!MI){ return; }
+        tick++;
+        [0,1,2].forEach(i=>{
+          const el = $('sr'+i); if (!el) return;
+          if (tick < 4 + i*3) el.textContent = SLOT_SYM[Math.floor(Math.random()*4)];
+          else { el.textContent = res[i]; el.classList.remove('spin'); }
+        });
+        if (tick >= 10){
+          clearInterval(MI.iv); MI.iv = null; MI.busy = false;
+          if (res[0] === res[1] && res[1] === res[2]){
+            MI.won += 3000; S.cash += 3000; renderHUD();
+            $('slotInfo').textContent = '🎉 Три ' + res[0] + '! +3 000 ₽. Запомни это чувство — именно на него автомат и ловит.';
+          } else $('slotInfo').textContent = 'Мимо. Потрачено: ' + fmt(MI.spent) + ' · выиграно: ' + fmt(MI.won);
+          if (MI.spins >= 8) miniSlotsDone();
+        }
+      }, 85);
+    }
+    function miniSlotsDone(){
+      if (!MI || MI.kind !== 'slot' || MI.busy) return;
+      MI.done = true;
+      const net = MI.won - MI.spent;
+      if (MI.spent > 0) S.monthLog.push(['🎰 Слоты', net]);
+      closeMini(MI.spins === 0
+        ? 'Ушёл, не сыграв. Скучно, зато бесплатно.'
+        : '🎰 Итог: ' + (net >= 0 ? '+' : '') + fmt(net) + '. Шанс тройки — 1 к 16, а платят ×10: автомат оставляет себе ~37% каждой ставки. Веселье — да. Доход — никогда.', 150);
+    }
+    /* 🎟 скретч-лотерея: билет уже куплен карточкой (−150 ₽) */
+    function openLotto(){
+      const SY = ['🍀','💰','⭐','🍋'];
+      let cells;
+      if (Math.random() < 1/16){ const s = SY[Math.floor(Math.random()*4)]; cells = [s,s,s]; }
+      else { do { cells = [0,1,2].map(()=>SY[Math.floor(Math.random()*4)]); } while (cells[0]===cells[1] && cells[1]===cells[2]); }
+      MI = { kind:'scr', cells, opened: 0, done: false };
+      $('miniTitle').textContent = '🎟 Моментальная лотерея';
+      $('miniBody').innerHTML = '<p style="text-align:center">Стирай поля. Три одинаковых символа — 1 000 ₽.</p>' +
+        '<div class="scrRow">' + [0,1,2].map(i=>`<div class="scrCell" id="sc${i}" onclick="G.miniScratch(${i})">?</div>`).join('') + '</div>';
+      show('miniOvl');
+    }
+    function miniScratch(i){
+      if (!MI || MI.kind !== 'scr' || MI.done) return;
+      const el = $('sc'+i); if (!el || el.classList.contains('open')) return;
+      el.classList.add('open'); el.textContent = MI.cells[i]; MI.opened++;
+      if (MI.opened === 3){
+        MI.done = true;
+        if (MI.cells[0] === MI.cells[1] && MI.cells[1] === MI.cells[2]){
+          S.cash += 1000; S.monthLog.push(['🎟 Лотерея: выигрыш', 1000]);
+          closeMini('🎉 Три ' + MI.cells[0] + ' — +1 000 ₽! Редкая удача: в среднем билет возвращает меньше половины своей цены.');
+        } else closeMini('Не совпало. Лотерея — налог на мечту: организатор забирает около половины всех ставок. 150 ₽ за пару минут фантазий.');
+      }
+    }
+    /* 🤳 реакция: поймай падающий телефон */
+    function openCatch(){
+      MI = { kind:'catch', done: false, t: null };
+      $('miniTitle').textContent = '🤳 Лови!';
+      $('miniBody').innerHTML = '<div class="catchZone"><div class="catchPhone" id="cph" onclick="G.miniCatch()">📱</div></div>' +
+        '<p class="miniHint">Тапни по телефону, пока не долетел до асфальта!</p>';
+      show('miniOvl');
+      MI.t = setTimeout(()=>{
+        if (!MI || MI.kind !== 'catch' || MI.done) return;
+        MI.done = true;
+        const p = $('cph'); if (p) p.textContent = '💥';
+        applyMoney(-3500, true);
+        S.monthLog.push(['🤳 Замена стекла', -3500]);
+        floatDelta(ICO.m + '<span>−3 500 ₽</span>', 'down');
+        closeMini('💥 Хрясь. Замена стекла — 3 500 ₽. Чехол с бортиком стоил бы 500. Страховка всегда дешевле ущерба — пока ущерба ещё нет.', 500);
+      }, 1750);
+      requestAnimationFrame(()=>{ const p = $('cph'); if (p){ p.style.transition = 'top 1.7s cubic-bezier(.5,.05,.9,.6)'; p.style.top = 'calc(100% - 54px)'; } });
+    }
+    function miniCatch(){
+      if (!MI || MI.kind !== 'catch' || MI.done) return;
+      MI.done = true; clearTimeout(MI.t);
+      const p = $('cph'); if (p){ p.style.transition = 'none'; p.textContent = '🙌'; }
+      S.mood = Math.min(100, S.mood + 3);
+      closeMini('🙌 Поймал! Сердце в пятках, экран цел, настроение +3. Реакция — это здорово, но чехол надёжнее.', 500);
+    }
+
     /* ===== dexterity micro-game: перекрой кран (телеграфировано, провал щадящий) ===== */
     let SK = null;
     function openSkill(cost){
+      markMini();
       SK = { cost, t0: Date.now(), raf: null, timeout: null };
       $('skillBody').innerHTML = `
         <p style="font-weight:700">Вода прибывает! Жми «Перекрыть», когда бегунок в зелёной зоне.</p>
@@ -1883,6 +2052,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
        'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','fund','fundOpen','examPassed',
        'iis','iisPaid','iisOpen','crypto','cryptoOpen','extraRent','gold','goldOpen','reit','reitOpen','unemployed','split','loveCost',
+       'step','miniAt','miniGap',
        'bestCap','gotBonus','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
         .forEach(k=>scal[k]=S[k]);
       LS.set(SAVE_KEY, {
@@ -2149,6 +2319,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         <h2>🕹 Торговая сессия</h2>
         <div id="tradeBody"></div>
       </div></div>
+      <div class="ovl" id="miniOvl"><div class="sheet">
+        <h3 id="miniTitle"></h3>
+        <div id="miniBody"></div>
+      </div></div>
       <div class="ovl" id="skillOvl"><div class="sheet">
         <h2>🚿 Прорвало кран!</h2>
         <div id="skillBody"></div>
@@ -2157,7 +2331,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     `;
 
     $('app').innerHTML = SHELL;
-    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard };
+    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
     let _fitting=false, _lastS=-1;
