@@ -135,7 +135,14 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 .ovl{position:absolute;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(10,14,12,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
 .ovl.show{display:flex;animation:fade .18s;}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-.sheet{width:100%;max-width:360px;max-height:94%;overflow-y:auto;background:var(--surface);border:1.5px solid var(--border);border-radius:26px;box-shadow:0 40px 80px -24px rgba(0,0,0,.5);padding:24px 22px;text-align:center;animation:pop .22s cubic-bezier(.2,.8,.3,1);}
+.sheet{width:100%;max-width:360px;max-height:94%;overflow-y:auto;background:var(--surface);border:1.5px solid var(--border);border-radius:26px;box-shadow:0 40px 80px -24px rgba(0,0,0,.5);padding:24px 22px;text-align:center;animation:pop .22s cubic-bezier(.2,.8,.3,1);scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--border) 55%,transparent) transparent;}
+.sheet::-webkit-scrollbar{width:3px;}
+.sheet::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--border) 65%,transparent);border-radius:3px;}
+.sheet::-webkit-scrollbar-track{background:transparent;}
+html,body{overflow:hidden;height:100%;}
+.yRow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 2px;border-bottom:1px dashed color-mix(in srgb,var(--border) 60%,transparent);font-size:12.5px;text-align:left;}
+.yRow span:first-child{font-weight:700;color:var(--text);white-space:nowrap;}
+.yRow span:last-child{color:var(--muted);font-weight:600;text-align:right;}
 @keyframes pop{0%{opacity:0;transform:translateY(22px) scale(.92)}58%{opacity:1;transform:translateY(-6px) scale(1.025)}80%{transform:translateY(2px) scale(.995)}100%{opacity:1;transform:none}}
 @keyframes popOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(18px) scale(.93)}}
 @keyframes fadeOut{from{opacity:1}to{opacity:0}}
@@ -311,13 +318,13 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Купить',m:-4000,o:8,imp:1},R:{lbl:'Пройти мимо',o:-4,note:'Скидка — это не заработок. Это способ потратить.'}},
      {e:'🍻',cat:'друзья',t:()=>`Пятница. Друзья зовут в ${pick(['бар','караоке','боулинг','паб-квиз','кальянную'])}. «Ты вообще живой там?»`,
       L:{lbl:'Пойти',m:-3000,o:8,r:8},R:{lbl:'«В другой раз»',r:-7,o:-3}},
-     {e:'🛵',cat:'быт',t:()=>`Тяжёлый день. Палец сам тянется к доставке ${pick(['роллов','пиццы','бургеров','шаурмы «той самой»'])}.`,
+     {e:'🛵',cat:'быт',max:16,t:()=>`Тяжёлый день. Палец сам тянется к доставке ${pick(['роллов','пиццы','бургеров','шаурмы «той самой»'])}.`,
       L:{lbl:'Заказать',m:-1800,o:6,imp:1},R:{lbl:'Гречка с котлетой',o:-3,h:3}},
-     {e:'📺',cat:'подписки',t:'Стриминг снова списал 599 ₽. Ты смотрел там одно видео. В марте.',
+     {e:'📺',cat:'подписки',max:16,t:'Стриминг снова списал 599 ₽. Ты смотрел там одно видео. В марте.',
       L:{lbl:'Пусть живёт',m:-599,o:2},R:{lbl:'Отменить',o:-2,note:'Подписки — тихий насос из кармана. Ревизия раз в квартал.'}},
      {e:'🚕',cat:'быт',t:'Ливень. Автобус будет через 20 минут. Такси — через две.',
       L:{lbl:'Такси',m:-700,o:4},R:{lbl:'Подождать',o:-3,h:-2}},
-     {e:'☕',cat:'привычки',t:'Кофейня у офиса выучила твоё имя. Это тревожный знак: минус 350 каждый день.',
+     {e:'☕',cat:'привычки',max:16,t:'Кофейня у офиса выучила твоё имя. Это тревожный знак: минус 350 каждый день.',
       L:{lbl:'Это святое',m:-2400,o:5},R:{lbl:'Термос из дома',m:-300,o:-2,note:'350 ₽ в день = 84 000 ₽ в год. Цена отпуска.'}},
      {e:'🎂',cat:'работа',t:'Коллега собирает «по тысяче» на день рождения шефа. Уже третий раз в этом году.',
       L:{lbl:'Скинуться',m:-1000,r:5},R:{lbl:'«Я скидывал!»',r:-6,o:2}},
@@ -476,6 +483,30 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Починить всё',m:-14000,r:2,note:'Содержание — скрытая статья доходной недвижимости: в среднем 1–2 месяца аренды в год уходит на ремонт и простои.'},R:{lbl:'«Потом»',r:-4,o:-2}},
      {e:'📈',cat:'жильё',req:'renting',once:true,min:27,t:'Собственник: «Рынок вырос, аренда теперь +4 000». Классика жанра.',
       L:{lbl:'Согласиться',fx:'rentUp'},R:{lbl:'Переехать дешевле',o:-5,note:'Переезд съел выходные и нервы, зато платёж прежний. Аренда — это гибкость, но не стабильность.'}},
+     {e:'🏘',cat:'жильё',req:'canShare',once:true,min:26,t:'Димон нашёл студию под сдачу за 600 000 — в складчину. Твоя доля 300 000, аренда и расходы пополам.',
+      L:{lbl:'Вложиться в долю',fx:'invShareBuy'},R:{lbl:'Пас',o:1,note:'Совместная собственность — это ещё и совместные решения: продать, ремонтировать, спорить. Отказаться — тоже решение.'}},
+     {e:'🤝',cat:'жильё',req:'shareHeld',once:true,min:30,t:'Димон: «Хочу выкупить твою долю. Дам на 15% больше, чем вложил».',
+      L:{lbl:'Продать с премией',fx:'invShareSell'},R:{lbl:'Держать: аренда капает',o:1,note:'Тоже стратегия: доходная недвижимость любит терпеливых. Но помни — в следующий раз премию могут и не предложить.'}},
+     /* ---- машины: цена владения, а не цена покупки ---- */
+     {e:'🚗',cat:'события',req:'canCar',once:true,t:'Друг переезжает и продаёт свой хэтчбек за 250 000 — «почти даром, только забирай».',
+      L:{lbl:'Купить (250 000)',fx:'carBuy'},R:{lbl:'Каршеринг дешевле',o:1,note:'Посчитал: машина — это бензин, парковка, страховка и ремонт, ~8–12К в месяц сверх цены. Каршеринг при твоих поездках пока выигрывает.'}},
+     {e:'📋',cat:'события',req:'car',t:'Страховой агент: «Каско — 4 000 в месяц. Во дворах нынче тесно».',
+      L:{lbl:'Оформить каско',fx:'kasko'},R:{lbl:'«Я аккуратно езжу»',o:1,note:'Аккуратно ездишь ты. Вопрос — как ездят остальные.'}},
+     {e:'💥',cat:'события',req:'car',once:true,min:11,t:'Во дворе кто-то притёр крыло и уехал. Записки нет, камер нет, свидетелей нет.',
+      L:{lbl:'Чинить',fx:'carCrash'},R:{lbl:'Ездить с боевым шрамом',o:-3,note:'Царапина не мешает ехать, но собьёт цену при продаже. Машина помнит всё.'}},
+     {e:'🏎',cat:'соблазн',req:'canBmw',once:true,min:20,t:'Салон: «BMW в кредит! Взнос 300 000, платёж 42 000/мес. Вы этого достойны».',
+      L:{lbl:'Достоин!',fx:'bmwBuy',imp:1},R:{lbl:'Достоин, но не куплю',o:2,note:'Новая машина теряет 15–20% цены в первый год. Кредитная машина — минус-актив: дешевеет сама, пока ты платишь проценты.'}},
+     /* ---- поздняя игра: ставки выше, вызовы серьёзнее ---- */
+     {e:'🧾',cat:'события',once:true,min:20,t:'Письмо из налоговой: «Просим пояснить регулярные поступления на карту». Подработки замечены.',
+      L:{lbl:'Самозанятость, заплатить 6%',m:-15000,o:-1,note:'6% с подработок — дешевле штрафов и бессонницы. Легализация — это тоже страховка.'},R:{lbl:'Игнорировать письмо',fx:'taxDodge'}},
+     {e:'🧊',cat:'инвестиции',req:'cryptoHeld',once:true,min:20,t:'Криптобиржа «приостановила вывод средств на техобслуживание». Третий день.',
+      L:{lbl:'Вывести срочно (−20%)',fx:'cryptoExit'},R:{lbl:'Ждать разблокировки',fx:'cryptoWait'}},
+     {e:'☕',cat:'соблазн',once:true,min:21,t:'Одногруппник зовёт в «беспроигрышный бизнес»: кофейни самообслуживания. Доля — 150 000, «отобьётся за квартал».',
+      L:{lbl:'Войти в долю',m:-150000,imp:1,fx:'bizIn'},R:{lbl:'«Беспроигрышных не бывает»',o:1,note:'90% малых бизнесов не переживают три года. Инвестируй в то, что можешь посчитать.'}},
+     {e:'👨‍👩‍👦',cat:'семья',once:true,min:18,t:'Звонок от мамы: отцу нужна операция на колене. Не срочно-страшная, но 50 000 — и очередь на полгода короче.',
+      L:{lbl:'Оплатить лечение',m:-50000,r:8,o:3},R:{lbl:'«Сейчас не могу»',r:-10,o:-6,note:'Семья — тоже актив. Самый недиверсифицируемый.'}},
+     {e:'✈️',cat:'события',once:true,min:19,t:'Врач смотрит анализы: «Ещё полгода в таком режиме — посыпетесь». Настоящий отпуск — 90 000.',
+      L:{lbl:'Взять отпуск',m:-90000,h:10,o:20},R:{lbl:'«Потом отдохну»',h:-4,o:-8,note:'Экономия на восстановлении — самый дорогой способ сэкономить: больничные и выгорание срежут зарплату сильнее.'}},
      {e:'🧦',cat:'соблазн',t:'Подписка на носки: каждый месяц — коробка дизайнерских носков. Да, это существует.',
       L:{lbl:'Подписаться на носки',m:-990,o:2,imp:1,note:'Подписаться можно на что угодно. Отписаться — сложнее психологически.'},R:{lbl:'Носки и так есть',o:1}},
      {e:'📺',cat:'подписки',t:'Новый сериал выходит эксклюзивно на пятой платформе. У тебя подписки на четыре.',
@@ -559,7 +590,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       L:{lbl:'Достойный подарок',m:-4000,r:8,o:3},R:{lbl:'Открытка и звонок',r:-5}},
      {e:'📶',cat:'подписки',t:'Оператор тихо перевёл тебя на тариф подороже. Заботливо, без спроса.',
       L:{lbl:'Не заметить',m:-400},R:{lbl:'Позвонить и вернуть',o:-2,note:'Раз в полгода проверяй тарифы и подписки — операторы считают твою невнимательность своей выручкой.'}},
-     {e:'🍱',cat:'привычки',t:'Бизнес-ланч у офиса подорожал до 450. Очередь не уменьшилась.',
+     {e:'🍱',cat:'привычки',max:16,t:'Бизнес-ланч у офиса подорожал до 450. Очередь не уменьшилась.',
       L:{lbl:'Продолжать',m:-3500,o:2},R:{lbl:'Контейнеры из дома',o:-3,h:2}},
      {e:'🧾',cat:'финансы',req:'deduct',t:'За недавнее лечение зубов положен налоговый вычет — 2 600 ₽. Но бумажки, госуслуги, вот это всё.',
       L:{lbl:'Заполнить',m:2600,o:-2,fx:'taxDeduct',note:'Вычеты — деньги, которые государство должно тебе. Лень — единственная причина их не забирать.'},R:{lbl:'Ну его',o:1}},
@@ -642,6 +673,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       gold:0, goldOpen:false, reit:0, reitOpen:false, unemployed:0, split:0, loveCost:0,
       step:0, miniAt:-99, miniGap:12,
       home:0, mortgage:0, mortPay:0, rentUp:0,
+      invShare:0, car:0, carLoan:0, carPay:0, carCost:0,
       deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[], capHist:[], glossary:new Set(),
       mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
     };}
@@ -680,6 +712,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['goldChipA','🥇','Золото', S.gold, S.gold > 0],
         ['reitChipA','🏢','REIT', S.reit, S.reit > 0],
         ['homeChipA','🏠','Квартира', S.home - S.mortgage, S.home > 0],
+        ['shareChipA','🏘','Доля', S.invShare, S.invShare > 0],
+        ['carChipA','🚗','Машина', S.car - S.carLoan, S.car > 0],
       ].filter(c=>c[4]);
       $('assetLine').innerHTML = chips.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       if (cushionFx){ cushionFx = false; const el = $('cushionChip'); if (el){ el.classList.add('hit'); } }
@@ -697,9 +731,12 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['🥇', 'Золото (страховка от обвалов)', S.gold],
         ['🏢', 'REIT (аренда без квартиры)', S.reit],
         ['🏠', 'Квартира (дорожает ~4%/год)', S.home],
+        ['🏘', 'Доля в студии (аренда пополам)', S.invShare],
+        ['🚗', 'Машина (дешевеет ~1%/мес)', S.car],
       ].filter((r,i)=>i===0 || r[2] > 0);
       $('portBody').innerHTML = rows.map(([ico,l,v])=>`<div class="dRow"><span style="min-width:0">${ico} ${termify(l)}</span><span class="dv">${fmt(v)}</span></div>`).join('')
         + (S.mortgage ? `<div class="dRow"><span>🏦 ${termify('Ипотека')} (остаток)</span><span class="dv" style="color:var(--bad)">−${fmt(S.mortgage)}</span></div>` : '')
+        + (S.carLoan ? `<div class="dRow"><span>🏎 Автокредит (остаток)</span><span class="dv" style="color:var(--bad)">−${fmt(S.carLoan)}</span></div>` : '')
         + (S.debt ? `<div class="dRow"><span>🩸 Долг (30%/мес)</span><span class="dv" style="color:var(--bad)">−${fmt(S.debt)}</span></div>` : '')
         + `<div class="dRow" style="border-bottom:none"><span><b>Капитал всего</b></span><span class="dv">${fmt(totalCap())}</span></div>`;
       show('portOvl');
@@ -787,6 +824,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         '<button class="qOpt" onclick="G.homeMode(\'rent\')">🔑 <b>Сдавать за 25 000</b><br>сам продолжаешь снимать; арендатор почти закрывает ипотеку, но бывают простои</button>';
       show('miniOvl');
     }
+    function toggleYields(){ const p = $('yieldPanel'); p.style.display = p.style.display === 'none' ? '' : 'none'; }
     function homeMode(mode){
       if (S.flags.homeLive || S.flags.homeRent) return;
       S.flags.homeLive = mode === 'live'; S.flags.homeRent = mode === 'rent';
@@ -864,7 +902,45 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         S.monthLog.push(['🏠 Первый взнос за квартиру', -450000]);
         setTimeout(openHomeMode, 420);
       },
-      homeSkip(){ S.flags.homeDecided = true; },
+      homeSkip(){ S.flags.homeSkipUntil = S.month + 3; toast('Ок, пока снимаем и инвестируем. Но рынок не ждёт — риелтор вернётся с этим вопросом через пару месяцев.'); },
+      carBuy(){
+        if (!drawFunds(250000)) return;
+        S.car = 250000; S.carCost = 8000;
+        S.monthLog.push(['🚗 Хэтчбек от друга', -250000]);
+        toast('🚗 Своя машина! Взнос собран с карты, депозита и подушки — в этом порядке. Теперь в ведомости появятся бензин, парковка и страховка: машина — это не цена покупки, это цена владения.');
+      },
+      bmwBuy(){
+        if (!drawFunds(300000)) return;
+        if (S.car > 0){ S.cash += S.car; S.monthLog.push(['🚗 Продал старую машину', S.car]); }
+        S.car = 2500000; S.carLoan = 2200000; S.carPay = 42000; S.carCost = 14000;
+        S.monthLog.push(['🏎 Взнос за BMW', -300000]);
+        toast('🏎 Красивая. Дорогая. Дешевеющая: −1% стоимости каждый месяц, пока кредит стоит на месте. Следи за отчётами — это будет наглядно.');
+      },
+      kasko(){ S.flags.kasko = true; toast('🛡 Каско оформлено: +4 000 ₽/мес к расходам на машину. Страховка — это покупка предсказуемости.'); },
+      carCrash(){
+        if (S.flags.kasko){
+          toast('🛡 Каско закрыло ремонт полностью. Годовая страховка окупилась одним ударом чужого бампера.');
+        } else {
+          applyMoney(-35000, true);
+          S.monthLog.push(['🚗 Ремонт крыла', -35000]);
+          toast('Ремонт крыла: −35 000 ₽. Каско за 4 000/мес закрыло бы это целиком. Страховка всегда кажется дорогой — ровно до первого удара.');
+        }
+      },
+      invShareBuy(){
+        if (!drawFunds(300000)) return;
+        S.invShare = 300000;
+        S.monthLog.push(['🏘 Доля в студии (складчина)', -300000]);
+        toast('🏘 Твоя половина студии оформлена (деньги собраны: карта → депозит → подушка). Аренда пополам будет капать в ведомости. Помни: совладелец — это и партнёр, и риск.');
+      },
+      invShareSell(){
+        const out = Math.round(S.invShare * 1.15);
+        S.cash += out; S.monthLog.push(['🏘 Продал долю партнёру (+15%)', out]); S.invShare = 0;
+        toast('🏘 Вышел с премией +15%. Редкая удача: обычно долю в квартире продать трудно — неликвидность и есть скрытая цена недвижимости.');
+      },
+      taxDodge(){ S.pending.push({ chance:.5, amount:0, label:'🧾 Налоговая пока отстала. В этот раз.', failLabel:'⚖️ Налоговая насчитала налог, пени и штраф. Письма из налоговой не рассасываются.', failAmount:45000 }); },
+      cryptoExit(){ const out = Math.round(S.crypto * 0.8); S.cash += out; S.monthLog.push(['🧊 Срочный вывод крипты (−20%)', out]); S.crypto = 0; toast('Вывел с потерей 20% — зато живые деньги. Биржа — не банк: страховки вкладов там нет.'); },
+      cryptoWait(){ S.pending.push({ chance:.5, amount:0, label:'🧊 Биржа разблокировала вывод — крипта снова доступна. Пронесло.', failLabel:'🧊 Биржа обанкротилась вместе с твоей криптой. «Not your keys — not your coins».', cryptoLoss:true }); },
+      bizIn(){ S.pending.push({ chance:.3, amount:320000, delay:3, label:'☕ Кофейня внезапно выжила — партнёр выкупил твою долю с прибылью', failLabel:'☕ Кофейня закрылась через квартал. «Беспроигрышных» бизнесов не бывает — бывают непосчитанные риски.' }); },
       refi(){ S.mortPay = Math.max(20000, S.mortPay - 4000); toast('📉 Рефинансирование: платёж −4 000 ₽/мес навсегда. ~48 000 ₽ в год за неделю бумажной беготни — лучшая почасовая ставка в твоей жизни.'); },
       rentUp(){ S.rentUp = (S.rentUp || 0) + 4000; toast('Аренда теперь дороже на 4 000 ₽/мес. У съёма есть цена, которую не пишут в объявлении: её назначает собственник, когда захочет.'); },
       rebalance(){
@@ -927,7 +1003,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.L.fx === 'unlockCrypto' && S.cryptoOpen) ||
         (c.L.fx === 'openExam2' && S.goldOpen) ||
         (c.L.fx === 'openExam3' && S.flags.mortgageOk) ||
-        (c.L.fx === 'homeBuy' && S.flags.homeDecided) ||
+        (c.L.fx === 'homeBuy' && S.home > 0) ||
+        (c.L.fx === 'kasko' && S.flags.kasko) ||
         (c.L.fx === 'gym' && S.flags.gym) ||
         (c.L.fx === 'dental' && S.flags.dental) ||
         (c.L.fx === 'invCourse' && S.flags.invEdu) ||
@@ -949,11 +1026,18 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         (c.req === 'home' && S.home > 0) ||
         (c.req === 'homeLive' && S.flags.homeLive) ||
         (c.req === 'homeRent' && S.flags.homeRent) ||
-        (c.req === 'renting' && S.level >= 5 && !S.home && S.flags.homeDecided) ||
+        (c.req === 'renting' && S.level >= 5 && !S.home && S.flags.homeSkipUntil) ||
+        (c.req === 'car' && S.car > 0) ||
+        (c.req === 'canCar' && !S.car && S.month >= 9 && liquidAll() >= 250000) ||
+        (c.req === 'canBmw' && S.level >= 4 && liquidAll() >= 300000 && S.carLoan === 0) ||
+        (c.req === 'canShare' && S.level >= 5 && !S.invShare && liquidAll() >= 300000) ||
+        (c.req === 'shareHeld' && S.invShare > 0) ||
+        (c.req === 'cryptoHeld' && S.crypto > 0) ||
         (c.req === 'deduct' && (S.flags.dentalSpend || 0) > (S.flags.deductUsed || 0));
       /* казуальные мини-активности — не чаще каждого 10–15 свайпа */
       const miniOk = (S.step || 0) - (S.miniAt ?? -99) >= (S.miniGap || 12);
-      const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && !done(c) && reqOk(c) && (!c.mini || miniOk));
+      /* мелкие ранние соблазны уходят из поздней игры (c.max), ставки растут */
+      const avail = POOL.filter(c=>(!c.min || S.month >= c.min) && (!c.max || S.month <= c.max) && !done(c) && reqOk(c) && (!c.mini || miniOk));
       const fresh = avail.filter(c=>!S.used.has(c.t));
       /* one-per-run cards (мамин ДР, свадьба, айфон...) never come back from the stale pile */
       const stale = avail.filter(c=>S.used.has(c.t) && !c.once);
@@ -993,7 +1077,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         const mCard = POOL.find(c => c.L.fx === 'openExam3');
         if (!picks.includes(mCard)) picks[Math.floor(Math.random()*picks.length)] = mCard;
       }
-      if (S.level >= 5 && S.flags.mortgageOk && !S.flags.homeDecided){
+      /* отказ от ипотеки не финален: вопрос возвращается через 3 месяца */
+      if (S.level >= 5 && S.flags.mortgageOk && !S.home && (!S.flags.homeSkipUntil || S.month >= S.flags.homeSkipUntil)){
         const hCard = POOL.find(c => c.L.fx === 'homeBuy');
         if (!picks.includes(hCard)) picks[Math.floor(Math.random()*picks.length)] = hCard;
       }
@@ -1179,6 +1264,21 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           } else { rows.push(['🔑 Доход от сдачи', 25000]); total += 25000; }
         }
       }
+      /* доля в студии со складчины: аренда пополам, простои — тоже пополам */
+      if (S.invShare > 0){
+        if (Math.random() < 0.12){ rows.push(['🏘 Доля: простой арендатора', 0]); }
+        else { rows.push(['🏘 Доля в студии: аренда', 6000]); total += 6000; }
+      }
+      /* машина: цена владения */
+      if (S.car > 0){
+        rows.push(['🚗 Бензин, парковка, мелочи', -S.carCost]); total -= S.carCost;
+        if (S.flags.kasko){ rows.push(['🛡 Каско', -4000]); total -= 4000; }
+      }
+      if (S.carPay > 0){
+        rows.push([`🏎 Автокредит (остаток ${fmtK(S.carLoan)})`, -S.carPay]); total -= S.carPay;
+        S.carLoan = Math.max(0, S.carLoan - 12000);
+        if (S.carLoan === 0){ S.carPay = 0; noteQueue.push('🏎 Автокредит закрыт. Машина теперь действительно твоя — и всё ещё дешевеет.'); }
+      }
       if (S.split > 0){ rows.push([`Сплит-платёж (осталось ${S.split})`, -2475]); total -= 2475; S.split--; }
       if (S.loveCost > 0){ rows.push(['💞 Свидания, цветы, кино', -S.loveCost]); total -= S.loveCost; S.mood = Math.min(100, S.mood + 3); S.rel = Math.min(100, S.rel + 2); }
       if (S.catCost){ rows.push(['Кот (корм, наполнитель, вайб)', -S.catCost]); total -= S.catCost; }
@@ -1204,7 +1304,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     /* ---- goals & cash flow ---- */
     const GOALS = { cushion:60000, capital:150000, quality:50 };
     function maxMonths(){ return S.level >= 5 ? 36 : (S.level >= 4 ? 24 : (S.level >= 3 ? 18 : (S.level >= 2 ? 12 : MONTHS))); }
-    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund + S.iis + S.crypto + S.gold + S.reit + S.home - S.mortgage - S.debt; }
+    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund + S.iis + S.crypto + S.gold + S.reit + S.home - S.mortgage + S.invShare + S.car - S.carLoan - S.debt; }
+    const liquidAll = () => S.cash + S.deposit + S.cushion;
     function goalsHTML(){
       const cap = totalCap();
       const q = Math.round((S.health + S.mood + S.rel) / 3);
@@ -1625,6 +1726,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         }
         else {
           if (p.failAmount){ S.cash -= p.failAmount; rows.push(['⚖️ Списание: проигранный спор / маржин-колл', -p.failAmount]); }
+          if (p.cryptoLoss && S.crypto > 0){ rows.push(['🧊 Крипта на бирже потеряна', -S.crypto]); S.crypto = 0; }
           if (p.failLabel) noteQueue.push(p.failLabel);
         }
         return false;
@@ -1702,6 +1804,16 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           S.cash += 45000; rows.push(['🏛 Налоговый вычет за квартиру (первая часть)', 45000]);
           noteQueue.push('🏛 Вычет 13% за покупку жилья: первая часть пришла. В реальности можно вернуть до 260 000 ₽ с цены квартиры и ещё до 390 000 ₽ с процентов по ипотеке — про вторую часть забывают почти все.');
         }
+      }
+      /* доля в студии дорожает как квартира */
+      if (S.invShare > 0){
+        const sg = Math.round(S.invShare * 0.003);
+        S.invShare += sg; rows.push(['🏘 Доля: переоценка +0,3%', sg]);
+      }
+      /* машина дешевеет — единственный «актив» с гарантированным минусом */
+      if (S.car > 0){
+        const cd = Math.round(S.car * 0.01);
+        S.car -= cd; rows.push(['🚗 Машина: амортизация −1%', -cd]);
       }
       /* доля риска расползлась — мягкий пинок про ребалансировку (раз за ран) */
       if (S.level >= 2 && S.cushion >= 60000){
@@ -1868,6 +1980,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         ['stGold','🥇','Золото', S.gold, S.goldOpen || S.gold > 0],
         ['stReit','🏢','REIT', S.reit, S.reitOpen || S.reit > 0],
         ['stHome','🏠','Квартира', S.home - S.mortgage, S.home > 0],
+        ['stShare','🏘','Доля', S.invShare, S.invShare > 0],
+        ['stCar','🚗','Машина', S.car - S.carLoan, S.car > 0],
       ].filter(r=>r[4]);
       $('allocAssets').innerHTML = st.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
@@ -2129,6 +2243,8 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
         {v:S.gold, c:'var(--mood)', ico:'🥇', l:'Золото'},
         {v:S.reit, c:'var(--muted)', ico:'🏢', l:'REIT'},
         {v:S.home - S.mortgage, c:'var(--text)', ico:'🏠', l:'Квартира (своя доля)'},
+        {v:S.invShare, c:'var(--rel)', ico:'🏘', l:'Доля в студии'},
+        {v:S.car - S.carLoan, c:'var(--muted)', ico:'🚗', l:'Машина'},
       ].filter(p=>p.v > 0);
       const gross = parts.reduce((x,p)=>x+p.v, 0) || 1;
       /* оценка структуры: эффективно ли, безопасно ли — и что делать */
@@ -2229,7 +2345,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
       ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
        'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','fund','fundOpen','examPassed',
        'iis','iisPaid','iisOpen','crypto','cryptoOpen','extraRent','gold','goldOpen','reit','reitOpen','unemployed','split','loveCost',
-       'step','miniAt','miniGap','home','mortgage','mortPay','rentUp',
+       'step','miniAt','miniGap','home','mortgage','mortPay','rentUp','invShare','car','carLoan','carPay','carCost',
        'bestCap','gotBonus','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
         .forEach(k=>scal[k]=S[k]);
       LS.set(SAVE_KEY, {
@@ -2463,6 +2579,20 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
           <div class="assetLine" id="allocAssets"></div>
         </div>
         <p id="allocWarn" style="display:none;margin:10px 0 0;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,var(--bad) 14%,var(--surface));border:1.5px solid var(--bad);color:var(--bad);font-weight:700;font-size:13.5px;text-align:left">⚠️ На карте минус. Переведи деньги из активов (кнопки «→💰» ниже) — иначе в новый месяц войдёшь с микрозаймом под 30%/мес.</p>
+        <button class="btn sec" style="margin-top:10px;font-size:12.5px;padding:8px 14px" onclick="G.toggleYields()">📊 Что сколько приносит?</button>
+        <div id="yieldPanel" style="display:none;margin-top:6px">
+          <div class="yRow"><span>🛡 Подушка</span><span>+0,5%/мес · мгновенный доступ, щит от кризисов</span></div>
+          <div class="yRow"><span>🏦 Вклад</span><span>+1%/мес · надёжно, скучно</span></div>
+          <div class="yRow"><span>📜 Облигации</span><span>+1,1%/мес купоном · стабильно</span></div>
+          <div class="yRow"><span>📦 Фонд</span><span>−2,5…+3,5%/мес · при обвале −8%</span></div>
+          <div class="yRow"><span>📈 Акции</span><span>−9…+11%/мес · раз в ~10 мес обвал −18%</span></div>
+          <div class="yRow"><span>🥇 Золото</span><span>−2…+3%/мес · +8…12% когда рынки падают</span></div>
+          <div class="yRow"><span>🏢 REIT</span><span>+0,8%/мес деньгами + переоценка ±</span></div>
+          <div class="yRow"><span>🪙 Крипта</span><span>−35…+50%/мес · казино с графиком</span></div>
+          <div class="yRow"><span>🏛 ИИС</span><span>+13% от взносов в финале · заперт до конца</span></div>
+          <div class="yRow"><span>🏠 Квартира</span><span>+0,3%/мес + экономия аренды / доход от сдачи</span></div>
+          <p class="small" style="margin:8px 0 0;text-align:left">Правило: чем выше возможная доходность — тем сильнее качели. Сначала подушка, потом стабильное, рисковое — на деньги, потерю которых переживёшь.</p>
+        </div>
         <div class="alloc">
           <button id="allocCush" onclick="G.alloc('cushion')">🛡 В подушку<b>+10&nbsp;000</b></button>
           <button id="allocDep" onclick="G.alloc('deposit')" disabled>🏦 На депозит<b>+10&nbsp;000</b></button>
@@ -2524,7 +2654,7 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
     `;
 
     $('app').innerHTML = SHELL;
-    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, startLevel5, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, devLevel5, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch, homeMode };
+    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, startLevel5, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, devLevel5, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch, homeMode, toggleYields };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
     let _fitting=false, _lastS=-1;
