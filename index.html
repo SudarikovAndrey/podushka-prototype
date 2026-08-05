@@ -508,6 +508,15 @@ html,body{overflow:hidden;height:100%;}
       L:{lbl:'Починить всё',m:-14000,r:2,note:'Содержание — скрытая статья доходной недвижимости: в среднем 1–2 месяца аренды в год уходит на ремонт и простои.'},R:{lbl:'«Потом»',r:-4,o:-2}},
      {e:'📈',cat:'жильё',req:'renting',once:true,min:27,t:'Собственник: «Рынок вырос, аренда теперь +4 000». Классика жанра.',
       L:{lbl:'Согласиться',fx:'rentUp'},R:{lbl:'Переехать дешевле',o:-5,note:'Переезд съел выходные и нервы, зато платёж прежний. Аренда — это гибкость, но не стабильность.'}},
+     /* ---- level 6: фундаментальный анализ ---- */
+     {e:'🔍',cat:'инвестиции',req:'lvl6',t:'Брокер открыл витрину отдельных компаний: «Хотите разобрать две на выбор? Покажем цифры».',
+      L:{lbl:'Разобрать компании',fx:'quest'},R:{lbl:'Позже',o:0}},
+     {e:'📋',cat:'инвестиции',req:'questsDone',t:'Три разбора позади. Брокер: «Сдайте тест аналитика — откроем покупку конкретных компаний».',
+      L:{lbl:'Пройти тест',fx:'openExam4'},R:{lbl:'Потом',o:1}},
+     {e:'📰',cat:'инвестиции',req:'picksHeld',once:true,min:39,t:'«НейроЧип отчитался хуже прогноза!» — кричат заголовки. Акция за день −12%.',
+      L:{lbl:'Докупить на просадке',o:-1,note:'Если бизнес не изменился, а цена упала — это скидка. Если изменился — это предупреждение. Разница видна в отчёте, а не в заголовке.'},R:{lbl:'Продать в панике',o:-4,note:'Продажа по заголовку — самый дорогой способ инвестировать. Один квартал хуже прогноза ещё не меняет качество бизнеса.'}},
+     {e:'🤳',cat:'инвестиции',req:'picksHeld',once:true,min:41,t:'Блогер: «ГазПрок — иксы! Дивиденды 8%, дёшево по P/E!» У ГазПрока Debt/EBITDA 2,6 и отрицательный FCF.',
+      L:{lbl:'Верю блогеру',m:-30000,imp:1,note:'Дешёвая компания с большим долгом и без живых денег — это «ловушка стоимости». Дёшево не равно выгодно.'},R:{lbl:'Свериться с цифрами',o:2,note:'Ты посмотрел долг и FCF раньше, чем на дивдоходность. Именно этому и учит тест аналитика.'}},
      {e:'🏘',cat:'жильё',req:'canShare',once:true,min:26,t:'Димон нашёл студию под сдачу за 600 000 — в складчину. Твоя доля 300 000, аренда и расходы пополам.',
       L:{lbl:'Вложиться в долю',fx:'invShareBuy'},R:{lbl:'Пас',o:1,note:'Совместная собственность — это ещё и совместные решения: продать, ремонтировать, спорить. Отказаться — тоже решение.'}},
      {e:'🤝',cat:'жильё',req:'shareHeld',once:true,min:30,t:'Димон: «Хочу выкупить твою долю. Дам на 15% больше, чем вложил».',
@@ -699,6 +708,7 @@ html,body{overflow:hidden;height:100%;}
       step:0, miniAt:-99, miniGap:12,
       home:0, mortgage:0, mortPay:0, rentUp:0,
       invShare:0, car:0, carLoan:0, carPay:0, carCost:0,
+      picks:{}, quest:0, analystOk:false,
       deck:[], monthTotal:0, used:new Set(), usedCr:new Set(), flags:{}, pending:[], seenNotes:new Set(), monthLog:[], capHist:[], glossary:new Set(),
       mEarn:0, mSpend:0, impulses:0, crisesTotal:0, crisesAbsorbed:0, loansTaken:0,
     };}
@@ -739,6 +749,7 @@ html,body{overflow:hidden;height:100%;}
         ['homeChipA','🏠','Квартира', S.home - S.mortgage, S.home > 0],
         ['shareChipA','🏘','Доля', S.invShare, S.invShare > 0],
         ['carChipA','🚗','Машина', S.car - S.carLoan, S.car > 0],
+        ['picksChipA','📇','Имена', picksTotal(), picksTotal() > 0],
       ].filter(c=>c[4]);
       $('assetLine').innerHTML = chips.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       if (cushionFx){ cushionFx = false; const el = $('cushionChip'); if (el){ el.classList.add('hit'); } }
@@ -759,6 +770,7 @@ html,body{overflow:hidden;height:100%;}
         ['🏘', 'Доля в студии (аренда пополам)', S.invShare],
         ['🚗', 'Машина (дешевеет ~1%/мес)', S.car],
       ].filter((r,i)=>i===0 || r[2] > 0);
+      Object.keys(S.picks || {}).forEach(k=>{ const c = COMPANIES[k]; if (c && S.picks[k] > 0) rows.push([c.e, c.n + ' (P/E ' + c.pe + ', див ' + c.div + '%)', S.picks[k]]); });
       $('portBody').innerHTML = rows.map(([ico,l,v])=>`<div class="dRow"><span style="min-width:0">${ico} ${termify(l)}</span><span class="dv">${fmt(v)}</span></div>`).join('')
         + (S.mortgage ? `<div class="dRow"><span>🏦 ${termify('Ипотека')} (остаток)</span><span class="dv" style="color:var(--bad)">−${fmt(S.mortgage)}</span></div>` : '')
         + (S.carLoan ? `<div class="dRow"><span>🏎 Автокредит (остаток)</span><span class="dv" style="color:var(--bad)">−${fmt(S.carLoan)}</span></div>` : '')
@@ -917,6 +929,8 @@ html,body{overflow:hidden;height:100%;}
       },
       openExam2(){ startExam('invest2'); },
       openExam3(){ startExam('mortgage'); },
+      openExam4(){ startExam('analyst'); },
+      quest(){ setTimeout(openQuest, 380); },
       homeBuy(){
         if (!drawFunds(450000)){
           toast('На первый взнос нужно 450 000 живыми деньгами (карта + депозит + подушка). Пока не хватает — предложение вернётся, а рынок никуда не денется.');
@@ -1028,6 +1042,8 @@ html,body{overflow:hidden;height:100%;}
         (c.L.fx === 'unlockCrypto' && S.cryptoOpen) ||
         (c.L.fx === 'openExam2' && S.goldOpen) ||
         (c.L.fx === 'openExam3' && S.flags.mortgageOk) ||
+        (c.L.fx === 'openExam4' && S.analystOk) ||
+        (c.L.fx === 'quest' && (S.quest || 0) >= QUESTS.length) ||
         (c.L.fx === 'homeBuy' && S.home > 0) ||
         (c.L.fx === 'kasko' && S.flags.kasko) ||
         (c.L.fx === 'gym' && S.flags.gym) ||
@@ -1058,6 +1074,9 @@ html,body{overflow:hidden;height:100%;}
         (c.req === 'canShare' && S.level >= 5 && !S.invShare && liquidAll() >= 300000) ||
         (c.req === 'shareHeld' && S.invShare > 0) ||
         (c.req === 'cryptoHeld' && S.crypto > 0) ||
+        (c.req === 'lvl6' && S.level >= 6) ||
+        (c.req === 'questsDone' && (S.quest || 0) >= QUESTS.length && !S.analystOk) ||
+        (c.req === 'picksHeld' && picksTotal() > 0) ||
         (c.req === 'deduct' && (S.flags.dentalSpend || 0) > (S.flags.deductUsed || 0));
       /* казуальные мини-активности — не чаще каждого 10–15 свайпа */
       const miniOk = (S.step || 0) - (S.miniAt ?? -99) >= (S.miniGap || 12);
@@ -1096,6 +1115,15 @@ html,body{overflow:hidden;height:100%;}
       if (S.level >= 4 && !S.iisOpen){
         const iCard = POOL.find(c => c.L.fx === 'unlockIIS');
         if (!picks.includes(iCard)) picks[Math.floor(Math.random()*picks.length)] = iCard;
+      }
+      /* level 6 on-ramp: разборы компаний, затем тест аналитика */
+      if (S.level >= 6 && (S.quest || 0) < QUESTS.length){
+        const qCard = POOL.find(c => c.L.fx === 'quest');
+        if (!picks.includes(qCard)) picks[Math.floor(Math.random()*picks.length)] = qCard;
+      }
+      if (S.level >= 6 && (S.quest || 0) >= QUESTS.length && !S.analystOk){
+        const aCard = POOL.find(c => c.L.fx === 'openExam4');
+        if (!picks.includes(aCard)) picks[Math.floor(Math.random()*picks.length)] = aCard;
       }
       /* level 5 on-ramp: сначала ипотечный тест, потом предложение о покупке */
       if (S.level >= 5 && !S.flags.mortgageOk){
@@ -1328,8 +1356,8 @@ html,body{overflow:hidden;height:100%;}
     function closePayday(){ hide('payOvl'); buildDeck(); saveGame(); showCard(); maybeOnboard(); setTimeout(maybeShowNote, 260); }
     /* ---- goals & cash flow ---- */
     const GOALS = { cushion:60000, capital:150000, quality:50 };
-    function maxMonths(){ return S.level >= 5 ? 36 : (S.level >= 4 ? 24 : (S.level >= 3 ? 18 : (S.level >= 2 ? 12 : MONTHS))); }
-    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund + S.iis + S.crypto + S.gold + S.reit + S.home - S.mortgage + S.invShare + S.car - S.carLoan - S.debt; }
+    function maxMonths(){ return S.level >= 6 ? 48 : (S.level >= 5 ? 36 : (S.level >= 4 ? 24 : (S.level >= 3 ? 18 : (S.level >= 2 ? 12 : MONTHS)))); }
+    function totalCap(){ return S.cash + S.cushion + S.deposit + S.bonds + S.stocks + S.fund + S.iis + S.crypto + S.gold + S.reit + S.home - S.mortgage + S.invShare + S.car - S.carLoan + picksTotal() - S.debt; }
     const liquidAll = () => S.cash + S.deposit + S.cushion;
     function goalsHTML(){
       const cap = totalCap();
@@ -1361,6 +1389,13 @@ html,body{overflow:hidden;height:100%;}
 
     /* ===== GLOSSARY: подчёркнутые термины, объяснение по тапу, копятся в словаре ===== */
     const TERMS = {
+      pe:{ w:'P/E', re:/P\/E/, d:'Цена акции, поделённая на прибыль на акцию: сколько рублей платят за один рубль годовой прибыли. P/E 8 — дёшево, P/E 50 — в цену заложены большие ожидания роста. Сравнивать имеет смысл только внутри одной отрасли.' },
+      evEbitda:{ w:'EV/EBITDA', re:/EV\/EBITDA/, d:'Стоимость всей компании вместе с долгом, поделённая на прибыль до вычета процентов, налогов и амортизации. В отличие от P/E учитывает долг — поэтому честнее сравнивает закредитованные компании.' },
+      roe:{ w:'ROE', re:/ROE/, d:'Отдача на капитал акционеров: сколько прибыли компания делает на каждый рубль собственных средств. Высокий ROE годами — признак сильного бизнеса, а не удачного квартала.' },
+      debtEbitda:{ w:'Debt/EBITDA', re:/Debt\/EBITDA/, d:'Долг, поделённый на годовую прибыль до процентов и амортизации: за сколько лет бизнес мог бы расплатиться. До 2 — спокойно, выше 3–4 — красная зона: рост ставок или спад бьёт по такой компании первым.' },
+      fcf:{ w:'FCF', re:/FCF/, d:'Свободный денежный поток — деньги, которые остаются после всех расходов и вложений в развитие. Из него платят дивиденды и гасят долг. Отрицательный FCF значит: бизнес сжигает деньги.' },
+      divYield:{ w:'Дивдоходность', re:/дивдоходност[а-яё]*/i, d:'Годовые дивиденды, поделённые на цену акции. Внезапно высокая дивдоходность чаще означает не щедрость, а упавшую цену — сначала проверь, что случилось с бизнесом.' },
+      mcap:{ w:'Капитализация', re:/капитализаци[а-яё]*/i, d:'Рыночная цена всей компании: цена акции, умноженная на число акций. Показывает масштаб, но ничего не говорит о том, дорого это или дёшево.' },
       mortgage:{ w:'Ипотека', re:/ипотек[а-яё]*/i, d:'Кредит под залог квартиры: жильё твоё, но пока долг не выплачен, банк держит его в залоге. Три главные цифры перед подписью: первый взнос, ставка и ПСК. И помни: в аннуитете первые годы ты платишь в основном проценты.' },
       annuity:{ w:'Аннуитет', re:/аннуитет[а-яё]*/i, d:'Способ платить кредит одинаковыми суммами каждый месяц. Хитрость внутри: в первые годы платёж почти целиком состоит из процентов, тело долга тает медленно. Поэтому досрочные платежи в начале срока экономят больше всего.' },
       psk:{ w:'ПСК', re:/ПСК/, d:'Полная стоимость кредита: ставка плюс все обязательные платежи, страховки и комиссии. Именно её, а не рекламную ставку из баннера, нужно сравнивать между банками.' },
@@ -1410,7 +1445,96 @@ html,body{overflow:hidden;height:100%;}
     }, true);
 
     /* ===== EXAMS: знания открывают возможности (по мотивам теста ЦБ) ===== */
+    /* ===== LEVEL 6: карточки компаний (цифры вымышленные, «по мотивам») ===== */
+    const COMPANIES = {
+      apl:  { e:'🍏', n:'Яблоко',      cap:'3,2 трлн', pe:30, ev:22, roe:145, debt:1.1, fcf:'сильный +', div:0.5, r:[-0.06,-0.02,0.02,0.05,0.09] },
+      chip: { e:'🎮', n:'НейроЧип',    cap:'2,1 трлн', pe:55, ev:40, roe:90,  debt:0.4, fcf:'сильный +', div:0.1, r:[-0.18,-0.07,0.04,0.14,0.22] },
+      win:  { e:'🪟', n:'Окна',        cap:'2,8 трлн', pe:34, ev:24, roe:40,  debt:0.6, fcf:'сильный +', div:0.8, r:[-0.05,-0.01,0.02,0.05,0.08] },
+      bank: { e:'🏦', n:'БанкВТ',      cap:'1,4 трлн', pe:4,  ev:0,  roe:9,   debt:0,   fcf:'нестабильный', div:9, r:[-0.08,-0.03,0.01,0.04,0.07] },
+      gas:  { e:'⛽', n:'ГазПрок',     cap:'3,9 трлн', pe:6,  ev:4.5,roe:7,   debt:2.6, fcf:'отрицательный', div:8, r:[-0.10,-0.04,0.01,0.04,0.08] },
+      car:  { e:'⚡', n:'ЭлектроКар',  cap:'700 млрд', pe:90, ev:55, roe:12,  debt:0.9, fcf:'на грани', div:0, r:[-0.25,-0.10,0.03,0.15,0.28] },
+      ore:  { e:'⛏', n:'РудаКо',      cap:'1,1 трлн', pe:9,  ev:5,  roe:25,  debt:0.5, fcf:'сильный +', div:7, r:[-0.12,-0.05,0.02,0.06,0.11] },
+    };
+    const QUESTS = [
+      { m:['pe'], a:'win', b:'car', q:'За какую компанию платят дороже за каждый рубль прибыли?', ok:'b',
+        note:'P/E — цена одного рубля годовой прибыли. У ⚡ P/E 90: рынок платит 90 ₽ за рубль прибыли и ждёт бурного роста. Не дождётся — падение будет глубоким. Высокий P/E не «плохо», но это счёт, выставленный будущему.' },
+      { m:['pe','debt','fcf'], a:'gas', b:'ore', q:'Обе дешёвые по P/E. Кому кризис страшнее?', ok:'a',
+        note:'Debt/EBITDA 2,6 и отрицательный FCF у ⛽ значит: долг большой, а живых денег бизнес не приносит — в кризис такие компании режут дивиденды первыми. У ⛏ долг 0,5 EBITDA и сильный FCF. Красная зона по долгу — выше 3.' },
+      { m:['pe','roe','div','fcf'], a:'bank', b:'apl', q:'Чей дивиденд надёжнее на десять лет вперёд?', ok:'b',
+        note:'🏦 платит 9% при ROE 9 — раздаёт почти всё, расти нечем. 🍏 платит 0,5% при ROE 145: доходность крошечная, но бизнес переваривает капитал с огромной отдачей и наращивает выплаты годами. Высокая дивдоходность часто означает не щедрость, а упавшую цену.' },
+    ];
+    function metricRow(label, val, hint){ return `<div class="yRow"><span>${label}</span><span>${val}${hint ? ' · ' + hint : ''}</span></div>`; }
+    function companyCard(key, metrics){
+      const c = COMPANIES[key]; const m = k => metrics.includes(k);
+      return `<div style="background:var(--surface-2);border:1.5px solid var(--border);border-radius:14px;padding:11px 13px;text-align:left">
+        <p style="margin:0 0 6px;font-weight:700;font-size:15px">${c.e} ${c.n}</p>
+        ${m('cap') ? metricRow(termify('Капитализация'), c.cap) : ''}
+        ${m('pe') ? metricRow(termify('P/E'), c.pe) : ''}
+        ${m('ev') && c.ev ? metricRow(termify('EV/EBITDA'), c.ev) : ''}
+        ${m('roe') ? metricRow(termify('ROE'), c.roe + '%') : ''}
+        ${m('debt') ? metricRow(termify('Debt/EBITDA'), c.debt || '—') : ''}
+        ${m('fcf') ? metricRow(termify('FCF'), c.fcf) : ''}
+        ${m('div') ? metricRow(termify('Дивдоходность'), c.div + '%') : ''}
+      </div>`;
+    }
+    function openQuest(){
+      const i = Math.min(S.quest || 0, QUESTS.length - 1), q = QUESTS[i];
+      $('miniTitle').textContent = '🔍 Разбор компаний ' + (i+1) + ' / ' + QUESTS.length;
+      $('miniBody').innerHTML = `<p style="font-weight:700;text-align:left">${q.q}</p>
+        <div style="display:grid;gap:10px;margin:12px 0">${companyCard(q.a, q.m)}${companyCard(q.b, q.m)}</div>
+        <button class="btn sec" onclick="G.questPick('a')">${COMPANIES[q.a].e} ${COMPANIES[q.a].n}</button>
+        <button class="btn sec" onclick="G.questPick('b')">${COMPANIES[q.b].e} ${COMPANIES[q.b].n}</button>`;
+      show('miniOvl');
+    }
+    function questPick(side){
+      const i = Math.min(S.quest || 0, QUESTS.length - 1), q = QUESTS[i];
+      const right = side === q.ok;
+      if (right){ S.quest = (S.quest || 0) + 1; S.mood = Math.min(100, S.mood + 4); }
+      ['pe','roe','fcf','debtEbitda','divYield','evEbitda','mcap'].forEach(k=>S.glossary.add(k));
+      hide('miniOvl'); renderHUD(); saveGame();
+      setTimeout(()=>toast((right ? '✅ Верно. ' : '❌ Мимо. ') + q.note), 250);
+    }
+    /* именные акции: покупка долями по 10 000 */
+    function openPicks(){
+      $('miniTitle').textContent = '📇 Именные акции';
+      $('miniBody').innerHTML = '<p class="small" style="text-align:left;margin:0 0 8px">Свободно: <b>' + fmt(S.cash) + '</b>. Покупка — по 10 000 ₽. Дивиденды приходят на карту каждый месяц.</p>' +
+        Object.keys(COMPANIES).map(k=>{
+          const c = COMPANIES[k], have = (S.picks && S.picks[k]) || 0;
+          return `<button class="qOpt" onclick="G.buyPick('${k}')" ${S.cash < 10000 ? 'disabled' : ''}>
+            <b>${c.e} ${c.n}</b> · P/E ${c.pe} · див ${c.div}% · ROE ${c.roe}%
+            ${have ? '<br><span style="color:var(--good)">в портфеле: ' + fmt(have) + '</span>' : ''}</button>`;
+        }).join('') +
+        '<button class="btn" onclick="G.closePicks()">Готово</button>';
+      show('miniOvl');
+    }
+    function buyPick(key){
+      if (!COMPANIES[key] || S.cash < 10000) return;
+      S.cash -= 10000;
+      S.picks = S.picks || {}; S.picks[key] = (S.picks[key] || 0) + 10000;
+      S.monthLog.push([COMPANIES[key].e + ' ' + COMPANIES[key].n + ': покупка', -10000]);
+      renderHUD(); saveGame(); openPicks();
+    }
+    function closePicks(){ hide('miniOvl'); setTimeout(()=>{ updateAlloc(); show('allocOvl'); }, 230); }
+    const picksTotal = () => Object.values(S.picks || {}).reduce((a,b)=>a+b, 0);
+
     const EXAMS = {
+      analyst: {
+        title: '📋 Тест аналитика',
+        qs: [
+          { q:'P/E равен 40. Что это значит?',
+            a:['Компания прибыльнее той, у которой 8','За рубль прибыли платят 40 ₽ — в цену заложены большие ожидания','Дивиденды составят 40%'], ok:1 },
+          { q:'Чем опасен Debt/EBITDA выше 4?',
+            a:['Ничем, это обычный уровень','Долг велик относительно прибыли: рост ставок или спад легко ломают такую компанию','Компания не платит налоги'], ok:1 },
+          { q:'ROE 40% против ROE 6% — о чём это?',
+            a:['Первая эффективнее использует капитал акционеров','Первая дороже стоит на бирже','Вторая надёжнее'], ok:0 },
+          { q:'FCF (свободный денежный поток) отрицательный. Это…',
+            a:['Норма для любого бизнеса','Бизнес сжигает деньги: дивиденды и долг под вопросом','Признак быстрого роста и всегда плюс'], ok:1 },
+          { q:'Дивдоходность внезапно стала 15%. Первое, что стоит проверить:',
+            a:['Не упала ли цена акции из-за проблем в бизнесе','Как быстро купить побольше','Размер капитализации'], ok:0 },
+        ],
+        onPass(){ S.analystOk = true; },
+        passMsg: '✅ Сдано: 5 из 5. Открыты именные акции — теперь покупаешь конкретные компании, а не «акции вообще». Ищи 📇 при распределении денег.',
+      },
       broker: {
         title: '📋 Тест брокера',
         qs: [
@@ -1472,7 +1596,7 @@ html,body{overflow:hidden;height:100%;}
       if (passed){ ex.onPass(); saveGame(); }
       setTimeout(()=>{
         toast(passed ? ex.passMsg
-          : '❌ Тест не сдан: меньше 3 из 3 верных. Как и у ЦБ — пересдача бесплатна, предложение вернётся.');
+          : '❌ Тест не сдан: нужны все ' + ex.qs.length + ' верных ответа. Как и у ЦБ — пересдача бесплатна, предложение вернётся.');
       }, 250);
       renderHUD();
     }
@@ -1761,9 +1885,9 @@ html,body{overflow:hidden;height:100%;}
       if (S.cushion > 0){ const ci = Math.round(S.cushion * 0.005); S.cushion += ci; rows.push(['🛡 Подушка на накопительном счёте (+0,5%)', ci]); }
       if (S.cushion >= 60000){ S.mood = Math.min(100, S.mood + 2); }
       /* level 2: markets move */
+      let crashed = false;
       if (S.level >= 2){
         if (S.bonds > 0){ const coupon = Math.round(S.bonds * 0.011); S.bonds += coupon; rows.push(['📜 Облигации: купон (~14% годовых)', coupon]); }
-        let crashed = false;
         if (S.stocks > 0){
           if (Math.random() < 0.1){
             crashed = true;
@@ -1830,6 +1954,20 @@ html,body{overflow:hidden;height:100%;}
           noteQueue.push('🏛 Вычет 13% за покупку жилья: первая часть пришла. В реальности можно вернуть до 260 000 ₽ с цены квартиры и ещё до 390 000 ₽ с процентов по ипотеке — про вторую часть забывают почти все.');
         }
       }
+      /* именные акции: каждая компания живёт своей жизнью + дивиденды на карту */
+      if (picksTotal() > 0){
+        let divTotal = 0;
+        Object.keys(S.picks).forEach(k=>{
+          const c = COMPANIES[k]; if (!c || !S.picks[k]) return;
+          let r = pick(c.r);
+          if (crashed) r = Math.min(r, -Math.abs(r) - 0.04);       /* в обвал падают все, «дорогие» — сильнее */
+          const d = Math.round(S.picks[k] * r);
+          S.picks[k] = Math.max(0, S.picks[k] + d);
+          rows.push([c.e + ' ' + c.n + ': ' + (r>0?'+':'') + (Math.round(r*1000)/10) + '%', d]);
+          if (c.div){ const dv = Math.round(S.picks[k] * c.div / 100 / 12); if (dv){ divTotal += dv; } }
+        });
+        if (divTotal){ S.cash += divTotal; rows.push(['📇 Дивиденды на карту', divTotal]); }
+      }
       /* доля в студии дорожает как квартира */
       if (S.invShare > 0){
         const sg = Math.round(S.invShare * 0.003);
@@ -1870,6 +2008,7 @@ html,body{overflow:hidden;height:100%;}
       if (S.debt > 45000){
         /* пока есть что продать — банкротства нет: экстренная распродажа, рыночное — с дисконтом за срочность */
         const fire = [['cushion',1],['deposit',1],['bonds',0.9],['fund',0.9],['stocks',0.9],['gold',0.9],['reit',0.9],['crypto',0.85]];
+        if (S.debt > 45000 && picksTotal() > 0){ const got = Math.round(picksTotal()*0.9); S.cash += got; S.picks = {}; rows.push(['📇 Экстренная продажа именных акций (−10%)', got]); }
         let sold = 0;
         for (const [k, rate] of fire){
           if (S.debt <= 0) break;
@@ -2007,6 +2146,7 @@ html,body{overflow:hidden;height:100%;}
         ['stHome','🏠','Квартира', S.home - S.mortgage, S.home > 0],
         ['stShare','🏘','Доля', S.invShare, S.invShare > 0],
         ['stCar','🚗','Машина', S.car - S.carLoan, S.car > 0],
+        ['stPicks','📇','Имена', picksTotal(), picksTotal() > 0],
       ].filter(r=>r[4]);
       $('allocAssets').innerHTML = st.map(([id,ico,l,v])=>`<span class="aChip" id="${id}"><span>${ico} ${l}</span><b>${fmtK(v)}</b></span>`).join('');
       $('allocDep').disabled = !S.depositOpen || S.cash < 10000;
@@ -2042,6 +2182,8 @@ html,body{overflow:hidden;height:100%;}
       $('allocIis').style.display = S.iisOpen ? '' : 'none';
       $('allocCrypto').style.display = S.cryptoOpen ? '' : 'none';
       $('allocLvl4b').style.display = (S.goldOpen || S.reitOpen) ? '' : 'none';
+      $('allocLvl6').style.display = S.analystOk ? '' : 'none';
+      if (S.analystOk) $('allocPicks').disabled = S.cash < 10000;
       $('allocGold').style.display = S.goldOpen ? '' : 'none';
       $('allocReit').style.display = S.reitOpen ? '' : 'none';
       $('allocTrade').disabled = false;
@@ -2132,8 +2274,28 @@ html,body{overflow:hidden;height:100%;}
         if (totalCap() >= 400000 && S.debt === 0){ offerLevel5(); return; }
         finish(); return;
       }
+      if (S.level === 5 && S.month > 36){
+        if (totalCap() >= 800000 && S.debt === 0){ offerLevel6(); return; }
+        finish(); return;
+      }
       if (S.month > maxMonths()){ finish(); return; }
       payday();
+    }
+    function offerLevel6(){
+      $('endSheet').innerHTML = `
+        <h1>🔓 Уровень 6: Аналитик</h1>
+        <p>Три года прожито, капитал <b>${fmt(totalCap())}</b>. Ты покупал «акции вообще» — пора научиться выбирать конкретные компании.</p>
+        <p>Впереди месяцы 37–48: <b>🔍 разборы компаний</b> — семь карточек с P/E, EV/EBITDA, ROE, Debt/EBITDA, FCF и дивдоходностью; метрики вводятся по одной. Потом <b>📋 тест аналитика</b> из пяти вопросов, и он откроет <b>📇 именные акции</b>: портфель станет конкретным, а отчёты покажут, какие ставки сработали.</p>
+        <p class="small">Правило уровня: сначала смотрим долг и живые деньги, потом на дивиденды. Дешёвое и щедрое часто оказывается ловушкой.</p>
+        <button class="btn" onclick="G.startLevel6()">Стать аналитиком</button>
+        <button class="btn sec" onclick="G.finishNow()">Завершить с этим результатом</button>`;
+      show('endOvl');
+    }
+    function startLevel6(){
+      hide('endOvl');
+      S.level = 6;
+      toast('Уровень 6. Теперь за каждой акцией — конкретный бизнес с конкретными цифрами. Заголовки врут, отчётность — нет.');
+      renderHUD(); payday();
     }
     function offerLevel5(){
       $('endSheet').innerHTML = `
@@ -2274,6 +2436,7 @@ html,body{overflow:hidden;height:100%;}
         {v:S.home - S.mortgage, c:'var(--text)', ico:'🏠', l:'Квартира (своя доля)'},
         {v:S.invShare, c:'var(--rel)', ico:'🏘', l:'Доля в студии'},
         {v:S.car - S.carLoan, c:'var(--muted)', ico:'🚗', l:'Машина'},
+        {v:picksTotal(), c:'var(--health)', ico:'📇', l:'Именные акции'},
       ].filter(p=>p.v > 0);
       const gross = parts.reduce((x,p)=>x+p.v, 0) || 1;
       /* оценка структуры: эффективно ли, безопасно ли — и что делать */
@@ -2374,7 +2537,7 @@ html,body{overflow:hidden;height:100%;}
       ['month','cash','cushion','deposit','debt','health','mood','rel','salary','credit','creditLeft',
        'catCost','cashback','depositOpen','monthTotal','mfo','level','bonds','stocks','bondsOpen','stocksOpen','fund','fundOpen','examPassed',
        'iis','iisPaid','iisOpen','crypto','cryptoOpen','extraRent','gold','goldOpen','reit','reitOpen','unemployed','split','loveCost',
-       'step','miniAt','miniGap','home','mortgage','mortPay','rentUp','invShare','car','carLoan','carPay','carCost',
+       'step','miniAt','miniGap','home','mortgage','mortPay','rentUp','invShare','car','carLoan','carPay','carCost','quest','analystOk',
        'bestCap','gotBonus','mEarn','mSpend','impulses','crisesTotal','crisesAbsorbed','loansTaken']
         .forEach(k=>scal[k]=S[k]);
       LS.set(SAVE_KEY, {
@@ -2389,6 +2552,7 @@ html,body{overflow:hidden;height:100%;}
         snap: S.snap || null,
         capHist: S.capHist,
         glossary: [...S.glossary],
+        picks: S.picks || {},
       });
     }
     function loadGame(){
@@ -2405,6 +2569,7 @@ html,body{overflow:hidden;height:100%;}
       S.snap = d.snap || null;
       S.capHist = d.capHist || [];
       S.glossary = new Set(d.glossary || []);
+      S.picks = d.picks || {};
       if (!S.monthTotal) S.monthTotal = S.deck.length || CARDS_PER_MONTH;
       return true;
     }
@@ -2482,6 +2647,20 @@ html,body{overflow:hidden;height:100%;}
       Object.assign(S, { month:19, level:4, cash:20000, cushion:70000, deposit:40000, depositOpen:true,
         bonds:40000, stocks:30000, fund:30000, bondsOpen:true, stocksOpen:true, fundOpen:true, examPassed:true,
         salary:90000, creditLeft:0, health:62, mood:62, rel:62, impulses:7, crisesTotal:20, crisesAbsorbed:14, bestCap:230000 });
+      renderHUD(); animateHUD(); payday();
+    }
+    /* dev: jump to level 6 with a mature portfolio */
+    function devLevel6(){
+      if (S && !ended) pushHist('abandoned');
+      LS.del(SAVE_KEY);
+      hide('setOvl'); hide('startOvl'); hide('endOvl');
+      ended = false; noteQueue = []; noteThen = null;
+      S = newState();
+      Object.assign(S, { month:37, level:6, cash:150000, cushion:120000, deposit:300000, depositOpen:true,
+        bonds:120000, stocks:90000, fund:80000, bondsOpen:true, stocksOpen:true, fundOpen:true, examPassed:true,
+        goldOpen:true, reitOpen:true, iisOpen:true, gold:60000, reit:80000,
+        home:3060000, mortgage:2300000, mortPay:33000, flags:{ mortgageOk:true, homeRent:true, homeBoughtAt:26 },
+        salary:100000, creditLeft:0, health:64, mood:64, rel:60, impulses:11, crisesTotal:32, crisesAbsorbed:24, bestCap:1200000 });
       renderHUD(); animateHUD(); payday();
     }
     /* dev: jump to level 5 with enough liquid for the down payment */
@@ -2578,6 +2757,7 @@ html,body{overflow:hidden;height:100%;}
           <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel3()">⚡ Dev: ур.3</button>
           <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel4()">⚡ Dev: ур.4</button>
           <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel5()">⚡ Dev: ур.5</button>
+          <button class="btn sec" style="font-size:12px;opacity:.75" onclick="G.devLevel6()">⚡ Dev: ур.6</button>
         </div>
       </div></div>
       <div class="ovl" id="payOvl"><div class="sheet">
@@ -2642,6 +2822,9 @@ html,body{overflow:hidden;height:100%;}
         <div class="alloc" id="allocLvl4b" style="display:none">
           <button id="allocGold" onclick="G.alloc('gold')">🥇 Золото<b>растёт при обвалах</b></button>
           <button id="allocReit" onclick="G.alloc('reit')">🏢 REIT<b>аренда без квартиры</b></button>
+        </div>
+        <div class="alloc" id="allocLvl6" style="display:none">
+          <button id="allocPicks" onclick="G.openPicks()">📇 Именные акции<b>конкретные компании</b></button>
         </div>
         <p class="small" id="allocOutLbl" style="margin:10px 0 0;display:none">⇄ Вывести обратно в деньги:</p>
         <div class="alloc" id="allocOut" style="display:none">
@@ -2734,7 +2917,7 @@ html,body{overflow:hidden;height:100%;}
         }});
       } catch(e){ adBusy = false; if (btn) btn.disabled = false; }
     }
-    window.G = { watchAd, startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, startLevel5, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, devLevel5, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch, homeMode, toggleYields };
+    window.G = { watchAd, startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, startLevel5, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, devLevel5, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch, homeMode, toggleYields, startLevel6, devLevel6, questPick, openPicks, buyPick, closePicks };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
     /* игра растянута на весь экран — масштабирование рамки не нужно */
