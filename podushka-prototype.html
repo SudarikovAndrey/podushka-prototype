@@ -4,16 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Подушка — прототип</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Caveat:wght@500;600;700&family=Hanken+Grotesk:wght@400;600;700;800&family=Bricolage+Grotesque:wght@600;700;800&family=Syne:wght@600;700;800&family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
-body{font-family:'Hanken Grotesk',system-ui,-apple-system,sans-serif;background:#0a0b0e;color:#111;}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:#0a0b0e;color:#111;overscroll-behavior:none;}
 a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
 
-.stage{min-height:100vh;height:100vh;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(120% 120% at 50% 0%,#1b1d23,#08090c);}
+.stage{min-height:100vh;height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(120% 120% at 50% 0%,#1b1d23,#08090c);}
+/* игра занимает весь экран — требования Яндекс Игр 1.6.1.1 / 1.6.2.1 */
+.frameFull{width:100%!important;height:100%!important;border-radius:0!important;box-shadow:none!important;}
+/* широкий экран (десктоп, планшет в альбомной): две колонки, поле до края */
+@media (min-width:760px) and (min-aspect-ratio:1/1){
+  #app{display:grid;grid-template-columns:minmax(290px,370px) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;
+       column-gap:26px;align-content:start;width:100%;max-width:1240px;margin:0 auto;padding:18px 26px calc(14px + env(safe-area-inset-bottom));}
+  .themebar{grid-column:1;grid-row:1;}
+  #hud{grid-column:1;grid-row:2;}
+  #table{grid-column:2;grid-row:1 / span 4;margin-top:0;}
+  .hint{grid-column:1;grid-row:4;position:static;align-self:end;text-align:left;margin-top:14px;}
+  .card{width:min(94%,400px);height:min(100%,600px);}
+}
 .frame{
   --bg:radial-gradient(120% 82% at 50% 33%,#4B3720 0%,#2C2013 47%,#160E06 100%);
   --surface:#F3E7CB;--surface-2:#E7D7B4;--border:#D3BF95;--text:#33281A;--muted:#8B7A59;
@@ -23,10 +32,10 @@ a{color:var(--accent);text-decoration:none;} a:hover{opacity:.82;}
   --glow-left:rgba(180,71,46,.42);--glow-right:rgba(47,110,67,.42);
   --radius:15px;--radius-sm:12px;
   --card-shadow:0 26px 50px -18px rgba(12,7,2,.62),0 6px 16px rgba(12,7,2,.32);
-  --font-display:'Lora',Georgia,serif;
-  --font-text:'Lora',Georgia,serif;
-  --font-num:'Lora',Georgia,serif;
-  --font-hand:'Caveat','Segoe Script',cursive;
+  --font-display:Georgia,'Times New Roman','Iowan Old Style',serif;
+  --font-text:Georgia,'Times New Roman','Iowan Old Style',serif;
+  --font-num:Georgia,'Times New Roman',serif;
+  --font-hand:'Segoe Script','Bradley Hand',cursive;
   --cream:#F0E5CC;
   position:relative;width:430px;height:816px;flex:0 0 auto;transform-origin:center center;
   background:var(--bg);color:var(--text);overflow:hidden;display:flex;flex-direction:column;font-family:var(--font-text);
@@ -273,7 +282,7 @@ html,body{overflow:hidden;height:100%;}
 </head>
 <body>
 
-<div class="stage"><div class="frame"><div id="app"></div></div></div>
+<div class="stage"><div class="frame frameFull"><div id="app"></div></div></div>
 <script>
 (function(){
     const props = {};
@@ -292,9 +301,9 @@ html,body{overflow:hidden;height:100%;}
 
     /* ===== THEMES ===== */
     const THEMES = {
-      a:{vars:{'--bg':'radial-gradient(125% 100% at 50% 0%,#FBFAF6 0%,#ECE8DE 100%)','--surface':'#ffffff','--surface-2':'#F3F1E9','--border':'#E6E2D6','--text':'#17211C','--muted':'#6E7A73','--accent':'#10B981','--accent-ink':'#04150E','--good':'#0EA96E','--bad':'#F04E37','--health':'#F0466B','--mood':'#F5A524','--rel':'#7C5CFC','--shield':'#10B981','--money':'#0E9E6E','--dir-left':'#7C5CFC','--dir-right':'#10B981','--glow-left':'rgba(124,92,252,.5)','--glow-right':'rgba(16,185,129,.5)','--radius':'26px','--radius-sm':'16px','--card-shadow':'0 22px 44px -16px rgba(24,40,32,.32),0 4px 14px rgba(24,40,32,.10)','--font-display':"'Bricolage Grotesque','Hanken Grotesk',sans-serif",'--font-text':"'Hanken Grotesk',system-ui,sans-serif",'--font-num':"'Bricolage Grotesque','Hanken Grotesk',sans-serif"}},
-      b:{vars:{'--bg':'radial-gradient(120% 100% at 50% -5%,#FDF6EA 0%,#F3E7D2 100%)','--surface':'#ffffff','--surface-2':'#FBF1DE','--border':'#1E1830','--text':'#1E1830','--muted':'#6E6885','--accent':'#4F46E5','--accent-ink':'#ffffff','--good':'#4FA80C','--bad':'#FB5607','--health':'#FF476F','--mood':'#F09E00','--rel':'#FF006E','--shield':'#4F46E5','--money':'#2E9E4B','--dir-left':'#FF006E','--dir-right':'#4F46E5','--glow-left':'rgba(255,0,110,.45)','--glow-right':'rgba(79,70,229,.45)','--radius':'24px','--radius-sm':'16px','--card-shadow':'0 16px 32px -14px rgba(30,24,48,.30),5px 6px 0 -1px #1E1830','--font-display':"'Syne','Manrope',sans-serif",'--font-text':"'Manrope',system-ui,sans-serif",'--font-num':"'Syne','Manrope',sans-serif"}},
-      c:{vars:{'--bg':'radial-gradient(120% 95% at 50% -8%,#1A1F2B 0%,#0A0C12 68%)','--surface':'#161B26','--surface-2':'#1F2634','--border':'rgba(255,255,255,.10)','--text':'#EAF1F3','--muted':'#8A93A6','--accent':'#2DE08A','--accent-ink':'#04120B','--good':'#2DE08A','--bad':'#FF4D6D','--health':'#FF6B8A','--mood':'#FFC24B','--rel':'#39D7FF','--shield':'#2DE08A','--money':'#5CF2B0','--dir-left':'#39D7FF','--dir-right':'#2DE08A','--glow-left':'rgba(57,215,255,.55)','--glow-right':'rgba(45,224,138,.55)','--radius':'22px','--radius-sm':'15px','--card-shadow':'0 26px 60px -22px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05)','--font-display':"'Space Grotesk','Hanken Grotesk',sans-serif",'--font-text':"'Space Grotesk',system-ui,sans-serif",'--font-num':"'Space Mono','Space Grotesk',monospace"}},
+      a:{vars:{'--bg':'radial-gradient(125% 100% at 50% 0%,#FBFAF6 0%,#ECE8DE 100%)','--surface':'#ffffff','--surface-2':'#F3F1E9','--border':'#E6E2D6','--text':'#17211C','--muted':'#6E7A73','--accent':'#10B981','--accent-ink':'#04150E','--good':'#0EA96E','--bad':'#F04E37','--health':'#F0466B','--mood':'#F5A524','--rel':'#7C5CFC','--shield':'#10B981','--money':'#0E9E6E','--dir-left':'#7C5CFC','--dir-right':'#10B981','--glow-left':'rgba(124,92,252,.5)','--glow-right':'rgba(16,185,129,.5)','--radius':'26px','--radius-sm':'16px','--card-shadow':'0 22px 44px -16px rgba(24,40,32,.32),0 4px 14px rgba(24,40,32,.10)','--font-display':"system-ui,'Segoe UI',Roboto,sans-serif",'--font-text':"system-ui,'Segoe UI',Roboto,sans-serif",'--font-num':"system-ui,'Segoe UI',Roboto,sans-serif"}},
+      b:{vars:{'--bg':'radial-gradient(120% 100% at 50% -5%,#FDF6EA 0%,#F3E7D2 100%)','--surface':'#ffffff','--surface-2':'#FBF1DE','--border':'#1E1830','--text':'#1E1830','--muted':'#6E6885','--accent':'#4F46E5','--accent-ink':'#ffffff','--good':'#4FA80C','--bad':'#FB5607','--health':'#FF476F','--mood':'#F09E00','--rel':'#FF006E','--shield':'#4F46E5','--money':'#2E9E4B','--dir-left':'#FF006E','--dir-right':'#4F46E5','--glow-left':'rgba(255,0,110,.45)','--glow-right':'rgba(79,70,229,.45)','--radius':'24px','--radius-sm':'16px','--card-shadow':'0 16px 32px -14px rgba(30,24,48,.30),5px 6px 0 -1px #1E1830','--font-display':"'Trebuchet MS',system-ui,sans-serif",'--font-text':"system-ui,'Segoe UI',Roboto,sans-serif",'--font-num':"'Trebuchet MS',system-ui,sans-serif"}},
+      c:{vars:{'--bg':'radial-gradient(120% 95% at 50% -8%,#1A1F2B 0%,#0A0C12 68%)','--surface':'#161B26','--surface-2':'#1F2634','--border':'rgba(255,255,255,.10)','--text':'#EAF1F3','--muted':'#8A93A6','--accent':'#2DE08A','--accent-ink':'#04120B','--good':'#2DE08A','--bad':'#FF4D6D','--health':'#FF6B8A','--mood':'#FFC24B','--rel':'#39D7FF','--shield':'#2DE08A','--money':'#5CF2B0','--dir-left':'#39D7FF','--dir-right':'#2DE08A','--glow-left':'rgba(57,215,255,.55)','--glow-right':'rgba(45,224,138,.55)','--radius':'22px','--radius-sm':'15px','--card-shadow':'0 26px 60px -22px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.05)','--font-display':"system-ui,'Segoe UI',Roboto,sans-serif",'--font-text':"system-ui,'Segoe UI',Roboto,sans-serif",'--font-num':"ui-monospace,Consolas,'Courier New',monospace"}},
     };
     let curTheme = 'a';
     const THEME_KEY = 'podushka.theme.v2';
@@ -1990,6 +1999,9 @@ html,body{overflow:hidden;height:100%;}
         b.disabled = S.cash < 10000;
       });
       /* withdrawals / sells: turn assets back into cash */
+      /* награда за рекламу — не чаще раза в месяц */
+      const rvB = $('rvBtn');
+      if (rvB) rvB.style.display = (ysdk && rvMonth !== S.month) ? '' : 'none';
       /* минус на карте: баннер + подсветка, подушка становится выводимой */
       $('allocWarn').style.display = S.cash < 0 ? '' : 'none';
       $('allocLeft').classList.toggle('neg', S.cash < 0);
@@ -2086,6 +2098,7 @@ html,body{overflow:hidden;height:100%;}
         toast('😬 Минус на карте так и остался — банк закрыл его микрозаймом ' + fmt(loan) + ' под 30%/мес. В следующий раз выгоднее вывести из активов: даже продажа акций в просадке дешевле такого займа.');
       }
       hide('allocOvl');
+      ygInterstitial();
       S.month++;
       if (S.level === 1 && S.month > MONTHS){
         if (totalCap() >= 40000 && S.debt === 0){ offerLevel2(); return; }
@@ -2625,6 +2638,7 @@ html,body{overflow:hidden;height:100%;}
           <button id="wGold" onclick="G.alloc('wGold')">🥇→💰<b>10 000</b></button>
           <button id="wReit" onclick="G.alloc('wReit')">🏢→💰<b>10 000</b></button>
         </div>
+        <button class="btn sec" id="rvBtn" style="display:none;margin-top:12px" onclick="G.watchAd()">🎬 Посмотреть рекламу → +10 к настроению</button>
         <button class="btn sec" style="margin-top:14px" onclick="G.nextMonth()">Хватит, живём дальше →</button>
       </div></div>
       <div class="ovl" id="termOvl"><div class="sheet note" id="termBody"></div></div>
@@ -2654,24 +2668,65 @@ html,body{overflow:hidden;height:100%;}
     `;
 
     $('app').innerHTML = SHELL;
-    window.G = { startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, startLevel5, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, devLevel5, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch, homeMode, toggleYields };
+    /* ===== SDK Яндекс Игр: инициализация, язык, реклама ===== */
+    let ysdk = null, ygLang = 'ru', adBusy = false, lastAdMonth = -9, rvMonth = -9;
+    function ygInit(){
+      const sc = document.createElement('script');
+      sc.src = '/sdk.js'; sc.async = true;
+      sc.onload = function(){
+        if (typeof YaGames === 'undefined') return;
+        YaGames.init().then(function(sdk){
+          ysdk = sdk;
+          /* автоопределение языка портала (требование 2.14) */
+          try { ygLang = (sdk.environment && sdk.environment.i18n && sdk.environment.i18n.lang) || 'ru'; } catch(e){}
+          document.documentElement.setAttribute('lang', ygLang);
+          /* игра готова к взаимодействию */
+          try { sdk.features.LoadingAPI.ready(); } catch(e){}
+          try {
+            sdk.on('game_api_pause', function(){ ygPause(true); });
+            sdk.on('game_api_resume', function(){ ygPause(false); });
+          } catch(e){}
+          const rv = $('rvBtn'); if (rv) rv.style.display = '';
+        }).catch(function(){});
+      };
+      sc.onerror = function(){ /* вне Яндекс Игр — играем без SDK */ };
+      document.body.appendChild(sc);
+    }
+    function ygPause(on){ /* игра пошаговая: на паузе просто блокируем ввод */ document.body.style.pointerEvents = on ? 'none' : ''; }
+    /* межстраничная реклама — только в логической паузе между месяцами, не чаще раза в 2 месяца */
+    function ygInterstitial(){
+      if (!ysdk || !ysdk.adv || !S) return;
+      if (S.month - lastAdMonth < 2) return;
+      lastAdMonth = S.month;
+      try { ysdk.adv.showFullscreenAdv({ callbacks: { onClose: function(){}, onError: function(){} } }); } catch(e){}
+    }
+    /* реклама за вознаграждение — по кнопке, награда бонусная и на прохождение не влияет */
+    function watchAd(){
+      if (!ysdk || !ysdk.adv || adBusy) return;
+      adBusy = true;
+      const btn = $('rvBtn'); if (btn) btn.disabled = true;
+      try {
+        ysdk.adv.showRewardedVideo({ callbacks: {
+          onRewarded: function(){
+            rvMonth = S.month;
+            S.mood = Math.min(100, S.mood + 10);
+            renderHUD(); saveGame();
+            setTimeout(function(){ toast('🎬 Спасибо за просмотр: настроение +10. Это бонус — на прохождение он не влияет.'); }, 200);
+          },
+          onClose: function(){ adBusy = false; if (btn) btn.disabled = false; updateAlloc(); },
+          onError: function(){ adBusy = false; if (btn) btn.disabled = false; }
+        }});
+      } catch(e){ adBusy = false; if (btn) btn.disabled = false; }
+    }
+    window.G = { watchAd, startRun, newSession, continueRun, openSettings, closeSettings, closeNote, closePayday, openAlloc, alloc, nextMonth, startLevel2, startLevel3, startLevel4, startLevel5, finishNow: finish, finGo, openFlow, closeFlow, setTheme, devLevel2, devLevel3, devLevel4, devLevel5, examAnswer, openTrade, tradeAct, closeTrade, skillStop, closeTerm, openPortfolio, closePortfolio, closeOnboard, miniBox, miniSpin, miniSlotsDone, miniScratch, miniCatch, homeMode, toggleYields };
     document.addEventListener('keydown', keyHandler);
     applyTheme(LS.get(THEME_KEY) || 'p');
-    let _fitting=false, _lastS=-1;
-    function fitScale(){
-      if(_fitting) return; _fitting=true;
-      requestAnimationFrame(()=>{
-        const stage=document.querySelector('.stage'), frame=document.querySelector('.frame');
-        if(stage&&frame){
-          const s=Math.min(1,(stage.clientHeight-10)/816,(stage.clientWidth-8)/430);
-          if(Math.abs(s-_lastS)>0.002){ _lastS=s; frame.style.transform='scale('+s+')'; }
-        }
-        _fitting=false;
-      });
-    }
+    /* игра растянута на весь экран — масштабирование рамки не нужно */
+    function fitScale(){ const f=document.querySelector('.frame'); if(f) f.style.transform='none'; }
     window.addEventListener('resize', fitScale);
-    fitScale(); setTimeout(fitScale, 80);
+    fitScale();
     renderStart();
+    ygInit();
 })();
 </script></body>
 </html>
